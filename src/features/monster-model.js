@@ -139,13 +139,34 @@ export function crearCompendio(baseMonstruos) {
     if (filtros.habitat.length && !filtros.habitat.every((sel) => (m.habitat || []).some((h) => coincideCampo(h, sel)))) return false;
     return true;
   }
+  // Para ordenar por CR se usa el CR "representativo" de cada monstruo: si tiene
+  // variantes con CR numérico, se compara contra el mínimo (orden ascendente) o
+  // el máximo (orden descendente) de todos sus CR filtrables (base + variantes).
+  // Los monstruos sin ningún CR numérico (CR "variable") quedan siempre al final,
+  // y los empates se resuelven por nombre.
   function ordenarMonstruos(lista) {
     const ordenada = [...lista];
+    const esAsc = filtros.orden === 'cr_asc';
+    const esDesc = filtros.orden === 'cr_desc';
+    if (esAsc || esDesc) {
+      const crParaOrden = new Map();
+      lista.forEach((m) => {
+        const crs = obtenerCrsFiltrables(m);
+        crParaOrden.set(m.id, crs.length ? (esAsc ? Math.min(...crs) : Math.max(...crs)) : null);
+      });
+      ordenada.sort((a, b) => {
+        const ca = crParaOrden.get(a.id);
+        const cb = crParaOrden.get(b.id);
+        if (ca === null && cb === null) return a.nombre.localeCompare(b.nombre);
+        if (ca === null) return 1;
+        if (cb === null) return -1;
+        return (esAsc ? ca - cb : cb - ca) || a.nombre.localeCompare(b.nombre);
+      });
+      return ordenada;
+    }
     switch (filtros.orden) {
       case 'nombre_asc': ordenada.sort((a, b) => a.nombre.localeCompare(b.nombre)); break;
       case 'nombre_desc': ordenada.sort((a, b) => b.nombre.localeCompare(a.nombre)); break;
-      case 'cr_asc': ordenada.sort((a, b) => a.cr - b.cr || a.nombre.localeCompare(b.nombre)); break;
-      case 'cr_desc': ordenada.sort((a, b) => b.cr - a.cr || a.nombre.localeCompare(b.nombre)); break;
       default: break;
     }
     return ordenada;
