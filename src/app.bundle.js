@@ -532,10 +532,6 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
         ${monstruoBase.variantes && monstruoBase.variantes.length ? `<div class="fila" style="margin-top:10px;align-items:flex-end">
           <div style="min-width:260px"><label>Variante</label>
           <select id="selector-variante">${monstruoBase.variantes.map((v) => `<option value="${v.id}" ${varianteSeleccionada && varianteSeleccionada.id === v.id ? 'selected' : ''}>${v.nombre}</option>`).join('')}</select></div></div>` : ''}
-        <div class="botones-filtro">
-          <button class="accion fantasma" id="btn-cambiar-imagen">Cambiar imagen</button>
-          <button class="accion fantasma" id="btn-restaurar-imagen">Restaurar original</button>
-        </div>
       </div>
     </div>
     <hr class="filete">
@@ -742,38 +738,6 @@ function enlazarEventosLista() {
     };
   }
 }
-function abrirModalImagen(id) {
-  const monstruo = compendio.obtenerMonstruoPorId(id);
-  if (!monstruo) return;
-  const fondo = document.createElement('div');
-  fondo.className = 'modal-fondo';
-  fondo.innerHTML = `<div class="modal-caja" role="dialog" aria-modal="true" aria-label="Cambiar imagen de ${monstruo.nombre}">
-    <h3>Cambiar imagen — ${monstruo.nombre}</h3>
-    <label>Pegar una URL de imagen</label><input type="text" id="modal-url" placeholder="https://...">
-    <label>o subir un archivo desde tu equipo</label><input type="file" id="modal-file" accept="image/*">
-    <div class="modal-acciones">
-      <button class="accion" id="modal-guardar">Guardar</button>
-      <button class="accion fantasma" id="modal-cancelar">Cancelar</button>
-    </div></div>`;
-  document.body.appendChild(fondo);
-  fondo.querySelector('#modal-cancelar').onclick = () => fondo.remove();
-  fondo.onclick = (evento) => { if (evento.target === fondo) fondo.remove(); };
-  fondo.querySelector('#modal-guardar').onclick = async () => {
-    const url = fondo.querySelector('#modal-url').value.trim();
-    const archivo = fondo.querySelector('#modal-file').files[0];
-    if (archivo) {
-      const lector = new FileReader();
-      lector.onload = async (evento) => {
-        try { await compendio.guardarImagenCustom(id, evento.target.result); fondo.remove(); render(); }
-        catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
-      };
-      lector.readAsDataURL(archivo);
-    } else if (url) {
-      try { await compendio.guardarImagenCustom(id, url); fondo.remove(); render(); }
-      catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
-    } else { alert('Pega una URL o elige un archivo antes de guardar.'); }
-  };
-}
 function enlazarEventosZoomImagenFicha() {
   const imagenFicha = document.getElementById('ficha-imagen-principal');
   if (!imagenFicha) return;
@@ -789,11 +753,7 @@ function enlazarEventosZoomImagenFicha() {
 function enlazarEventosDetalle(id) {
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) btnVolver.onclick = () => irA('#/');
-  const btnCambiar = document.getElementById('btn-cambiar-imagen');
-  const btnRestaurar = document.getElementById('btn-restaurar-imagen');
   const selectorVariante = document.getElementById('selector-variante');
-  if (btnCambiar) btnCambiar.onclick = () => abrirModalImagen(id);
-  if (btnRestaurar) btnRestaurar.onclick = async () => { await compendio.borrarImagenCustom(id); render(); };
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha();
 }
