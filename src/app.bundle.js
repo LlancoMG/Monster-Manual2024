@@ -560,7 +560,7 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     ${legendariasHtml}
     ${monstruo.descripcion_breve ? `<div class="seccion-titulo">Descripción</div><p>${monstruo.descripcion_breve}</p>` : ''}
     ${monstruo.notas ? `<div class="notas-usuario"><b>Notas personales:</b> ${monstruo.notas}</div>` : ''}
-    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : 'Página del manual sin completar — edítala en el JSON.'}</p>
+    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` :""}</p>
   </div>`;
 }
 // ---- ui/filtros-views.js ----
