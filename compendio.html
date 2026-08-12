@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compendio de Monstruos — D&D 5.5 (2024)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== VARIABLES DE TEMA ===================== */
+:root{
+  --pergamino:#ece1c3;
+  --pergamino-osc:#ddcda3;
+  --tinta:#2b2018;
+  --tinta-suave:#5a4c33;
+  --granate:#7a1e2b;
+  --granate-osc:#58111a;
+  --oro:#b8874a;
+  --oro-claro:#d9b477;
+  --fondo-noche:#17130f;
+  --bajo:#59684a;
+  --medio:#b8874a;
+  --alto:#7a1e2b;
+  --mortal:#3a0e14;
+  --cr-variable:#2f4f7f;
+  --t-nomuerto:#5b3a72; --t-dragon:#7a1e2b; --t-gigante:#8a5a24;
+  --t-fienda:#7a1414; --t-humanoide:#3f5e46; --t-bestia:#4a5a2b;
+  --t-monstruosidad:#2d5a63; --t-aberracion:#264a5c; --t-limo:#4a6b3f;
+  --t-celestial:#a68a3a; --t-constructo:#6b6b6b; --t-elemental:#2a7a8c;
+  --t-feerica:#8a4a8c; --t-planta:#3a7a3a; --t-otro:#5a4c33;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'EB Garamond', Georgia, 'Times New Roman', serif;
+  color:var(--tinta);
+  background:
+    radial-gradient(ellipse at top, #241c14 0%, var(--fondo-noche) 55%);
+  min-height:100vh;
+}
+a{color:inherit;}
+:focus-visible{outline:3px solid var(--oro-claro); outline-offset:2px;}
+
+/* ===================== CABECERA ===================== */
+.cabecera{
+  background:linear-gradient(180deg, var(--granate) 0%, var(--granate-osc) 100%);
+  border-bottom:3px solid var(--oro);
+  box-shadow:0 6px 18px rgba(0,0,0,.5);
+  padding:22px 20px 18px;
+  text-align:center;
+}
+.cabecera h1{
+  font-family:'Cinzel', Georgia, serif;
+  color:var(--oro-claro);
+  letter-spacing:2px;
+  margin:0;
+  font-size:clamp(20px,4vw,32px);
+  text-shadow:0 2px 4px rgba(0,0,0,.6);
+}
+.cabecera p{color:#e7d3b0; font-style:italic; margin:6px 0 0; font-size:13.5px;}
+
+.contenedor{max-width:1180px; margin:0 auto; padding:22px 16px 60px;}
+
+/* ===================== TARJETAS / PANELES ===================== */
+.panel{
+  background:var(--pergamino);
+  border:1px solid var(--oro);
+  border-radius:8px;
+  box-shadow:0 10px 24px rgba(0,0,0,.45), inset 0 0 60px rgba(120,90,40,.08);
+  padding:18px 20px 22px;
+  margin-bottom:20px;
+}
+.panel h2{
+  font-family:'Cinzel', serif; font-size:15px; letter-spacing:1px;
+  color:var(--granate-osc); margin:0 0 12px;
+  border-bottom:2px solid var(--oro); padding-bottom:8px;
+  text-transform:uppercase; font-variant:small-caps;
+}
+label{font-size:12.5px; color:var(--tinta-suave); display:block; margin:8px 0 3px; font-weight:600;}
+select, input[type=text]{
+  width:100%; font-family:'EB Garamond', serif; font-size:15px;
+  padding:7px 9px; border:1px solid #b8a878; background:#fbf6e9;
+  color:var(--tinta); border-radius:6px;
+}
+.fila{display:flex; gap:12px; flex-wrap:wrap;}
+.fila > div{flex:1; min-width:150px;}
+.botones-filtro{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px;}
+
+button.accion{
+  font-family:'Cinzel', serif; letter-spacing:.5px; font-size:12.5px;
+  background:var(--granate); color:#f4e6c8; border:1px solid var(--oro);
+  padding:9px 16px; border-radius:6px; cursor:pointer;
+}
+button.accion:hover{background:var(--granate-osc);}
+button.accion:disabled{opacity:.4; cursor:not-allowed;}
+button.accion:disabled:hover{background:var(--granate);}
+button.fantasma{background:transparent; color:var(--granate); border:1px solid var(--granate);}
+button.fantasma:hover{background:rgba(122,30,43,.08);}
+button.fantasma:disabled:hover{background:transparent;}
+
+/* ===================== LISTADO ===================== */
+.contador{font-size:12.5px; color:var(--tinta-suave); margin:0 0 10px;}
+.rejilla{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:14px;}
+.tarjeta{
+  background:#fbf6e9; border:1px solid var(--oro); border-radius:8px;
+  overflow:hidden; cursor:pointer; text-align:left; display:flex; flex-direction:column;
+  transition:transform .12s, box-shadow .12s; box-shadow:0 3px 8px rgba(0,0,0,.15);
+}
+.tarjeta:hover, .tarjeta:focus-visible{transform:translateY(-3px); box-shadow:0 10px 18px rgba(0,0,0,.3);}
+.tarjeta .miniatura{width:100%; height:130px; overflow:hidden; background:var(--pergamino-osc);}
+.tarjeta .miniatura img, .tarjeta .miniatura svg{width:100%; height:100%; object-fit:cover; display:block;}
+.tarjeta .cuerpo{padding:10px 12px 12px;}
+.tarjeta .nombre-cr{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+.tarjeta h3{font-family:'Cinzel', serif; font-size:15px; margin:0; color:var(--tinta);}
+.insignia-cr{
+  font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700;
+  color:#fff; padding:2px 8px; border-radius:10px; white-space:nowrap;
+}
+.tarjeta .meta{font-size:11.5px; font-style:italic; color:var(--tinta-suave); margin:2px 0 6px;}
+.variantes-cr{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 7px;}
+.chip-cr-variante{
+  display:inline-block;
+  font-size:10.5px;
+  font-family:'JetBrains Mono', monospace;
+  background:var(--pergamino-osc);
+  border:1px solid #b8a878;
+  color:var(--tinta-suave);
+  border-radius:9px;
+  padding:1px 6px;
+}
+.tarjeta .lore{font-size:13px; line-height:1.4; margin:0 0 6px;}
+.chip-hab{
+  display:inline-flex; align-items:center; font-size:10.5px; background:var(--pergamino-osc);
+  border:1px solid #b8a878; padding:1px 7px; border-radius:9px; margin:1px 3px 0 0; color:var(--tinta-suave);
+}
+.vacio{padding:40px 20px; text-align:center; color:var(--tinta-suave); font-style:italic;}
+
+/* ===================== PAGINACIÓN ===================== */
+.paginacion{
+  display:flex; justify-content:center; align-items:center; gap:16px;
+  margin-top:18px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--pergamino-osc);
+}
+.pagina-info{font-size:12.5px; color:var(--tinta-suave); font-style:italic; font-variant:small-caps; letter-spacing:.5px;}
+
+/* ===================== FICHA DE DETALLE ===================== */
+.ficha-cabecera{display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;}
+.ficha-imagen{
+  width:220px; height:220px; border-radius:8px; overflow:hidden; border:2px solid var(--oro);
+  flex-shrink:0; background:var(--pergamino-osc); position:relative; cursor:zoom-in;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.ficha-imagen img, .ficha-imagen svg{width:100%; height:100%; object-fit:cover; display:block;}
+.ficha-imagen-ampliada{
+  transform:scale(3);
+  cursor:zoom-out;
+  z-index:8;
+  box-shadow:0 16px 34px rgba(0,0,0,.42);
+}
+@media (max-width:640px){
+  .ficha-imagen-ampliada{transform:scale(3.2);}
+}
+.ficha-titulos{flex:1; min-width:240px;}
+.ficha-titulos h2{font-family:'Cinzel', serif; font-size:clamp(22px,4vw,30px); color:var(--granate-osc); margin:0 0 2px; border:none; padding:0; text-transform:none; font-variant:normal;}
+.ficha-sub{font-style:italic; color:var(--tinta-suave); font-size:14px; margin:0 0 8px;}
+.filete{
+  height:6px; margin:14px 0;
+  background:linear-gradient(90deg, transparent, var(--granate) 15%, var(--oro) 50%, var(--granate) 85%, transparent);
+  clip-path: polygon(0 45%, 8% 0, 92% 0, 100% 45%, 92% 100%, 8% 100%);
+}
+.linea-stat{font-size:14.5px; margin:4px 0; line-height:1.5;}
+.linea-stat b{color:var(--granate-osc); font-variant:small-caps;}
+.tabla-atributos{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:14px 0;}
+@media (max-width:640px){.tabla-atributos{grid-template-columns:repeat(3,1fr);}}
+.cel-atributo{background:#f2e7c9; border:1px solid #cbb98a; border-radius:6px; text-align:center; padding:7px 2px;}
+.cel-atributo .n{font-family:'Cinzel', serif; font-size:10.5px; color:var(--tinta-suave); text-transform:uppercase;}
+.cel-atributo .v{font-family:'JetBrains Mono', monospace; font-size:17px; font-weight:700;}
+.cel-atributo .m{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--granate);}
+.seccion-titulo{
+  font-family:'Cinzel', serif; font-size:13px; letter-spacing:1px; color:var(--granate-osc);
+  margin:16px 0 6px; text-transform:uppercase; border-bottom:1px solid var(--oro); padding-bottom:3px;
+}
+.rasgo{margin:7px 0; font-size:14.5px; line-height:1.55;}
+.rasgo b{color:var(--tinta); font-variant:small-caps;}
+.insignia-peligro{display:inline-block; font-family:'JetBrains Mono', monospace; color:#fff; padding:4px 12px; border-radius:6px; font-size:13px; font-weight:700; margin:6px 0;}
+.chips-habitat{margin:6px 0;}
+.notas-usuario{background:rgba(122,30,43,.06); border-left:3px solid var(--granate); padding:8px 12px; font-size:13.5px; margin-top:10px;}
+.pagina-manual{font-size:12px; color:var(--tinta-suave); margin-top:14px; font-style:italic;}
+
+/* ===================== MODAL IMAGEN ===================== */
+.modal-fondo{
+  position:fixed; inset:0; background:rgba(10,7,4,.75); display:flex;
+  align-items:center; justify-content:center; z-index:50; padding:16px;
+}
+.modal-caja{
+  background:var(--pergamino); border:2px solid var(--oro); border-radius:8px;
+  padding:20px 22px; max-width:420px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,.5);
+}
+.modal-caja h3{font-family:'Cinzel', serif; color:var(--granate-osc); margin:0 0 12px; font-size:16px;}
+.modal-acciones{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;}
+
+/* ===================== VARIOS ===================== */
+.oculto{display:none !important;}
+.footer-nota{color:#c9b48c; font-size:11.5px; text-align:center; margin-top:14px; font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="cabecera">
+  <h1>Compendio de Monstruos</h1>
+  <p>Colección personal — Dungeons &amp; Dragons, edición revisada 2024</p>
+</div>
+
+<div class="contenedor" id="app"></div>
+<script src="./monstruos.legacy.js"></script>
+<script src="./src/app.bundle.js"></script>
+</body>
+</html>
