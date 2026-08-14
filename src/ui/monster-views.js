@@ -34,7 +34,10 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
     ? `<div class="variantes-cr">${variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')}</div>`
     : '';
   const nombreEn = monstruo.nombre_en ? ` · <i>${monstruo.nombre_en}</i>` : '';
-  return `<button class="tarjeta" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
+  // Se usa <a> (con href real al hash de la ficha) en vez de <button> para que
+  // el clic derecho ofrezca "Abrir en una pestaña nueva", "Abrir en ventana
+  // nueva", etc., como cualquier enlace normal.
+  return `<a class="tarjeta" href="#/monstruo/${encodeURIComponent(monstruo.id)}" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
     <div class="miniatura">${marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor)}</div>
     <div class="cuerpo">
       <div class="nombre-cr"><h3>${monstruo.nombre}</h3>
@@ -43,7 +46,7 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
       ${variantesCrHtml}
       <p class="lore">${monstruo.descripcion_breve || ''}</p>
       <div>${(monstruo.habitat || []).map((h) => chipHabitatHtml(h)).join('')}</div>
-    </div></button>`;
+    </div></a>`;
 }
 export function construirPanelResultados({ todos, resultados, paginaActual, tamPagina, obtenerFuenteImagen, tipoColor, obtenerVariantesConCr }) {
   const totalPaginas = Math.max(1, Math.ceil(resultados.length / tamPagina));

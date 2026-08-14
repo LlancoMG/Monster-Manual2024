@@ -15,9 +15,9 @@ function analizarHash() {
 }
 function irA(hash) { location.hash = hash; }
 function enlazarEventosPanelResultados() {
-  document.querySelectorAll('.tarjeta').forEach((tarjeta) => {
-    tarjeta.onclick = () => irA(`#/monstruo/${encodeURIComponent(tarjeta.getAttribute('data-id'))}`);
-  });
+  // Las tarjetas ahora son <a href="#/monstruo/..."> reales (ver monster-views.js),
+  // así que la navegación con clic izquierdo, ctrl/cmd+clic, clic central y
+  // clic derecho → "Abrir en pestaña nueva" ya funciona sola, sin JS.
   const btnAnterior = document.getElementById('btn-pag-anterior');
   const btnSiguiente = document.getElementById('btn-pag-siguiente');
   if (btnAnterior) btnAnterior.onclick = () => { compendio.setPaginaActual(compendio.getPaginaActual() - 1); actualizarPanelResultados(); };

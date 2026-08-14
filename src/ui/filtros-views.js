@@ -11,23 +11,41 @@ const ESTILOS_FILTROS = `<style>
 .dd-filtro>summary::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--tinta-suave);transition:transform .15s;}
 .dd-filtro[open]>summary::after{transform:translateY(-50%) rotate(180deg);}
 .dd-filtro[open]>summary,.dd-filtro>summary:focus-visible{outline:3px solid var(--oro-claro);outline-offset:2px;border-color:var(--oro);}
-.dd-panel{position:absolute;top:100%;left:0;z-index:20;background:var(--pergamino);border:1px solid var(--oro);border-radius:8px;padding:10px;margin-top:4px;box-shadow:0 10px 24px rgba(0,0,0,.35);}
-.dd-panel-rejilla{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:6px;width:520px;}
+.dd-panel{position:absolute;top:100%;left:0;z-index:20;background:var(--pergamino);border:1px solid var(--oro);border-radius:8px;padding:10px;margin-top:4px;box-shadow:0 10px 24px rgba(0,0,0,.35);max-width:calc(100vw - 32px);box-sizing:border-box;}
+.dd-panel-rejilla{display:grid;grid-template-columns:repeat(3,minmax(115px,1fr));gap:5px;width:400px;}
 .dd-panel-columna{display:flex;flex-direction:column;gap:6px;min-width:210px;}
 .chip-opcion{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;font-family:'EB Garamond',serif;font-size:13.5px;font-weight:600;background:#fbf6e9;border:1px solid #b8a878;color:var(--tinta-suave);cursor:pointer;opacity:.6;}
 .chip-opcion:has(input:checked){opacity:1;box-shadow:inset 0 0 0 2px var(--oro);}
 .chip-opcion input{transform:scale(1.2);accent-color:var(--oro);}
+/* Fichas un poco más chicas, solo para Hábitat y CR exacto. */
+.chip-opcion-compacta{padding:3px 6px;font-size:12px;gap:4px;}
+/* Hábitat y CR exacto se anclan al borde derecho de su propio campo (que
+   coincide con el borde derecho de la cuadrícula de filtros) en vez de crecer
+   hacia la derecha, para que el panel nunca se salga de la pantalla ni obligue
+   a desplazarse horizontalmente en resoluciones más chicas. */
+#dd-cr-exacto .dd-panel,#dd-habitat .dd-panel{left:auto;right:0;}
 </style>`;
 
-function dropdownSimpleHtml({ id, etiqueta, opciones, valorActual, textoActual }) {
+// Si se indica "columnas", el panel se abre como rejilla de varias columnas
+// (más ancho y más bajo) en lugar de una lista vertical larga.
+// "compacto" reduce el ancho de columna y el tamaño de las fichas — se usa
+// solo para el filtro de CR exacto.
+function dropdownSimpleHtml({ id, etiqueta, opciones, valorActual, textoActual, columnas, compacto }) {
+  const clasePanel = columnas ? 'dd-panel' : 'dd-panel dd-panel-columna';
+  const anchoColumna = compacto ? 115 : 160;
+  const espacio = compacto ? 5 : 6;
+  const estiloPanel = columnas
+    ? ` style="display:grid;grid-template-columns:repeat(${columnas},minmax(0,1fr));gap:${espacio}px;width:min(${columnas * anchoColumna}px,calc(100vw - 32px));"`
+    : '';
+  const claseOpcion = compacto ? 'chip-opcion chip-opcion-compacta' : 'chip-opcion';
   return `
   <div class="campo-filtro">
     <label>${etiqueta}</label>
     <details class="dd-filtro" id="dd-${id}">
       <summary class="control-filtro">${textoActual}</summary>
-      <div class="dd-panel dd-panel-columna">
+      <div class="${clasePanel}"${estiloPanel}>
         ${opciones.map(([valor, texto]) => `
-        <label class="chip-opcion">
+        <label class="${claseOpcion}">
           <input type="radio" name="f-${id}" value="${valor}" ${valor === valorActual ? 'checked' : ''}>${texto}
         </label>`).join('')}
       </div>
@@ -47,7 +65,7 @@ function dropdownHabitatHtml(seleccionados) {
         ${HABITATS.map((h) => {
           const estilo = HABITAT_ESTILO[h] || {};
           return `
-          <label class="chip-opcion" style="background:${estilo.fondo || '#fbf6e9'};border-color:${estilo.borde || '#b8a878'};color:${estilo.texto || 'var(--tinta-suave)'}">
+          <label class="chip-opcion chip-opcion-compacta" style="background:${estilo.fondo || '#fbf6e9'};border-color:${estilo.borde || '#b8a878'};color:${estilo.texto || 'var(--tinta-suave)'}">
             <input type="checkbox" class="f-habitat-item" value="${h}" ${seleccionados.includes(h) ? 'checked' : ''}>${h}
           </label>`;
         }).join('')}
@@ -74,10 +92,10 @@ export function vistaLista({ filtros, crsExactos, panelResultadosHtml }) {
         <input type="text" id="f-q" class="control-filtro" value="${filtros.q}" placeholder="ej. dragón, goblin, beholder, dragon...">
       </div>
       ${dropdownSimpleHtml({ id: 'rango', etiqueta: 'Rango de peligro', opciones: opcionesRango, valorActual: filtros.rango, textoActual: textoRango })}
-      ${dropdownSimpleHtml({ id: 'cr-exacto', etiqueta: 'CR exacto', opciones: opcionesCr, valorActual: filtros.crExacto, textoActual: textoCr })}
+      ${dropdownSimpleHtml({ id: 'cr-exacto', etiqueta: 'CR exacto', opciones: opcionesCr, valorActual: filtros.crExacto, textoActual: textoCr, columnas: 4, compacto: true })}
     </div>
     <div class="fila">
-      ${dropdownSimpleHtml({ id: 'tipo', etiqueta: 'Tipo', opciones: opcionesTipo, valorActual: filtros.tipo, textoActual: filtros.tipo === 'todos' ? 'Todos' : filtros.tipo })}
+      ${dropdownSimpleHtml({ id: 'tipo', etiqueta: 'Tipo', opciones: opcionesTipo, valorActual: filtros.tipo, textoActual: filtros.tipo === 'todos' ? 'Todos' : filtros.tipo, columnas: 3 })}
       ${dropdownSimpleHtml({ id: 'tamano', etiqueta: 'Tamaño', opciones: opcionesTamano, valorActual: filtros.tamano, textoActual: filtros.tamano === 'todos' ? 'Todos' : filtros.tamano })}
       ${dropdownSimpleHtml({ id: 'orden', etiqueta: 'Ordenar por', opciones: opcionesOrden, valorActual: filtros.orden, textoActual: textoOrden })}
       ${dropdownHabitatHtml(filtros.habitat)}
