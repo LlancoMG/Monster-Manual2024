@@ -227,6 +227,54 @@ button.fantasma:disabled:hover{background:transparent;}
 /* ===================== VARIOS ===================== */
 .oculto{display:none !important;}
 .footer-nota{color:#c9b48c; font-size:11.5px; text-align:center; margin-top:14px; font-style:italic;}
+
+/* ===================== ESTADÍSTICAS RÁPIDAS (CA / PG / Velocidad) ===================== */
+/* Misma familia visual que .cel-atributo, para que la ficha se sienta más
+   cohesiva en vez de tener líneas de texto sueltas para estos tres datos. */
+.stats-rapidas{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0;}
+.stat-rapida{
+  flex:1; min-width:150px;
+  background:#f2e7c9; border:1px solid #cbb98a; border-radius:6px;
+  padding:8px 12px; display:flex; flex-direction:column; gap:2px;
+}
+.stat-rapida-etiqueta{
+  font-family:'Cinzel', serif; font-size:10.5px; letter-spacing:.6px;
+  color:var(--granate-osc); text-transform:uppercase; font-variant:small-caps;
+}
+.stat-rapida-valor{font-family:'JetBrains Mono', monospace; font-size:15.5px; font-weight:700; color:var(--tinta);}
+
+/* ===================== SECCIONES SEPARADAS: REACCIONES Y LEGENDARIAS ===================== */
+/* Reacciones: caja con acento azul-verdoso (distinta de rasgos/acciones). */
+.seccion-reacciones{
+  margin-top:16px; padding:12px 16px 10px;
+  border:1px solid #6f9aa3; border-radius:8px;
+  background:linear-gradient(180deg, rgba(42,122,140,.09), rgba(42,122,140,.02));
+}
+.seccion-reacciones .seccion-titulo{
+  margin-top:0; color:#1f5164; border-bottom-color:#6f9aa3;
+}
+.seccion-reacciones .rasgo{border-left-color:#2a7a8c;}
+.seccion-reacciones .rasgo b{color:#1f5164;}
+
+/* Acciones legendarias: caja con acento dorado y título en degradé de oro,
+   para que destaquen como la sección más importante del final de la ficha. */
+.seccion-legendarias{
+  margin-top:18px; padding:14px 16px 10px;
+  border:1px solid var(--oro); border-radius:8px;
+  background:linear-gradient(180deg, rgba(184,135,74,.12), rgba(184,135,74,.03));
+  box-shadow:inset 0 0 26px rgba(184,135,74,.08);
+}
+.seccion-titulo-legendaria{
+  margin-top:0;
+  border-bottom-color:var(--oro);
+  background:linear-gradient(90deg, #8a651f, var(--oro) 45%, var(--oro-claro) 100%);
+  -webkit-background-clip:text; background-clip:text;
+  color:var(--oro); /* respaldo para navegadores sin soporte de background-clip:text */
+  -webkit-text-fill-color:transparent;
+}
+.seccion-legendarias .rasgo{border-left-color:var(--oro);}
+.seccion-legendarias .rasgo b{color:var(--granate-osc);}
+
 </style>
 </head>
 <body>

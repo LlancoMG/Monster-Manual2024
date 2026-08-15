@@ -1,13 +1,12 @@
-// Bundle generado manualmente (equivale a ejecutar node scripts/crear-bundle.js).
-// Reemplaza por completo el contenido de src/app.bundle.js.
-// ---- features/constants.js ----
-const TIPOS = ['Aberración', 'Bestia', 'Celestial', 'Constructo', 'Dragón', 'Elemental', 'Feérico', 'Fiel', 'Gigante', 'Humanoide', 'Monstruosidad', 'Limo', 'Planta', 'No muerto'];
+// Bundle generado automáticamente con: node scripts/crear-bundle.js
+// ---- src/features/constants.js ----
+const TIPOS = ['Aberración', 'Bestia', 'Celestial', 'Constructo', 'Dragón', 'Elemental', 'Feérica', 'Fienda', 'Gigante', 'Humanoide', 'Monstruosidad', 'Limo', 'Planta', 'No muerto'];
 const TIPO_COLOR = {
   'no muerto': 'var(--t-nomuerto)', 'dragón': 'var(--t-dragon)', 'gigante': 'var(--t-gigante)',
-  'fiel': 'var(--t-fiel)', 'humanoide': 'var(--t-humanoide)', 'bestia': 'var(--t-bestia)',
+  'fienda': 'var(--t-fienda)', 'humanoide': 'var(--t-humanoide)', 'bestia': 'var(--t-bestia)',
   'monstruosidad': 'var(--t-monstruosidad)', 'aberración': 'var(--t-aberracion)', 'limo': 'var(--t-limo)',
   celestial: 'var(--t-celestial)', constructo: 'var(--t-constructo)', elemental: 'var(--t-elemental)',
-  'feérico': 'var(--t-feerica)', planta: 'var(--t-planta)'
+  'feérica': 'var(--t-feerica)', planta: 'var(--t-planta)'
 };
 const TAMANOS = ['Diminuto', 'Pequeño', 'Mediano', 'Grande', 'Enorme', 'Gigantesco'];
 const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas'];
@@ -46,9 +45,9 @@ const FILTROS_POR_DEFECTO = {
   q: '', rango: 'todos', crExacto: 'todos', tipo: 'todos',
   tamano: 'todos', habitat: [], orden: 'nombre_asc'
 };
-// ---- features/nombres-en.js ----
-// Diccionario id -> nombre oficial en inglés. Ya va incluido en el bundle,
-// por eso NO hace falta tocar monstruos.legacy.js.
+// ---- src/features/nombres-en.js ----
+// Mapa id → nombre oficial en inglés (Monster Manual 2024).
+// Se usa en runtime para la búsqueda y también para inyectarlo al JSON legacy.
 const NOMBRES_INGLES = {
   goblin: 'Goblin', lobo_terrible: 'Dire Wolf', orco: 'Orc', arpia: 'Harpy', espectro: 'Specter',
   mimico: 'Mimic', cubo_gelatinoso: 'Gelatinous Cube', gigante_colinas: 'Hill Giant', contemplador: 'Beholder',
@@ -98,7 +97,7 @@ const NOMBRES_INGLES = {
   chacal: 'Jackal', chacalwere: 'Jackalwere', kenku: 'Kenku', orca: 'Orca', caballeros: 'Knights', kobolds: 'Kobolds',
   kraken: 'Kraken', kuo_toa: 'Kuo-toa', lamia: 'Lamia', larvas: 'Larvae', lemures: 'Lemures', leon: 'Lion',
   lagarto: 'Lizard', hombres_lagarto: 'Lizardfolk', magos: 'Mages', magmin: 'Magmin', mamut: 'Mammoth', manes: 'Manes',
-  manticoa: 'Manticore', marid: 'Marid', marilith: 'Marilith', mastin: 'Mastiff', medusa: 'Medusa', mephits: 'Mephits',
+  manticoa: 'Manticore', marid: 'Marid', marilith: 'Marilith', mastin: 'Mastiff', medusa: 'Medusa', mefits: 'Mephits',
   merfolk: 'Merfolk', merrow: 'Merrow', mezzoloth: 'Mezzoloth', mind_flayers: 'Mind Flayers',
   minotauro_de_baphomet: 'Minotaur of Baphomet', modrones: 'Modrones', mula: 'Mule', momias: 'Mummies',
   'micónidos': 'Myconids', nalfeshnee: 'Nalfeshnee', bruja_nocturna: 'Night Hag', pesadilla: 'Nightmare', nobles: 'Nobles',
@@ -123,7 +122,7 @@ const NOMBRES_INGLES = {
   tumularios: 'Wights', fuego_fatuo: 'Will-o\'-Wisp', wyvern: 'Wyvern', xorn: 'Xorn', yeti: 'Yeti', yuan_ti: 'Yuan-ti',
   zombis: 'Zombies', dragones_hada: 'Faerie Dragons'
 };
-// ---- features/utils.js ----
+// ---- src/features/utils.js ----
 function crAFraccion(cr) {
   if (cr === 0.125) return '1/8';
   if (cr === 0.25) return '1/4';
@@ -146,9 +145,11 @@ function fmtMod(modificador) {
 function normalizar(texto) {
   return (texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+// Quita el contenido entre paréntesis para comparar "humanoide (orco)" contra "humanoide".
 function quitarParentesis(texto) {
   return normalizar(texto).replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
 }
+// Compara un campo del monstruo (con o sin paréntesis) contra un valor de filtro limpio.
 function coincideCampo(valorCampo, valorFiltro) {
   if (!valorCampo || !valorFiltro) return false;
   const campoSinParentesis = quitarParentesis(valorCampo);
@@ -168,12 +169,17 @@ function fraccionANumero(valor) {
   const decimal = Number(txt.replace(',', '.'));
   return Number.isFinite(decimal) ? decimal : valor;
 }
-// ---- features/storage.js ----
+// ---- src/features/storage.js ----
 const CLAVE_VARIANTES = 'compendio_variantes_seleccionadas';
 const CLAVE_IMPORTADOS = 'compendio_monstruos_importados';
+
+// Las imágenes personalizadas viven en IndexedDB (no en localStorage) porque
+// localStorage tiene un límite total de ~5 MB compartido con el resto de los
+// datos, mientras que IndexedDB soporta imágenes mucho más pesadas.
 const DB_NOMBRE = 'compendio_db';
 const DB_VERSION = 1;
 const ALMACEN_IMAGENES = 'imagenes_custom';
+
 let dbPromise = null;
 function abrirDB() {
   if (dbPromise) return dbPromise;
@@ -189,7 +195,11 @@ function abrirDB() {
   });
   return dbPromise;
 }
+
 let cacheImagenes = {};
+
+// Se resuelve cuando las imágenes guardadas ya se cargaron en memoria desde
+// IndexedDB. La app espera esta promesa antes del primer render.
 const imagenesListas = (async () => {
   try {
     const db = await abrirDB();
@@ -209,7 +219,11 @@ const imagenesListas = (async () => {
     cacheImagenes = {};
   }
 })();
-function cargarImagenesCustom() { return cacheImagenes; }
+
+function cargarImagenesCustom() {
+  return cacheImagenes;
+}
+
 async function guardarImagenCustom(id, dataUrl) {
   cacheImagenes = { ...cacheImagenes, [id]: dataUrl };
   const db = await abrirDB();
@@ -220,6 +234,7 @@ async function guardarImagenCustom(id, dataUrl) {
     tx.onerror = () => reject(tx.error);
   });
 }
+
 async function borrarImagenCustom(id) {
   const { [id]: _quitada, ...resto } = cacheImagenes;
   cacheImagenes = resto;
@@ -231,21 +246,33 @@ async function borrarImagenCustom(id) {
     tx.onerror = () => reject(tx.error);
   });
 }
+
 function cargarVariantesSeleccionadas() {
-  try { return JSON.parse(localStorage.getItem(CLAVE_VARIANTES)) || {}; } catch (error) { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_VARIANTES)) || {};
+  } catch (error) {
+    return {};
+  }
 }
+
 function guardarVarianteSeleccionada(id, varianteId) {
   const variantes = cargarVariantesSeleccionadas();
   variantes[id] = varianteId;
   localStorage.setItem(CLAVE_VARIANTES, JSON.stringify(variantes));
 }
+
 function cargarImportados() {
-  try { return JSON.parse(localStorage.getItem(CLAVE_IMPORTADOS)) || []; } catch (error) { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_IMPORTADOS)) || [];
+  } catch (error) {
+    return [];
+  }
 }
+
 function guardarImportados(lista) {
   localStorage.setItem(CLAVE_IMPORTADOS, JSON.stringify(lista));
 }
-// ---- features/monster-model.js ----
+// ---- src/features/monster-model.js ----
 function normalizarCamposMonstruo(data) {
   if (!data || typeof data !== 'object') return {};
   const m = { ...data };
@@ -276,7 +303,7 @@ function extraerAccionesDesdeNotas(variante) {
   if (!variante || typeof variante.notas !== 'string') return [];
   const notas = variante.notas;
   const acciones = [];
-  const ataques = [...notas.matchAll(/([A-Za-zÁÉÍÓÚáéíóúÑñ' ]+)\s*\+(\d+)\s+a golpear[^.]*(?:para|Impacto:)\s*([0-9dD+ ]+)\s*([a-záéíóúñ]+)/gi)];
+  const ataques = [...notas.matchAll(/([A-Za-zÁÉÍÓÚáéíóúÑñ' ]+)\s*\+(\d+)\s*a golpear[^.]*(?:para|Impacto:)\s*([0-9dD+ ]+)\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/g)];
   ataques.forEach((m) => {
     const nombre = m[1].trim().replace(/\s+/g, ' ');
     acciones.push({ nombre, texto: `+${m[2]} a golpear. Impacto: ${m[3].trim()} ${m[4].trim()}.` });
@@ -342,7 +369,7 @@ function crearCompendio(baseMonstruos) {
   function obtenerTodosMonstruos() {
     const mapa = new Map(baseMonstruos.map((m) => [m.id, m]));
     cargarImportados().forEach((m) => { if (m && m.id) mapa.set(m.id, m); });
-    // Fusiona el nombre en inglés del diccionario sin tocar el JSON.
+    // Fusiona el nombre en inglés (del JSON si existe, o del mapa de respaldo).
     return Array.from(mapa.values()).map((m) => ({ ...m, nombre_en: m.nombre_en || NOMBRES_INGLES[m.id] || '' }));
   }
   function obtenerMonstruoPorId(id) { return obtenerTodosMonstruos().find((m) => m.id === id); }
@@ -440,7 +467,7 @@ function crearCompendio(baseMonstruos) {
     obtenerVarianteSeleccionada, aplicarVariante, obtenerVariantesConCr, obtenerCrsFiltrables
   };
 }
-// ---- ui/monster-views.js ----
+// ---- src/ui/monster-views.js ----
 function retratoProcedural(monstruo, tipoColor) {
   const iniciales = (monstruo.nombre || '?').split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase();
   const color = tipoColor[monstruo.tipo] || 'var(--t-otro)';
@@ -474,8 +501,9 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
     ? `<div class="variantes-cr">${variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')}</div>`
     : '';
   const nombreEn = monstruo.nombre_en ? ` · <i>${monstruo.nombre_en}</i>` : '';
-  // <a> con href real al hash de la ficha: el clic derecho ahora ofrece
-  // "Abrir en una pestaña nueva" como cualquier enlace normal.
+  // Se usa <a> (con href real al hash de la ficha) en vez de <button> para que
+  // el clic derecho ofrezca "Abrir en una pestaña nueva", "Abrir en ventana
+  // nueva", etc., como cualquier enlace normal.
   return `<a class="tarjeta" href="#/monstruo/${encodeURIComponent(monstruo.id)}" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
     <div class="miniatura">${marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor)}</div>
     <div class="cuerpo">
@@ -505,6 +533,17 @@ function construirPanelResultados({ todos, resultados, paginaActual, tamPagina, 
     ${resultados.length ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}` : '<div class="vacio">Ningún monstruo coincide con estos filtros.<br><button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>'}`;
   return { html, pagina, totalPaginas };
 }
+// Convierte el patrón habitual de los bloques de estadísticas ("Nombre. resto
+// del texto") en "Nombre: resto del texto", igual que se hace con los
+// nombres de rasgos/acciones. Solo actúa si el ". " aparece cerca del
+// principio del texto (se asume que es el separador título/cuerpo y no un
+// punto cualquiera dentro de una oración larga).
+function formatoTituloDosPuntos(texto) {
+  if (typeof texto !== 'string') return texto;
+  const indice = texto.indexOf('. ');
+  if (indice === -1 || indice > 60) return texto;
+  return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
+}
 function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFuenteImagen, tipoColor }) {
   if (!monstruoBase) {
     return `<div class="panel"><h2>Monstruo no encontrado</h2>
@@ -526,20 +565,39 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
   const atributosHtml = ABIL.map((a) => `<div class="cel-atributo">
       <div class="n">${ABIL_NOMBRE[a]}</div><div class="v">${valorVisible(monstruo.atributos[a])}</div>
       <div class="m">${fmtMod(mod(monstruo.atributos[a]))}</div></div>`).join('');
+  // Clase de Armadura / Puntos de Golpe / Velocidad ahora se muestran como
+  // "estadísticas rápidas" en fichas individuales (misma familia visual que
+  // la tabla de atributos), en vez de simples líneas de texto sueltas.
+  const statsRapidasHtml = `<div class="stats-rapidas">
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Clase de Armadura</span><span class="stat-rapida-valor">${valorVisible(monstruo.ca)}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${valorVisible(monstruo.velocidad)}</span></div>
+  </div>`;
+  // Los títulos de estadísticas (Tiradas de salvación, Sentidos, etc.) ahora
+  // terminan en ":" en vez de "." para que se lean como una etiqueta, igual
+  // que los nombres de rasgos/acciones más abajo.
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
-    return visible !== '—' ? `<div class="linea-stat"><b>${etiqueta}.</b> ${visible}</div>` : '';
+    return visible !== '—' ? `<div class="linea-stat"><b>${etiqueta}:</b> ${visible}</div>` : '';
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}.</b> ${r.texto}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`).join('')}`
     : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
-    <div class="linea-stat"><b>Variante activa.</b> ${varianteSeleccionada.nombre}</div>
-    ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia.</b> ${varianteSeleccionada.presencia}</div>` : ''}
-    ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias.</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
-  const legendariasHtml = monstruo.legendarias ? `<div class="seccion-titulo">Acciones legendarias</div>
+    <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
+    ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
+    ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
+  // Reacciones y Acciones legendarias ahora son categorías visualmente
+  // separadas (cajas con acento de color propio), en vez de mezclarse con el
+  // resto de rasgos/acciones. Acciones legendarias usa tonos dorados.
+  const reaccionesHtml = (monstruo.reacciones && monstruo.reacciones.length)
+    ? `<div class="seccion-reacciones">${listaRasgos('Reacciones', monstruo.reacciones)}</div>`
+    : '';
+  const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
+    <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${t}</div>`).join('')}` : '';
+    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${formatoTituloDosPuntos(t)}</div>`).join('')}
+  </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `
   <div class="panel"><button class="accion fantasma" id="btn-volver">← Volver al listado</button></div>
@@ -558,9 +616,7 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
       </div>
     </div>
     <hr class="filete">
-    <div class="linea-stat"><b>Clase de Armadura.</b> ${valorVisible(monstruo.ca)}</div>
-    <div class="linea-stat"><b>Puntos de Golpe.</b> ${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</div>
-    <div class="linea-stat"><b>Velocidad.</b> ${valorVisible(monstruo.velocidad)}</div>
+    ${statsRapidasHtml}
     <div class="tabla-atributos">${atributosHtml}</div>
     ${varianteHtml}
     ${bloque('Tiradas de salvación', monstruo.tiradas_salvacion)}
@@ -575,16 +631,16 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     ${listaRasgos('Rasgos', monstruo.rasgos)}
     ${listaRasgos('Acciones', monstruo.acciones)}
     ${listaRasgos('Acciones adicionales', monstruo.acciones_adicionales)}
-    ${listaRasgos('Reacciones', monstruo.reacciones)}
+    ${reaccionesHtml}
     ${legendariasHtml}
     ${monstruo.descripcion_breve ? `<div class="seccion-titulo">Descripción</div><p>${monstruo.descripcion_breve}</p>` : ''}
     ${monstruo.notas ? `<div class="notas-usuario"><b>Notas personales:</b> ${monstruo.notas}</div>` : ''}
-    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` :""}</p>
+    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : 'Página del manual sin completar — edítala en el JSON.'}</p>
   </div>`;
 }
-// ---- ui/filtros-views.js ----
+// ---- src/ui/filtros-views.js ----
 // Estilos compartidos: TODOS los controles de filtro usan la misma piel
-// (caja de pergamino con flecha ▾ y panel desplegable con fichas), igual que el de hábitat.
+// (caja pergamino con flecha ▾ y panel desplegable con chips), igual que el de hábitat.
 const ESTILOS_FILTROS = `<style>
 .campo-filtro{position:relative;min-width:170px;}
 .control-filtro{width:100%;box-sizing:border-box;font-family:'EB Garamond',serif;font-size:15px;padding:7px 9px;border:1px solid #b8a878;border-radius:6px;background:#fbf6e9;color:var(--tinta);}
@@ -689,9 +745,10 @@ function vistaLista({ filtros, crsExactos, panelResultadosHtml }) {
   <div class="panel">${panelResultadosHtml}</div>
   <p class="footer-nota">Creado por <a href="https://github.com/LlancoMG" target="_blank" rel="noopener noreferrer">LlancoMG</a>.</p>`;
 }
-// ---- app.js ----
+// ---- src/app.js ----
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
+
 function analizarHash() {
   const hash = location.hash || '#/';
   const partes = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
@@ -700,9 +757,9 @@ function analizarHash() {
 }
 function irA(hash) { location.hash = hash; }
 function enlazarEventosPanelResultados() {
-  // Las tarjetas ahora son <a href="#/monstruo/..."> reales (ver tarjetaHtml),
-  // así que la navegación normal, ctrl/cmd+clic, clic central y clic derecho →
-  // "Abrir en pestaña nueva" ya funcionan solos, sin necesitar JS acá.
+  // Las tarjetas ahora son <a href="#/monstruo/..."> reales (ver monster-views.js),
+  // así que la navegación con clic izquierdo, ctrl/cmd+clic, clic central y
+  // clic derecho → "Abrir en pestaña nueva" ya funciona sola, sin JS.
   const btnAnterior = document.getElementById('btn-pag-anterior');
   const btnSiguiente = document.getElementById('btn-pag-siguiente');
   if (btnAnterior) btnAnterior.onclick = () => { compendio.setPaginaActual(compendio.getPaginaActual() - 1); actualizarPanelResultados(); };
@@ -773,38 +830,6 @@ function enlazarEventosLista() {
     };
   }
 }
-function abrirModalImagen(id) {
-  const monstruo = compendio.obtenerMonstruoPorId(id);
-  if (!monstruo) return;
-  const fondo = document.createElement('div');
-  fondo.className = 'modal-fondo';
-  fondo.innerHTML = `<div class="modal-caja" role="dialog" aria-modal="true" aria-label="Cambiar imagen de ${monstruo.nombre}">
-    <h3>Cambiar imagen — ${monstruo.nombre}</h3>
-    <label>Pegar una URL de imagen</label><input type="text" id="modal-url" placeholder="https://...">
-    <label>o subir un archivo desde tu equipo</label><input type="file" id="modal-file" accept="image/*">
-    <div class="modal-acciones">
-      <button class="accion" id="modal-guardar">Guardar</button>
-      <button class="accion fantasma" id="modal-cancelar">Cancelar</button>
-    </div></div>`;
-  document.body.appendChild(fondo);
-  fondo.querySelector('#modal-cancelar').onclick = () => fondo.remove();
-  fondo.onclick = (evento) => { if (evento.target === fondo) fondo.remove(); };
-  fondo.querySelector('#modal-guardar').onclick = async () => {
-    const url = fondo.querySelector('#modal-url').value.trim();
-    const archivo = fondo.querySelector('#modal-file').files[0];
-    if (archivo) {
-      const lector = new FileReader();
-      lector.onload = async (evento) => {
-        try { await compendio.guardarImagenCustom(id, evento.target.result); fondo.remove(); render(); }
-        catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
-      };
-      lector.readAsDataURL(archivo);
-    } else if (url) {
-      try { await compendio.guardarImagenCustom(id, url); fondo.remove(); render(); }
-      catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
-    } else { alert('Pega una URL o elige un archivo antes de guardar.'); }
-  };
-}
 // ===================== ZOOM DE IMAGEN DE LA FICHA =====================
 // El retrato ampliado se muestra en un overlay `position:fixed` centrado en
 // pantalla (no un transform sobre el propio elemento de la ficha), para que
@@ -821,7 +846,7 @@ function cerrarZoomImagen() {
   document.removeEventListener('keydown', manejarEscZoomImagen);
 }
 function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
-  cerrarZoomImagen();
+  cerrarZoomImagen(); // por si quedó uno abierto
   const fondo = document.createElement('div');
   fondo.className = 'zoom-imagen-fondo';
   fondo.setAttribute('role', 'dialog');
@@ -831,6 +856,7 @@ function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
     <button type="button" class="zoom-imagen-cerrar" aria-label="Cerrar imagen ampliada">×</button>
     <div class="zoom-imagen-contenido">${contenidoHtml}</div>`;
   document.body.appendChild(fondo);
+  // Clic en el fondo oscuro (fuera de la imagen) cierra el zoom.
   fondo.onclick = (evento) => { if (evento.target === fondo) cerrarZoomImagen(); };
   fondo.querySelector('.zoom-imagen-cerrar').onclick = cerrarZoomImagen;
   document.addEventListener('keydown', manejarEscZoomImagen);

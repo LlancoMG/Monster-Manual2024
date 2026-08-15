@@ -3693,20 +3693,7 @@ window.Monstruos = [
         "texto": "Puede respirar aire y agua."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento ácido",
-        "texto": "Exhala ácido en una línea cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -5193,20 +5180,7 @@ window.Monstruos = [
         "texto": "Usa el bloque del dragón de cobre; las estadísticas varían según la etapa de vida (Cría, Joven, Adulto o Anciano)."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento",
-        "texto": "Exhala ácido o gas de lentitud cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,

@@ -66,6 +66,17 @@ export function construirPanelResultados({ todos, resultados, paginaActual, tamP
     ${resultados.length ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}` : '<div class="vacio">Ningún monstruo coincide con estos filtros.<br><button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>'}`;
   return { html, pagina, totalPaginas };
 }
+// Convierte el patrón habitual de los bloques de estadísticas ("Nombre. resto
+// del texto") en "Nombre: resto del texto", igual que se hace con los
+// nombres de rasgos/acciones. Solo actúa si el ". " aparece cerca del
+// principio del texto (se asume que es el separador título/cuerpo y no un
+// punto cualquiera dentro de una oración larga).
+function formatoTituloDosPuntos(texto) {
+  if (typeof texto !== 'string') return texto;
+  const indice = texto.indexOf('. ');
+  if (indice === -1 || indice > 60) return texto;
+  return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
+}
 export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFuenteImagen, tipoColor }) {
   if (!monstruoBase) {
     return `<div class="panel"><h2>Monstruo no encontrado</h2>
@@ -87,20 +98,39 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
   const atributosHtml = ABIL.map((a) => `<div class="cel-atributo">
       <div class="n">${ABIL_NOMBRE[a]}</div><div class="v">${valorVisible(monstruo.atributos[a])}</div>
       <div class="m">${fmtMod(mod(monstruo.atributos[a]))}</div></div>`).join('');
+  // Clase de Armadura / Puntos de Golpe / Velocidad ahora se muestran como
+  // "estadísticas rápidas" en fichas individuales (misma familia visual que
+  // la tabla de atributos), en vez de simples líneas de texto sueltas.
+  const statsRapidasHtml = `<div class="stats-rapidas">
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Clase de Armadura</span><span class="stat-rapida-valor">${valorVisible(monstruo.ca)}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${valorVisible(monstruo.velocidad)}</span></div>
+  </div>`;
+  // Los títulos de estadísticas (Tiradas de salvación, Sentidos, etc.) ahora
+  // terminan en ":" en vez de "." para que se lean como una etiqueta, igual
+  // que los nombres de rasgos/acciones más abajo.
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
-    return visible !== '—' ? `<div class="linea-stat"><b>${etiqueta}.</b> ${visible}</div>` : '';
+    return visible !== '—' ? `<div class="linea-stat"><b>${etiqueta}:</b> ${visible}</div>` : '';
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}.</b> ${r.texto}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`).join('')}`
     : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
-    <div class="linea-stat"><b>Variante activa.</b> ${varianteSeleccionada.nombre}</div>
-    ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia.</b> ${varianteSeleccionada.presencia}</div>` : ''}
-    ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias.</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
-  const legendariasHtml = monstruo.legendarias ? `<div class="seccion-titulo">Acciones legendarias</div>
+    <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
+    ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
+    ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
+  // Reacciones y Acciones legendarias ahora son categorías visualmente
+  // separadas (cajas con acento de color propio), en vez de mezclarse con el
+  // resto de rasgos/acciones. Acciones legendarias usa tonos dorados.
+  const reaccionesHtml = (monstruo.reacciones && monstruo.reacciones.length)
+    ? `<div class="seccion-reacciones">${listaRasgos('Reacciones', monstruo.reacciones)}</div>`
+    : '';
+  const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
+    <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${t}</div>`).join('')}` : '';
+    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${formatoTituloDosPuntos(t)}</div>`).join('')}
+  </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `
   <div class="panel"><button class="accion fantasma" id="btn-volver">← Volver al listado</button></div>
@@ -116,16 +146,10 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
         ${monstruoBase.variantes && monstruoBase.variantes.length ? `<div class="fila" style="margin-top:10px;align-items:flex-end">
           <div style="min-width:260px"><label>Variante</label>
           <select id="selector-variante">${monstruoBase.variantes.map((v) => `<option value="${v.id}" ${varianteSeleccionada && varianteSeleccionada.id === v.id ? 'selected' : ''}>${v.nombre}</option>`).join('')}</select></div></div>` : ''}
-        <div class="botones-filtro">
-          <button class="accion fantasma" id="btn-cambiar-imagen">Cambiar imagen</button>
-          <button class="accion fantasma" id="btn-restaurar-imagen">Restaurar original</button>
-        </div>
       </div>
     </div>
     <hr class="filete">
-    <div class="linea-stat"><b>Clase de Armadura.</b> ${valorVisible(monstruo.ca)}</div>
-    <div class="linea-stat"><b>Puntos de Golpe.</b> ${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</div>
-    <div class="linea-stat"><b>Velocidad.</b> ${valorVisible(monstruo.velocidad)}</div>
+    ${statsRapidasHtml}
     <div class="tabla-atributos">${atributosHtml}</div>
     ${varianteHtml}
     ${bloque('Tiradas de salvación', monstruo.tiradas_salvacion)}
@@ -140,7 +164,7 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
     ${listaRasgos('Rasgos', monstruo.rasgos)}
     ${listaRasgos('Acciones', monstruo.acciones)}
     ${listaRasgos('Acciones adicionales', monstruo.acciones_adicionales)}
-    ${listaRasgos('Reacciones', monstruo.reacciones)}
+    ${reaccionesHtml}
     ${legendariasHtml}
     ${monstruo.descripcion_breve ? `<div class="seccion-titulo">Descripción</div><p>${monstruo.descripcion_breve}</p>` : ''}
     ${monstruo.notas ? `<div class="notas-usuario"><b>Notas personales:</b> ${monstruo.notas}</div>` : ''}
