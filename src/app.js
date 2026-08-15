@@ -120,19 +120,49 @@ function abrirModalImagen(id) {
     } else { alert('Pega una URL o elige un archivo antes de guardar.'); }
   };
 }
-function enlazarEventosZoomImagenFicha() {
+
+// ===================== ZOOM DE IMAGEN DE LA FICHA =====================
+// El retrato ampliado se muestra en un overlay `position:fixed` centrado en
+// pantalla (no un transform sobre el propio elemento de la ficha), para que
+// la imagen completa siempre entre en cualquier resolución y quede centrada.
+// Se cierra con Escape, con clic fuera de la imagen o con el botón ×.
+// Importante: esto NO toca el marcado ni los estilos de `.ficha-imagen`
+// (el retrato sin ampliar dentro de la ficha queda intacto).
+function manejarEscZoomImagen(evento) {
+  if (evento.key === 'Escape') cerrarZoomImagen();
+}
+function cerrarZoomImagen() {
+  const fondo = document.querySelector('.zoom-imagen-fondo');
+  if (fondo) fondo.remove();
+  document.removeEventListener('keydown', manejarEscZoomImagen);
+}
+function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
+  cerrarZoomImagen(); // por si quedó uno abierto
+  const fondo = document.createElement('div');
+  fondo.className = 'zoom-imagen-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Imagen ampliada de ${nombreMonstruo}`);
+  fondo.innerHTML = `
+    <button type="button" class="zoom-imagen-cerrar" aria-label="Cerrar imagen ampliada">×</button>
+    <div class="zoom-imagen-contenido">${contenidoHtml}</div>`;
+  document.body.appendChild(fondo);
+  // Clic en el fondo oscuro (fuera de la imagen) cierra el zoom.
+  fondo.onclick = (evento) => { if (evento.target === fondo) cerrarZoomImagen(); };
+  fondo.querySelector('.zoom-imagen-cerrar').onclick = cerrarZoomImagen;
+  document.addEventListener('keydown', manejarEscZoomImagen);
+  fondo.querySelector('.zoom-imagen-cerrar').focus();
+}
+function enlazarEventosZoomImagenFicha(nombreMonstruo) {
   const imagenFicha = document.getElementById('ficha-imagen-principal');
   if (!imagenFicha) return;
-  const alternarZoom = () => {
-    const ampliada = imagenFicha.classList.toggle('ficha-imagen-ampliada');
-    imagenFicha.setAttribute('aria-pressed', ampliada ? 'true' : 'false');
-  };
-  imagenFicha.onclick = alternarZoom;
+  const activarZoom = () => abrirZoomImagen(imagenFicha.innerHTML, nombreMonstruo || '');
+  imagenFicha.onclick = activarZoom;
   imagenFicha.onkeydown = (evento) => {
-    if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); alternarZoom(); }
+    if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); activarZoom(); }
   };
 }
-function enlazarEventosDetalle(id) {
+function enlazarEventosDetalle(id, nombreMonstruo) {
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) btnVolver.onclick = () => irA('#/');
   const btnCambiar = document.getElementById('btn-cambiar-imagen');
@@ -141,9 +171,10 @@ function enlazarEventosDetalle(id) {
   if (btnCambiar) btnCambiar.onclick = () => abrirModalImagen(id);
   if (btnRestaurar) btnRestaurar.onclick = async () => { await compendio.borrarImagenCustom(id); render(); };
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
-  enlazarEventosZoomImagenFicha();
+  enlazarEventosZoomImagenFicha(nombreMonstruo);
 }
 function render() {
+  cerrarZoomImagen();
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
@@ -154,7 +185,7 @@ function render() {
       monstruoBase: base, monstruo, varianteSeleccionada: variante,
       obtenerFuenteImagen: compendio.obtenerFuenteImagen, tipoColor: TIPO_COLOR
     });
-    enlazarEventosDetalle(ruta.id);
+    enlazarEventosDetalle(ruta.id, monstruo && monstruo.nombre);
   } else {
     const todos = compendio.obtenerTodosMonstruos();
     const resultados = compendio.calcularResultados();

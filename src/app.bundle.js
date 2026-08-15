@@ -773,26 +773,87 @@ function enlazarEventosLista() {
     };
   }
 }
-function enlazarEventosZoomImagenFicha() {
-  const imagenFicha = document.getElementById('ficha-imagen-principal');
-  if (!imagenFicha) return;
-  const alternarZoom = () => {
-    const ampliada = imagenFicha.classList.toggle('ficha-imagen-ampliada');
-    imagenFicha.setAttribute('aria-pressed', ampliada ? 'true' : 'false');
-  };
-  imagenFicha.onclick = alternarZoom;
-  imagenFicha.onkeydown = (evento) => {
-    if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); alternarZoom(); }
+function abrirModalImagen(id) {
+  const monstruo = compendio.obtenerMonstruoPorId(id);
+  if (!monstruo) return;
+  const fondo = document.createElement('div');
+  fondo.className = 'modal-fondo';
+  fondo.innerHTML = `<div class="modal-caja" role="dialog" aria-modal="true" aria-label="Cambiar imagen de ${monstruo.nombre}">
+    <h3>Cambiar imagen — ${monstruo.nombre}</h3>
+    <label>Pegar una URL de imagen</label><input type="text" id="modal-url" placeholder="https://...">
+    <label>o subir un archivo desde tu equipo</label><input type="file" id="modal-file" accept="image/*">
+    <div class="modal-acciones">
+      <button class="accion" id="modal-guardar">Guardar</button>
+      <button class="accion fantasma" id="modal-cancelar">Cancelar</button>
+    </div></div>`;
+  document.body.appendChild(fondo);
+  fondo.querySelector('#modal-cancelar').onclick = () => fondo.remove();
+  fondo.onclick = (evento) => { if (evento.target === fondo) fondo.remove(); };
+  fondo.querySelector('#modal-guardar').onclick = async () => {
+    const url = fondo.querySelector('#modal-url').value.trim();
+    const archivo = fondo.querySelector('#modal-file').files[0];
+    if (archivo) {
+      const lector = new FileReader();
+      lector.onload = async (evento) => {
+        try { await compendio.guardarImagenCustom(id, evento.target.result); fondo.remove(); render(); }
+        catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
+      };
+      lector.readAsDataURL(archivo);
+    } else if (url) {
+      try { await compendio.guardarImagenCustom(id, url); fondo.remove(); render(); }
+      catch (error) { alert(`No se pudo guardar la imagen: ${error.message || error}`); }
+    } else { alert('Pega una URL o elige un archivo antes de guardar.'); }
   };
 }
-function enlazarEventosDetalle(id) {
+// ===================== ZOOM DE IMAGEN DE LA FICHA =====================
+// El retrato ampliado se muestra en un overlay `position:fixed` centrado en
+// pantalla (no un transform sobre el propio elemento de la ficha), para que
+// la imagen completa siempre entre en cualquier resolución y quede centrada.
+// Se cierra con Escape, con clic fuera de la imagen o con el botón ×.
+// Importante: esto NO toca el marcado ni los estilos de `.ficha-imagen`
+// (el retrato sin ampliar dentro de la ficha queda intacto).
+function manejarEscZoomImagen(evento) {
+  if (evento.key === 'Escape') cerrarZoomImagen();
+}
+function cerrarZoomImagen() {
+  const fondo = document.querySelector('.zoom-imagen-fondo');
+  if (fondo) fondo.remove();
+  document.removeEventListener('keydown', manejarEscZoomImagen);
+}
+function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
+  cerrarZoomImagen();
+  const fondo = document.createElement('div');
+  fondo.className = 'zoom-imagen-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Imagen ampliada de ${nombreMonstruo}`);
+  fondo.innerHTML = `
+    <button type="button" class="zoom-imagen-cerrar" aria-label="Cerrar imagen ampliada">×</button>
+    <div class="zoom-imagen-contenido">${contenidoHtml}</div>`;
+  document.body.appendChild(fondo);
+  fondo.onclick = (evento) => { if (evento.target === fondo) cerrarZoomImagen(); };
+  fondo.querySelector('.zoom-imagen-cerrar').onclick = cerrarZoomImagen;
+  document.addEventListener('keydown', manejarEscZoomImagen);
+  fondo.querySelector('.zoom-imagen-cerrar').focus();
+}
+function enlazarEventosZoomImagenFicha(nombreMonstruo) {
+  const imagenFicha = document.getElementById('ficha-imagen-principal');
+  if (!imagenFicha) return;
+  const activarZoom = () => abrirZoomImagen(imagenFicha.innerHTML, nombreMonstruo || '');
+  imagenFicha.onclick = activarZoom;
+  imagenFicha.onkeydown = (evento) => {
+    if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); activarZoom(); }
+  };
+}
+function enlazarEventosDetalle(id, nombreMonstruo) {
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) btnVolver.onclick = () => irA('#/');
   const selectorVariante = document.getElementById('selector-variante');
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
-  enlazarEventosZoomImagenFicha();
+  enlazarEventosZoomImagenFicha(nombreMonstruo);
 }
 function render() {
+  cerrarZoomImagen();
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
@@ -803,7 +864,7 @@ function render() {
       monstruoBase: base, monstruo, varianteSeleccionada: variante,
       obtenerFuenteImagen: compendio.obtenerFuenteImagen, tipoColor: TIPO_COLOR
     });
-    enlazarEventosDetalle(ruta.id);
+    enlazarEventosDetalle(ruta.id, monstruo && monstruo.nombre);
   } else {
     const todos = compendio.obtenerTodosMonstruos();
     const resultados = compendio.calcularResultados();
