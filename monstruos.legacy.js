@@ -1,5 +1,5 @@
 // Versión legacy completa: define `window.Monstruos`.
-window.Monstruos = [
+window.Monstruos =[
   {
     "id": "goblin",
     "nombre": "Goblin",
@@ -1784,10 +1784,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "veneno, psíquico",
-    "inmunidadesestado": "hechizado, cansancio, asustado, paralizado, petrificado, envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "veneno, psíquico",
+    "inmunidades_estado": "hechizado, cansancio, asustado, paralizado, petrificado, envenenado",
     "sentidos": "Visión ciega 60 pies, Percepción pasiva 5",
     "idiomas": "ninguno",
     "rasgos": [
@@ -1838,10 +1838,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión ciega 30 pies, Percepción pasiva 11",
     "idiomas": "ninguno",
     "rasgos": [
@@ -1892,10 +1892,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 11",
     "idiomas": "ninguno",
     "rasgos": [],
@@ -1941,10 +1941,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Atletismo +5, Percepción +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "ninguno",
     "rasgos": [],
@@ -1998,10 +1998,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +8, Des +6, Con +8, Int +9, Sab +7, Car +8",
     "competencias": "Arcano +13, Engaño +12, Percepción +11",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión verdadera 120 pies, Percepción pasiva 21",
     "idiomas": "Abisal, Infernal, telepatía 120 pies",
     "rasgos": [
@@ -2071,10 +2071,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "ninguno",
     "rasgos": [
@@ -2129,10 +2129,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +7, Con +8, Sab +8, Car +9",
     "competencias": "Arcano +7, Engaño +13, Perspicacia +8, Persuasión +9",
-    "vulnerabilidadesdano": "hierro frío",
-    "resistenciasdano": "frío, fuego",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "hechizado, envenenado",
+    "vulnerabilidades_dano": "hierro frío",
+    "resistencias_dano": "frío, fuego",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "hechizado, envenenado",
     "sentidos": "Visión verdadera 120 pies, Percepción pasiva 14",
     "idiomas": "Abisal, Común, Infernal",
     "rasgos": [
@@ -2199,10 +2199,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +6, Int +4",
     "competencias": "Acrobacias +6, Engaño +6, Percepción +6, Sigilo +9",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "veneno",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "veneno",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 16",
     "idiomas": "Ladino, dos idiomas más",
     "rasgos": [
@@ -2265,10 +2265,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "fuego",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "ensordecido, cegado",
+    "vulnerabilidades_dano": "fuego",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "ensordecido, cegado",
     "sentidos": "Percepción pasiva 10",
     "idiomas": "entende las lenguas que conozca su creador, pero no puede hablar",
     "rasgos": [
@@ -2319,10 +2319,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +4",
-    "vulnerabilidadesdano": "fuego",
-    "resistenciasdano": "contundente, perforante",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "ensordecido, cegado",
+    "vulnerabilidades_dano": "fuego",
+    "resistencias_dano": "contundente, perforante",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "ensordecido, cegado",
     "sentidos": "Percepción pasiva 14",
     "idiomas": "entende las lenguas que conozca su creador, pero no puede hablar",
     "rasgos": [
@@ -2373,10 +2373,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +2",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 12",
     "idiomas": "ninguno",
     "rasgos": [],
@@ -2494,10 +2494,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Con +4, Sab +3",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "fuego",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "fuego",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Percepción pasiva 11",
     "idiomas": "Ignan",
     "rasgos": [
@@ -2639,10 +2639,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +1",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 11",
     "idiomas": "ninguno",
     "rasgos": [
@@ -2693,10 +2693,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 30 pies, Percepción pasiva 13",
     "idiomas": "ninguno",
     "rasgos": [
@@ -2747,10 +2747,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +13, Con +11, Sab +8, Car +11",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío, relámpago",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío, relámpago",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión verdadera 120 pies, Percepción pasiva 13",
     "idiomas": "Abisal, telepatía 120 pies",
     "rasgos": [
@@ -2824,10 +2824,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Sigilo +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 10",
     "idiomas": "Común",
     "rasgos": [
@@ -3050,10 +3050,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Car +5",
     "competencias": "Percepción +5",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "ácido, fuego, relámpago, necrótico",
-    "inmunidadesdano": "frío, veneno, contundente no mágico, perforante no mágico, cortante no mágico",
-    "inmunidadesestado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "ácido, fuego, relámpago, necrótico",
+    "inmunidades_dano": "frío, veneno, contundente no mágico, perforante no mágico, cortante no mágico",
+    "inmunidades_estado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 15",
     "idiomas": "Común, Elfo",
     "rasgos": [
@@ -3112,10 +3112,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +6, Con +7, Sab +5, Car +5",
     "competencias": "Percepción +8, Intimidación +5",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 18",
     "idiomas": "Infernal, telepatía 120 pies",
     "rasgos": [
@@ -3177,10 +3177,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3, Sigilo +4",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío, fuego, relámpago",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío, fuego, relámpago",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 13",
     "idiomas": "Abisal, telepatía 120 pies",
     "rasgos": [
@@ -3238,10 +3238,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 9",
     "idiomas": "ninguno",
     "rasgos": [
@@ -3292,10 +3292,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión ciega 60 pies, Percepción pasiva 11",
     "idiomas": "ninguno",
     "rasgos": [
@@ -3350,10 +3350,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +4, Con +4, Sab +2",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 10",
     "idiomas": "Infernal, telepatía 120 pies",
     "rasgos": [
@@ -3415,10 +3415,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +6, Sigilo +7",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "relámpago",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "relámpago",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 90 pies, Percepción pasiva 16",
     "idiomas": "Draconiano",
     "rasgos": [
@@ -3481,10 +3481,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Intimidación +2",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 10",
     "idiomas": "Común",
     "rasgos": [
@@ -3615,10 +3615,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "ninguno",
     "rasgos": [
@@ -3677,10 +3677,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +variable, Con +variable, Sab +variable, Car +variable",
     "competencias": "Percepción +variable, Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "ácido",
-    "inmunidadesestado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "ácido",
+    "inmunidades_estado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, visión en la oscuridad 120 pies, Percepción pasiva variable",
     "idiomas": "Común, Draconio",
     "rasgos": [
@@ -3832,20 +3832,16 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 17, +9 al ataque con conjuros): A voluntad: Detect Magic , Fear , Melf's Acid Arrow (versión de nivel 3) 1/día cada uno: Speak with Dead , Vitriolic Sphere"
-            },
-            {
-              "nombre": "Cloud of Insects",
-              "texto": "Salvación de Destreza: DC 17, una criatura que el dragón puede ver en un alcance de 120 pies. Fallo: 22 (4d10) daño de veneno, y el objetivo tiene desventaja en las tiradas de salvación para mantener la concentración hasta el final de su siguiente turno. Con fallo o éxito: El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Frightful Presence",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Fear. El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Pounce",
-              "texto": "El dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
             }
-          ]
+          ],
+          "legendarias": {
+            "cantidad": 3,
+            "texto": [
+              "Nube de insectos: salvación de Destreza CD 17 para una criatura visible a 120 pies. Fallo: 22 (4d10) de veneno, y desventaja en salvaciones de concentración hasta el final de su siguiente turno. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+              "Presencia aterradora: el dragón usa Lanzamiento de conjuros para lanzar Fear. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+              "Embestida: el dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
+            ]
+          }
         }
       },
       {
@@ -3890,20 +3886,16 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 21, +13 al ataque con conjuros): A voluntad: Detect Magic , Fear , Melf's Acid Arrow (versión de nivel 4) 1/día cada uno: Create Undead , Speak with Dead , Vitriolic Sphere (versión de nivel 5)"
-            },
-            {
-              "nombre": "Cloud of Insects",
-              "texto": "Salvación de Destreza: DC 21, una criatura que el dragón puede ver en un alcance de 120 pies. Fallo: 33 (6d10) daño de veneno, y el objetivo tiene desventaja en las tiradas de salvación para mantener la concentración hasta el final de su siguiente turno. Con fallo o éxito: El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Frightful Presence",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Fear. El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Pounce",
-              "texto": "El dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
             }
-          ]
+          ],
+          "legendarias": {
+            "cantidad": 3,
+            "texto": [
+              "Nube de insectos: salvación de Destreza CD 21 para una criatura visible a 120 pies. Fallo: 33 (6d10) de veneno, y desventaja en salvaciones de concentración hasta el final de su siguiente turno. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+              "Presencia aterradora: el dragón usa Lanzamiento de conjuros para lanzar Fear. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+              "Embestida: el dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
+            ]
+          }
         }
       }
     ],
@@ -3939,10 +3931,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío, fuego",
-    "inmunidadesdano": "ácido, contundente, perforante, cortante no mágico",
-    "inmunidadesestado": "cegado, hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío, fuego",
+    "inmunidades_dano": "ácido, contundente, perforante, cortante no mágico",
+    "inmunidades_estado": "cegado, hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, Percepción pasiva 8",
     "idiomas": "ninguno",
     "rasgos": [
@@ -4001,10 +3993,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "fuego",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "cegado, ensordecido, hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "fuego",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "cegado, ensordecido, hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, Percepción pasiva variable",
     "idiomas": "entende las lenguas de su creador, pero no puede hablar",
     "rasgos": [
@@ -4248,10 +4240,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3, Sigilo +5",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "Sylvano, pero no puede hablar",
     "rasgos": [
@@ -4306,10 +4298,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "todo",
-    "inmunidadesestado": "todo",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "todo",
+    "inmunidades_estado": "todo",
     "sentidos": "Visión ciega 60 pies, Percepción pasiva 5",
     "idiomas": "ninguno",
     "rasgos": [
@@ -4363,10 +4355,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +4",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 14",
     "idiomas": "ninguno",
     "rasgos": [
@@ -4417,10 +4409,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +variable, Con +variable, Sab +variable, Car +variable",
     "competencias": "Percepción +variable, Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "relámpago",
-    "inmunidadesestado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "relámpago",
+    "inmunidades_estado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, visión en la oscuridad 120 pies, Percepción pasiva variable",
     "idiomas": "Común, Draconio",
     "rasgos": [
@@ -4429,20 +4421,7 @@ window.Monstruos = [
         "texto": "Usa el bloque del dragón azul; las estadísticas varían según la etapa de vida (Cría, Joven, Adulto o Anciano)."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento de relámpago",
-        "texto": "Exhala relámpago en una línea cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -4581,19 +4560,15 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 18): A voluntad: Detect Magic , Invisibility , Mage Hand , Shatter 1/día cada uno: Scrying , Sending"
-            },
-            {
-              "nombre": "Vuelo encubierto",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Invisibility sobre sí mismo y puede volar hasta la mitad de su velocidad de vuelo. El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Estallido sónico",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Shatter. El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Barrido de cola",
-              "texto": "El dragón realiza un ataque de Desgarrar."
             }
+          ]
+        },
+        "legendarias": {
+          "cantidad": 3,
+          "texto": [
+            "Vuelo encubierto: el dragón usa Lanzamiento de conjuros para lanzar Invisibility sobre sí mismo y puede volar hasta la mitad de su velocidad de vuelo. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+            "Estallido sónico: el dragón usa Lanzamiento de conjuros para lanzar Shatter. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+            "Barrido de cola: el dragón realiza un ataque de Desgarrar."
           ]
         }
       },
@@ -4639,19 +4614,15 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 22): A voluntad: Detect Magic , Invisibility , Mage Hand , Shatter (versión de nivel 3) 1/día cada uno: Scrying , Sending"
-            },
-            {
-              "nombre": "Vuelo encubierto",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Invisibility sobre sí mismo y puede volar hasta la mitad de su velocidad de vuelo. El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Estallido sónico",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Shatter (versión de nivel 3). El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
-            },
-            {
-              "nombre": "Barrido de cola",
-              "texto": "El dragón realiza un ataque de Desgarrar."
             }
+          ]
+        },
+        "legendarias": {
+          "cantidad": 3,
+          "texto": [
+            "Vuelo encubierto: el dragón usa Lanzamiento de conjuros para lanzar Invisibility sobre sí mismo y puede volar hasta la mitad de su velocidad de vuelo. No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+            "Estallido sónico: el dragón usa Lanzamiento de conjuros para lanzar Shatter (versión de nivel 3). No puede volver a realizar esta acción hasta el inicio de su siguiente turno.",
+            "Barrido de cola: el dragón realiza un ataque de Desgarrar."
           ]
         }
       }
@@ -4688,10 +4659,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +1",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 11",
     "idiomas": "ninguno",
     "rasgos": [
@@ -4746,10 +4717,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +8, Con +8, Sab +6, Car +7",
     "competencias": "Percepción +10, Intimidación +7",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 20",
     "idiomas": "Infernal, telepatía 120 pies",
     "rasgos": [
@@ -4819,10 +4790,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +5, Con +5, Int +4, Sab +5, Car +5",
     "competencias": "Arcano +4, Percepción +5, Religión +4",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "hechizado, paralizado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "hechizado, paralizado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 15",
     "idiomas": "Abisal, Común",
     "rasgos": [
@@ -4881,10 +4852,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +variable, Con +variable, Sab +variable, Car +variable",
     "competencias": "Percepción +variable, Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "fuego",
-    "inmunidadesestado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "fuego",
+    "inmunidades_estado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, visión en la oscuridad 120 pies, Percepción pasiva variable",
     "idiomas": "Común, Draconio",
     "rasgos": [
@@ -4897,20 +4868,7 @@ window.Monstruos = [
         "texto": "Puede respirar aire y agua."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento",
-        "texto": "Exhala fuego o gas de repulsión cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -5057,20 +5015,16 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 16): A voluntad: Detect Magic , Minor Illusion , Scorching Ray , Shapechange (solo forma de Bestia o Humanoide, no puntos de golpe temporales ganados por el conjuro, y no requiere concentración ni puntos de golpe temporales para mantenerlo), Speak with Animals 1/día cada uno: Detect Thoughts , Control Weather"
-            },
-            {
-              "nombre": "Blazing Light",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Scorching Ray."
-            },
-            {
-              "nombre": "Pounce",
-              "texto": "El dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
-            },
-            {
-              "nombre": "Scorching Sands",
-              "texto": "Salvación de Destreza: DC 16, una criatura que el dragón puede ver en un alcance de 120 pies. Fallo: 27 (6d8) daño de fuego, y la velocidad del objetivo se reduce a la mitad hasta el final de su siguiente turno. Con fallo o éxito: El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
             }
-          ]
+          ],
+          "legendarias": {
+            "cantidad": 3,
+            "texto": [
+              "Luz abrasadora: el dragón usa Lanzamiento de conjuros para lanzar Scorching Ray.",
+              "Embestida: el dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar.",
+              "Arenas abrasadoras: salvación de Destreza CD 16 para una criatura visible a 120 pies. Fallo: 27 (6d8) de fuego, y su velocidad se reduce a la mitad hasta el final de su siguiente turno. No puede volver a realizar esta acción hasta el inicio de su siguiente turno."
+            ]
+          }
         }
       },
       {
@@ -5119,20 +5073,15 @@ window.Monstruos = [
             {
               "nombre": "Lanzamiento de conjuros",
               "texto": "El dragón lanza uno de los siguientes conjuros, sin componentes materiales y usando Carisma como característica de lanzamiento (CD de salvación de conjuro 20): A voluntad: Detect Magic , Minor Illusion , Scorching Ray (versión de nivel 3), Shapechange (solo forma de Bestia o Humanoide, no puntos de golpe temporales ganados por el conjuro, y no requiere concentración ni puntos de golpe temporales para mantenerlo), Speak with Animals 1/día cada uno: Control Weather , Detect Thoughts"
-            },
-            {
-              "nombre": "Blazing Light",
-              "texto": "El dragón usa Lanzamiento de conjuros para lanzar Scorching Ray (versión de nivel 3)."
-            },
-            {
-              "nombre": "Pounce",
-              "texto": "El dragón se mueve hasta la mitad de su velocidad y realiza un ataque de Desgarrar."
-            },
-            {
-              "nombre": "Scorching Sands",
-              "texto": "Salvación de Destreza: DC 20, una criatura que el dragón puede ver en un alcance de 120 pies. Fallo: 36 (8d8) daño de fuego, y la velocidad del objetivo se reduce a la mitad hasta el final de su siguiente turno. Con fallo o éxito: El dragón no puede volver a realizar esta acción hasta el inicio de su siguiente turno."
             }
-          ]
+          ],
+          "legendarias": {
+            "cantidad": 3,
+            "nombre": "Arenas abrasadoras",
+            "texto": [
+              "salvación de Destreza CD 20 para una criatura visible a 120 pies. Fallo: 36 (8d8) de fuego, y su velocidad se reduce a la mitad hasta el final de su siguiente turno. No puede volver a realizar esta acción hasta el inicio de su siguiente turno."
+            ]
+          }
         }
       }
     ],
@@ -5168,10 +5117,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +variable, Con +variable, Sab +variable, Car +variable",
     "competencias": "Percepción +variable, Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "ácido",
-    "inmunidadesestado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "ácido",
+    "inmunidades_estado": "hechizado, asustado, paralizado, petrificado, envenenado, derribado, agarrado, restringido",
     "sentidos": "Visión ciega 60 pies, visión en la oscuridad 120 pies, Percepción pasiva variable",
     "idiomas": "Común, Draconio",
     "rasgos": [
@@ -5438,10 +5387,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "ninguno",
     "rasgos": [
@@ -5500,10 +5449,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "variable",
     "competencias": "Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva variable",
     "idiomas": "Común, Goblin",
     "rasgos": [
@@ -5690,10 +5639,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "variable",
     "competencias": "Percepción +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 60 pies, sentido de vibraciones 60 pies, Percepción pasiva variable",
     "idiomas": "ninguno",
     "rasgos": [
@@ -5834,10 +5783,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "variable",
     "competencias": "Sigilo +variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva variable",
     "idiomas": "Bullywug",
     "rasgos": [
@@ -6065,10 +6014,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +6, Con +5, Int +4, Sab +3, Car +5",
     "competencias": "Engaño +7, Intimidación +5, Percepción +5",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío, fuego, veneno",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío, fuego, veneno",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 15",
     "idiomas": "Abisal, Común, Infernal",
     "rasgos": [
@@ -6131,10 +6080,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 9",
     "idiomas": "—",
     "rasgos": [],
@@ -6180,10 +6129,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +4",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 14",
     "idiomas": "ninguno",
     "rasgos": [
@@ -6246,10 +6195,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +3, Sigilo +4",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva 13",
     "idiomas": "—",
     "rasgos": [
@@ -6304,10 +6253,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "variable",
     "competencias": "variable",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Percepción pasiva variable",
     "idiomas": "Sylvano, Elfo",
     "rasgos": [
@@ -6504,10 +6453,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Fue +7, Con +7, Sab +4, Car +5",
     "competencias": "Percepción +7",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío",
-    "inmunidadesdano": "fuego, veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío",
+    "inmunidades_dano": "fuego, veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 17",
     "idiomas": "Infernal, telepatía 120 pies",
     "rasgos": [
@@ -6573,10 +6522,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "Des +7, Con +6, Sab +4",
     "competencias": "Percepción +7, Sigilo +7",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "frío, fuego",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "frío, fuego",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 120 pies, Percepción pasiva 17",
     "idiomas": "Abisal, telepatía 120 pies",
     "rasgos": [
@@ -6646,10 +6595,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +8",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "",
-    "inmunidadesestado": "",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "",
+    "inmunidades_estado": "",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 18",
     "idiomas": "entiende Dracónico pero no puede hablar",
     "rasgos": [],
@@ -6711,10 +6660,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "Percepción +6",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "veneno",
-    "inmunidadesestado": "envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "veneno",
+    "inmunidades_estado": "envenenado",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 16",
     "idiomas": "entiende Profundo pero no puede hablar",
     "rasgos": [
@@ -6777,10 +6726,10 @@ window.Monstruos = [
     },
     "tiradas_salvacion": "",
     "competencias": "",
-    "vulnerabilidadesdano": "",
-    "resistenciasdano": "",
-    "inmunidadesdano": "ácido, veneno, psíquico",
-    "inmunidadesestado": "hechizado, cansancio, asustado, paralizado, petrificado, envenenado",
+    "vulnerabilidades_dano": "",
+    "resistencias_dano": "",
+    "inmunidades_dano": "ácido, veneno, psíquico",
+    "inmunidades_estado": "hechizado, cansancio, asustado, paralizado, petrificado, envenenado",
     "sentidos": "Visión en la oscuridad 60 pies, Percepción pasiva 9",
     "idiomas": "entiende los idiomas de su creador pero no puede hablar",
     "rasgos": [
@@ -13436,20 +13385,7 @@ window.Monstruos = [
         "texto": "Si falla una tirada de salvación, puede elegir tener éxito en su lugar. Disponible solo en las etapas Adulto y Anciano."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento",
-        "texto": "Exhala fuego o gas debilitante cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -23861,20 +23797,7 @@ window.Monstruos = [
         "texto": "Usa el bloque del dragón rojo; las estadísticas varían según la etapa de vida (Cría, Joven, Adulto o Anciano)."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento de fuego",
-        "texto": "Exhala fuego en un cono cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -26112,20 +26035,7 @@ window.Monstruos = [
         "texto": "El dragón puede moverse a través de espacios de al menos 1 pie de ancho sin apretarse mientras esté en luz tenue u oscuridad."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento de sombra",
-        "texto": "Exhala energía necrótica en un cono cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -26408,20 +26318,7 @@ window.Monstruos = [
         "texto": "El dragón puede transformarse en un humanoide o bestia de CR igual o menor, o volver a su forma verdadera."
       }
     ],
-    "acciones": [
-      {
-        "nombre": "Aliento",
-        "texto": "Exhala frío o gas de parálisis cuya longitud y daño dependen de la etapa de vida del dragón."
-      },
-      {
-        "nombre": "Mordisco",
-        "texto": "Ataque con mordisco que escala con la etapa de vida."
-      },
-      {
-        "nombre": "Garras",
-        "texto": "Ataque con garras que escala con la etapa de vida."
-      }
-    ],
+    "acciones": [],
     "acciones_adicionales": [],
     "reacciones": [],
     "legendarias": null,
@@ -30271,5 +30168,5 @@ window.Monstruos = [
     "notas": "",
     "imagen": "img/dragones_hada.jpg",
     "fuente": "MM24"
-  }
-];
+    }
+]
