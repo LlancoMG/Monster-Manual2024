@@ -169,6 +169,67 @@ function fraccionANumero(valor) {
   const decimal = Number(txt.replace(',', '.'));
   return Number.isFinite(decimal) ? decimal : valor;
 }
+const TIPOS_DANO = [
+  'perforante', 'cortante', 'contundente', 'fuego', 'frio', 'acido',
+  'veneno', 'psiquico', 'necrotico', 'radiante', 'rayo', 'trueno', 'fuerza'
+];
+const ETIQUETA_TIPO_DANO = {
+  perforante: 'Perforante', cortante: 'Cortante', contundente: 'Contundente',
+  fuego: 'Fuego', frio: 'Frío', acido: 'Ácido', veneno: 'Veneno',
+  psiquico: 'Psíquico', necrotico: 'Necrótico', radiante: 'Radiante',
+  rayo: 'Rayo', trueno: 'Trueno', fuerza: 'Fuerza'
+};
+function normalizarTipoDano(palabra) {
+  const norm = normalizar(palabra);
+  return TIPOS_DANO.includes(norm) ? norm : null;
+}
+// Detecta expresiones de dados (ej. "2d6 + 3 cortante") dentro de un texto de
+// acción y devuelve, en orden de aparición, cada grupo con su posición
+// original (para resaltarlo en el HTML) y su tipo de daño si se reconoce
+// una palabra clave justo después (saltando conectores como "de"/"daño").
+function extraerGruposDano(texto) {
+  if (typeof texto !== 'string' || !texto) return [];
+  const regexDados = /(\d+)\s*[dD]\s*(\d+)((?:\s*[+\-]\s*\d+)*)/g;
+  const grupos = [];
+  let m;
+  while ((m = regexDados.exec(texto))) {
+    const cantidad = Number(m[1]);
+    const caras = Number(m[2]);
+    if (!cantidad || !caras) continue;
+    let bonus = 0;
+    if (m[3]) {
+      [...m[3].matchAll(/([+\-])\s*(\d+)/g)].forEach((bm) => {
+        bonus += (bm[1] === '-' ? -1 : 1) * Number(bm[2]);
+      });
+    }
+    let fin = m.index + m[0].length;
+    let tipo = null;
+    const resto = texto.slice(fin);
+    const siguiente = resto.match(/^\s*(?:de\s+)?(?:daño\s+)?([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/);
+    if (siguiente) {
+      const candidato = normalizarTipoDano(siguiente[1]);
+      if (candidato) { tipo = candidato; fin += siguiente[0].length; }
+    }
+    grupos.push({
+      indice: grupos.length, cantidad, caras, bonus, tipo,
+      inicio: m.index, fin, textoOriginal: texto.slice(m.index, fin).trim()
+    });
+  }
+  return grupos;
+}
+// Envuelve cada grupo detectado en un <span> clickeable, dejando el resto del texto intacto.
+function resaltarGruposDano(texto, grupos) {
+  if (!grupos || !grupos.length) return texto;
+  let resultado = '';
+  let cursor = 0;
+  grupos.forEach((g) => {
+    resultado += texto.slice(cursor, g.inicio);
+    resultado += `<span class="token-dado" data-grupo-idx="${g.indice}" tabindex="0" role="button" aria-label="Tirar ${g.textoOriginal}">${g.textoOriginal}</span>`;
+    cursor = g.fin;
+  });
+  resultado += texto.slice(cursor);
+  return resultado;
+}
 // ---- src/features/storage.js ----
 const CLAVE_VARIANTES = 'compendio_variantes_seleccionadas';
 const CLAVE_IMPORTADOS = 'compendio_monstruos_importados';
@@ -594,9 +655,14 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     if (visible === '—') return '';
     return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverDistancias(visible)}</div>`;
   };
-  const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`).join('')}`
-    : '';
+  const listaRasgos = (titulo, arr) => (arr && arr.length) ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => {
+      const grupos = extraerGruposDano(r.texto);
+      if (!grupos.length) return `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`;
+      const cuerpo = resaltarGruposDano(r.texto, grupos);
+      const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
+      return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${r.nombre}"><b>${r.nombre}:</b> ${cuerpo}</div>`;
+    }).join('')}`
+  : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
     <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
     ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
@@ -610,7 +676,15 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
   const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
     <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverDistancias(formatoTituloDosPuntos(t))}</div>`).join('')}
+    ${monstruo.legendarias.texto.map((t) => {
+      const formateado = formatoTituloDosPuntos(t);
+      const grupos = extraerGruposDano(formateado);
+      if (!grupos.length) return `<div class="rasgo">${formateado}</div>`;
+      const cuerpo = resaltarGruposDano(formateado, grupos);
+      const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
+      const nombreLinea = (formateado.split(':')[0] || 'Acción legendaria').trim();
+      return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${nombreLinea}">${cuerpo}</div>`;
+    }).join('')}
   </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `
@@ -649,7 +723,7 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     ${legendariasHtml}
     ${monstruo.descripcion_breve ? `<div class="seccion-titulo">Descripción</div><p>${monstruo.descripcion_breve}</p>` : ''}
     ${monstruo.notas ? `<div class="notas-usuario"><b>Notas personales:</b> ${monstruo.notas}</div>` : ''}
-    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : ''}</p>
+    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : 'Página del manual sin completar — edítala en el JSON.'}</p>
   </div>`;
 }
 // ---- src/ui/filtros-views.js ----
@@ -741,7 +815,7 @@ function vistaLista({ filtros, crsExactos, panelResultadosHtml }) {
     <div class="fila">
       <div class="campo-filtro" style="flex:2;min-width:260px;">
         <label>Nombre (español o inglés)</label>
-        <input type="text" id="f-q" class="control-filtro" value="${filtros.q}" placeholder="ej. dragón, goblin, beholder, owlbear...">
+        <input type="text" id="f-q" class="control-filtro" value="${filtros.q}" placeholder="ej. dragón, goblin, beholder, dragon...">
       </div>
       ${dropdownSimpleHtml({ id: 'rango', etiqueta: 'Rango de peligro', opciones: opcionesRango, valorActual: filtros.rango, textoActual: textoRango })}
       ${dropdownSimpleHtml({ id: 'cr-exacto', etiqueta: 'CR exacto', opciones: opcionesCr, valorActual: filtros.crExacto, textoActual: textoCr, columnas: 4, compacto: true })}
@@ -979,10 +1053,12 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
   enlazarEventosDistancias();
+  enlazarEventosDados();
 }
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
+  cerrarTiradaDados()
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
@@ -1018,3 +1094,94 @@ imagenesListas.then(() => {
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', render);
   else render();
 });
+// ===================== TIRADA DE DADOS =====================
+function tirarDadoValor(caras) { return Math.floor(Math.random() * caras) + 1; }
+function caraDadoHtml(clase, contenido) { return `<div class="cara ${clase}">${contenido}</div>`; }
+function construirDadoHtml(caras, valorFinal, retardoMs) {
+  const etiqueta = `d${caras}`;
+  return `<div class="dado-3d-escena">
+    <div class="dado-3d girando" style="animation-delay:${retardoMs}ms">
+      ${caraDadoHtml('cara-frente', valorFinal)}
+      ${caraDadoHtml('cara-atras', etiqueta)}
+      ${caraDadoHtml('cara-derecha', etiqueta)}
+      ${caraDadoHtml('cara-izquierda', etiqueta)}
+      ${caraDadoHtml('cara-arriba', etiqueta)}
+      ${caraDadoHtml('cara-abajo', etiqueta)}
+    </div>
+  </div>`;
+}
+function manejarEscTiradaDados(evento) { if (evento.key === 'Escape') cerrarTiradaDados(); }
+function cerrarTiradaDados() {
+  const fondo = document.querySelector('.dados-overlay-fondo');
+  if (fondo) fondo.remove();
+  document.removeEventListener('keydown', manejarEscTiradaDados);
+}
+function abrirTiradaDados(grupos, nombreLinea) {
+  cerrarZoomImagen();
+  cerrarTiradaDados();
+  const DURACION_MS = 900;
+  const RETARDO_ENTRE_DADOS_MS = 90;
+  let contadorDado = 0;
+  const gruposCalculados = grupos.map((g) => {
+    const valores = [];
+    let html = '';
+    for (let i = 0; i < g.cantidad; i++) {
+      const valor = tirarDadoValor(g.caras);
+      valores.push(valor);
+      html += construirDadoHtml(g.caras, valor, contadorDado * RETARDO_ENTRE_DADOS_MS);
+      contadorDado++;
+    }
+    const sumaDados = valores.reduce((a, b) => a + b, 0);
+    return { tipo: g.tipo, bonus: g.bonus || 0, valores, total: sumaDados + (g.bonus || 0), html };
+  });
+  const gruposHtml = gruposCalculados.map((g) => {
+    const bonusHtml = g.bonus ? `<span class="dado-bonus">${g.bonus >= 0 ? '+' : ''}${g.bonus}</span>` : '';
+    return `<div class="dados-grupo">${g.html}${bonusHtml}</div>`;
+  }).join('');
+  const fondo = document.createElement('div');
+  fondo.className = 'dados-overlay-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Tirada de dados: ${nombreLinea}`);
+  fondo.innerHTML = `
+    <button type="button" class="dados-overlay-cerrar" aria-label="Cerrar tirada de dados">×</button>
+    <div class="dados-overlay-contenido">
+      <h3 class="dados-overlay-titulo">${nombreLinea}</h3>
+      <div class="dados-escena">${gruposHtml}</div>
+      <div class="dados-resultado oculto" id="dados-resultado"></div>
+    </div>`;
+  document.body.appendChild(fondo);
+  fondo.onclick = (evento) => { if (evento.target === fondo) cerrarTiradaDados(); };
+  fondo.querySelector('.dados-overlay-cerrar').onclick = cerrarTiradaDados;
+  document.addEventListener('keydown', manejarEscTiradaDados);
+  fondo.querySelector('.dados-overlay-cerrar').focus();
+  const tiempoTotal = DURACION_MS + Math.max(0, contadorDado - 1) * RETARDO_ENTRE_DADOS_MS + 100;
+  setTimeout(() => {
+    const totalGeneral = gruposCalculados.reduce((acc, g) => acc + g.total, 0);
+    const lineasPorTipo = gruposCalculados.map((g) => {
+      const etiquetaTipo = g.tipo ? ETIQUETA_TIPO_DANO[g.tipo] : 'Daño';
+      const detalle = g.valores.length > 1
+        ? ` (${g.valores.join(' + ')}${g.bonus ? ` ${g.bonus >= 0 ? '+' : ''}${g.bonus}` : ''})` : '';
+      return `<div class="dados-linea-tipo"><b>${etiquetaTipo}:</b> ${g.total}${detalle}</div>`;
+    }).join('');
+    const totalHtml = gruposCalculados.length > 1 ? `<div class="dados-linea-total">Total: ${totalGeneral}</div>` : '';
+    const resultadoEl = document.getElementById('dados-resultado');
+    if (resultadoEl) { resultadoEl.classList.remove('oculto'); resultadoEl.innerHTML = lineasPorTipo + totalHtml; }
+  }, tiempoTotal);
+}
+function enlazarEventosDados() {
+  document.querySelectorAll('.linea-con-dados').forEach((contenedor) => {
+    const activar = () => {
+      try {
+        const grupos = JSON.parse(contenedor.getAttribute('data-grupos').replace(/&quot;/g, '"'));
+        abrirTiradaDados(grupos, contenedor.getAttribute('data-nombre') || '');
+      } catch (error) { /* datos de dados inválidos: se ignora el clic */ }
+    };
+    contenedor.querySelectorAll('.token-dado').forEach((token) => {
+      token.onclick = (evento) => { evento.stopPropagation(); activar(); };
+      token.onkeydown = (evento) => {
+        if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); evento.stopPropagation(); activar(); }
+      };
+    });
+  });
+}

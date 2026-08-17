@@ -1,5 +1,6 @@
 import { ABIL, ABIL_NOMBRE, PELIGRO_COLOR, PELIGRO_NOMBRE, HABITAT_ESTILO } from '../features/constants.js';
 import { crAFraccion, fmtMod, mod, nivelPeligro } from '../features/utils.js';
+import { crAFraccion, fmtMod, mod, nivelPeligro, extraerGruposDano, resaltarGruposDano } from '../features/utils.js';
 
 export function retratoProcedural(monstruo, tipoColor) {
   const iniciales = (monstruo.nombre || '?').split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase();
@@ -127,9 +128,14 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
     if (visible === '—') return '';
     return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverDistancias(visible)}</div>`;
   };
-  const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`).join('')}`
-    : '';
+  const listaRasgos = (titulo, arr) => (arr && arr.length) ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => {
+      const grupos = extraerGruposDano(r.texto);
+      if (!grupos.length) return `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`;
+      const cuerpo = resaltarGruposDano(r.texto, grupos);
+      const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
+      return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${r.nombre}"><b>${r.nombre}:</b> ${cuerpo}</div>`;
+    }).join('')}`
+  : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
     <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
     ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
@@ -143,7 +149,15 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
   const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
     <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverDistancias(formatoTituloDosPuntos(t))}</div>`).join('')}
+    ${monstruo.legendarias.texto.map((t) => {
+      const formateado = formatoTituloDosPuntos(t);
+      const grupos = extraerGruposDano(formateado);
+      if (!grupos.length) return `<div class="rasgo">${formateado}</div>`;
+      const cuerpo = resaltarGruposDano(formateado, grupos);
+      const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
+      const nombreLinea = (formateado.split(':')[0] || 'Acción legendaria').trim();
+      return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${nombreLinea}">${cuerpo}</div>`;
+    }).join('')}
   </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `

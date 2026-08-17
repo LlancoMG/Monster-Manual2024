@@ -3,6 +3,7 @@ import { crearCompendio } from './features/monster-model.js';
 import { imagenesListas } from './features/storage.js';
 import { construirPanelResultados, retratoProcedural, vistaDetalle } from './ui/monster-views.js';
 import { vistaLista } from './ui/filtros-views.js';
+import { ETIQUETA_TIPO_DANO } from './features/utils.js';
 
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
@@ -223,10 +224,12 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
   enlazarEventosDistancias();
+  enlazarEventosDados();
 }
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
+  cerrarTiradaDados()
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
@@ -262,3 +265,94 @@ imagenesListas.then(() => {
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', render);
   else render();
 });
+// ===================== TIRADA DE DADOS =====================
+function tirarDadoValor(caras) { return Math.floor(Math.random() * caras) + 1; }
+function caraDadoHtml(clase, contenido) { return `<div class="cara ${clase}">${contenido}</div>`; }
+function construirDadoHtml(caras, valorFinal, retardoMs) {
+  const etiqueta = `d${caras}`;
+  return `<div class="dado-3d-escena">
+    <div class="dado-3d girando" style="animation-delay:${retardoMs}ms">
+      ${caraDadoHtml('cara-frente', valorFinal)}
+      ${caraDadoHtml('cara-atras', etiqueta)}
+      ${caraDadoHtml('cara-derecha', etiqueta)}
+      ${caraDadoHtml('cara-izquierda', etiqueta)}
+      ${caraDadoHtml('cara-arriba', etiqueta)}
+      ${caraDadoHtml('cara-abajo', etiqueta)}
+    </div>
+  </div>`;
+}
+function manejarEscTiradaDados(evento) { if (evento.key === 'Escape') cerrarTiradaDados(); }
+function cerrarTiradaDados() {
+  const fondo = document.querySelector('.dados-overlay-fondo');
+  if (fondo) fondo.remove();
+  document.removeEventListener('keydown', manejarEscTiradaDados);
+}
+function abrirTiradaDados(grupos, nombreLinea) {
+  cerrarZoomImagen();
+  cerrarTiradaDados();
+  const DURACION_MS = 900;
+  const RETARDO_ENTRE_DADOS_MS = 90;
+  let contadorDado = 0;
+  const gruposCalculados = grupos.map((g) => {
+    const valores = [];
+    let html = '';
+    for (let i = 0; i < g.cantidad; i++) {
+      const valor = tirarDadoValor(g.caras);
+      valores.push(valor);
+      html += construirDadoHtml(g.caras, valor, contadorDado * RETARDO_ENTRE_DADOS_MS);
+      contadorDado++;
+    }
+    const sumaDados = valores.reduce((a, b) => a + b, 0);
+    return { tipo: g.tipo, bonus: g.bonus || 0, valores, total: sumaDados + (g.bonus || 0), html };
+  });
+  const gruposHtml = gruposCalculados.map((g) => {
+    const bonusHtml = g.bonus ? `<span class="dado-bonus">${g.bonus >= 0 ? '+' : ''}${g.bonus}</span>` : '';
+    return `<div class="dados-grupo">${g.html}${bonusHtml}</div>`;
+  }).join('');
+  const fondo = document.createElement('div');
+  fondo.className = 'dados-overlay-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Tirada de dados: ${nombreLinea}`);
+  fondo.innerHTML = `
+    <button type="button" class="dados-overlay-cerrar" aria-label="Cerrar tirada de dados">×</button>
+    <div class="dados-overlay-contenido">
+      <h3 class="dados-overlay-titulo">${nombreLinea}</h3>
+      <div class="dados-escena">${gruposHtml}</div>
+      <div class="dados-resultado oculto" id="dados-resultado"></div>
+    </div>`;
+  document.body.appendChild(fondo);
+  fondo.onclick = (evento) => { if (evento.target === fondo) cerrarTiradaDados(); };
+  fondo.querySelector('.dados-overlay-cerrar').onclick = cerrarTiradaDados;
+  document.addEventListener('keydown', manejarEscTiradaDados);
+  fondo.querySelector('.dados-overlay-cerrar').focus();
+  const tiempoTotal = DURACION_MS + Math.max(0, contadorDado - 1) * RETARDO_ENTRE_DADOS_MS + 100;
+  setTimeout(() => {
+    const totalGeneral = gruposCalculados.reduce((acc, g) => acc + g.total, 0);
+    const lineasPorTipo = gruposCalculados.map((g) => {
+      const etiquetaTipo = g.tipo ? ETIQUETA_TIPO_DANO[g.tipo] : 'Daño';
+      const detalle = g.valores.length > 1
+        ? ` (${g.valores.join(' + ')}${g.bonus ? ` ${g.bonus >= 0 ? '+' : ''}${g.bonus}` : ''})` : '';
+      return `<div class="dados-linea-tipo"><b>${etiquetaTipo}:</b> ${g.total}${detalle}</div>`;
+    }).join('');
+    const totalHtml = gruposCalculados.length > 1 ? `<div class="dados-linea-total">Total: ${totalGeneral}</div>` : '';
+    const resultadoEl = document.getElementById('dados-resultado');
+    if (resultadoEl) { resultadoEl.classList.remove('oculto'); resultadoEl.innerHTML = lineasPorTipo + totalHtml; }
+  }, tiempoTotal);
+}
+function enlazarEventosDados() {
+  document.querySelectorAll('.linea-con-dados').forEach((contenedor) => {
+    const activar = () => {
+      try {
+        const grupos = JSON.parse(contenedor.getAttribute('data-grupos').replace(/&quot;/g, '"'));
+        abrirTiradaDados(grupos, contenedor.getAttribute('data-nombre') || '');
+      } catch (error) { /* datos de dados inválidos: se ignora el clic */ }
+    };
+    contenedor.querySelectorAll('.token-dado').forEach((token) => {
+      token.onclick = (evento) => { evento.stopPropagation(); activar(); };
+      token.onkeydown = (evento) => {
+        if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); evento.stopPropagation(); activar(); }
+      };
+    });
+  });
+}

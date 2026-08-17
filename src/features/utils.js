@@ -44,3 +44,64 @@ export function fraccionANumero(valor) {
   const decimal = Number(txt.replace(',', '.'));
   return Number.isFinite(decimal) ? decimal : valor;
 }
+export const TIPOS_DANO = [
+  'perforante', 'cortante', 'contundente', 'fuego', 'frio', 'acido',
+  'veneno', 'psiquico', 'necrotico', 'radiante', 'rayo', 'trueno', 'fuerza'
+];
+export const ETIQUETA_TIPO_DANO = {
+  perforante: 'Perforante', cortante: 'Cortante', contundente: 'Contundente',
+  fuego: 'Fuego', frio: 'Frío', acido: 'Ácido', veneno: 'Veneno',
+  psiquico: 'Psíquico', necrotico: 'Necrótico', radiante: 'Radiante',
+  rayo: 'Rayo', trueno: 'Trueno', fuerza: 'Fuerza'
+};
+function normalizarTipoDano(palabra) {
+  const norm = normalizar(palabra);
+  return TIPOS_DANO.includes(norm) ? norm : null;
+}
+// Detecta expresiones de dados (ej. "2d6 + 3 cortante") dentro de un texto de
+// acción y devuelve, en orden de aparición, cada grupo con su posición
+// original (para resaltarlo en el HTML) y su tipo de daño si se reconoce
+// una palabra clave justo después (saltando conectores como "de"/"daño").
+export function extraerGruposDano(texto) {
+  if (typeof texto !== 'string' || !texto) return [];
+  const regexDados = /(\d+)\s*[dD]\s*(\d+)((?:\s*[+\-]\s*\d+)*)/g;
+  const grupos = [];
+  let m;
+  while ((m = regexDados.exec(texto))) {
+    const cantidad = Number(m[1]);
+    const caras = Number(m[2]);
+    if (!cantidad || !caras) continue;
+    let bonus = 0;
+    if (m[3]) {
+      [...m[3].matchAll(/([+\-])\s*(\d+)/g)].forEach((bm) => {
+        bonus += (bm[1] === '-' ? -1 : 1) * Number(bm[2]);
+      });
+    }
+    let fin = m.index + m[0].length;
+    let tipo = null;
+    const resto = texto.slice(fin);
+    const siguiente = resto.match(/^\s*(?:de\s+)?(?:daño\s+)?([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/);
+    if (siguiente) {
+      const candidato = normalizarTipoDano(siguiente[1]);
+      if (candidato) { tipo = candidato; fin += siguiente[0].length; }
+    }
+    grupos.push({
+      indice: grupos.length, cantidad, caras, bonus, tipo,
+      inicio: m.index, fin, textoOriginal: texto.slice(m.index, fin).trim()
+    });
+  }
+  return grupos;
+}
+// Envuelve cada grupo detectado en un <span> clickeable, dejando el resto del texto intacto.
+export function resaltarGruposDano(texto, grupos) {
+  if (!grupos || !grupos.length) return texto;
+  let resultado = '';
+  let cursor = 0;
+  grupos.forEach((g) => {
+    resultado += texto.slice(cursor, g.inicio);
+    resultado += `<span class="token-dado" data-grupo-idx="${g.indice}" tabindex="0" role="button" aria-label="Tirar ${g.textoOriginal}">${g.textoOriginal}</span>`;
+    cursor = g.fin;
+  });
+  resultado += texto.slice(cursor);
+  return resultado;
+}
