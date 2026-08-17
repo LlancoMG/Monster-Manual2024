@@ -5592,7 +5592,7 @@ window.Monstruos =[
             },
             {
               "nombre": "Mangual de guerra",
-              "texto": "Ataque cuerpo a cuerpo: +6, alcance 10 pies. Impacto: 13 (2d8+4) contundante."
+              "texto": "Ataque cuerpo a cuerpo: +6, alcance 10 pies. Impacto: 13 (2d8+4) contundente."
             },
             {
               "nombre": "Grito de guerra",
@@ -5702,7 +5702,7 @@ window.Monstruos =[
             },
             {
               "nombre": "Embestida",
-              "texto": "Si la bulette se mueve al menos 20 pies en línea recta hacia un objetivo y lo golpea con un ataque de Mordisco en el mismo turno, el objetivo recibe 13 (3d8) de daño contundante adicional y debe superar una salvación de Fuerza CD 15 o queda derribado."
+              "texto": "Si la bulette se mueve al menos 20 pies en línea recta hacia un objetivo y lo golpea con un ataque de Mordisco en el mismo turno, el objetivo recibe 13 (3d8) de daño contundente adicional y debe superar una salvación de Fuerza CD 15 o queda derribado."
             },
             {
               "nombre": "Salto mortífero",
@@ -5744,7 +5744,7 @@ window.Monstruos =[
             },
             {
               "nombre": "Embestida",
-              "texto": "Si el cachorro se mueve al menos 15 pies en línea recta hacia un objetivo y lo golpea con un ataque de Mordisco en el mismo turno, el objetivo recibe 7 (2d6) de daño contundante adicional y debe superar una salvación de Fuerza CD 13 o queda derribado."
+              "texto": "Si el cachorro se mueve al menos 15 pies en línea recta hacia un objetivo y lo golpea con un ataque de Mordisco en el mismo turno, el objetivo recibe 7 (2d6) de daño contundente adicional y debe superar una salvación de Fuerza CD 13 o queda derribado."
             }
           ]
         }
@@ -5916,7 +5916,7 @@ window.Monstruos =[
           "acciones": [
             {
               "nombre": "Bastón",
-              "texto": "Ataque cuerpo a cuerpo: +2, alcance 5 pies. Impacto: 3 (1d6) contundante."
+              "texto": "Ataque cuerpo a cuerpo: +2, alcance 5 pies. Impacto: 3 (1d6) contundente."
             }
           ]
         }
@@ -6090,7 +6090,7 @@ window.Monstruos =[
     "acciones": [
       {
         "nombre": "Mordisco",
-        "texto": "+5 a golpear, alcance 5 pies. Impacto: 2d4+3 contundante."
+        "texto": "+5 a golpear, alcance 5 pies. Impacto: 2d4+3 contundente."
       }
     ],
     "acciones_adicionales": [],
@@ -6156,7 +6156,7 @@ window.Monstruos =[
       },
       {
         "nombre": "Tentáculo",
-        "texto": "+4 a golpear, alcance 10 pies. Impacto: 7 (1d8+2) contundante. Si el objetivo es una criatura, debe superar una tirada de salvación de Constitución CD 13 o queda envenenada durante 1 minuto. Mientras esté envenenada de esta forma, el objetivo queda paralizado. El objetivo puede repetir la tirada de salvación al final de cada uno de sus turnos, terminando el efecto sobre sí mismo con un éxito."
+        "texto": "+4 a golpear, alcance 10 pies. Impacto: 7 (1d8+2) contundente. Si el objetivo es una criatura, debe superar una tirada de salvación de Constitución CD 13 o queda envenenada durante 1 minuto. Mientras esté envenenada de esta forma, el objetivo queda paralizado. El objetivo puede repetir la tirada de salvación al final de cada uno de sus turnos, terminando el efecto sobre sí mismo con un éxito."
       }
     ],
     "acciones_adicionales": [],
@@ -6266,7 +6266,7 @@ window.Monstruos =[
       },
       {
         "nombre": "Carga",
-        "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe daño contundante adicional y queda derribado si es Grande o menor."
+        "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe daño contundente adicional y queda derribado si es Grande o menor."
       }
     ],
     "acciones": [
@@ -6308,7 +6308,7 @@ window.Monstruos =[
           "rasgos": [
             {
               "nombre": "Carga",
-              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundante adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 12 o queda derribada."
+              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundente adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 12 o queda derribada."
             }
           ],
           "acciones": [
@@ -6356,7 +6356,7 @@ window.Monstruos =[
           "rasgos": [
             {
               "nombre": "Carga",
-              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundante adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 12 o queda derribada."
+              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundente adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 12 o queda derribada."
             },
             {
               "nombre": "Lanzamiento de conjuros",
@@ -6366,7 +6366,7 @@ window.Monstruos =[
           "acciones": [
             {
               "nombre": "Bastón",
-              "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 5 (1d6+2) contundante."
+              "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 5 (1d6+2) contundente."
             }
           ]
         }
@@ -6400,7 +6400,7 @@ window.Monstruos =[
           "rasgos": [
             {
               "nombre": "Carga",
-              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundante adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 13 o queda derribada."
+              "texto": "Si el centaur se mueve al menos 30 pies en línea recta hacia un objetivo y lo golpea con un ataque de lanza en el mismo turno, el objetivo recibe 7 (2d6) de daño contundente adicional. Si el objetivo es una criatura, debe superar una salvación de Fuerza CD 13 o queda derribada."
             },
             {
               "nombre": "Remate",
@@ -6609,7 +6609,7 @@ window.Monstruos =[
       },
       {
         "nombre": "Mordisco de cabra",
-        "texto": "+7 a golpear, alcance 5 pies. Impacto: 11 (2d6+4) contundante."
+        "texto": "+7 a golpear, alcance 5 pies. Impacto: 11 (2d6+4) contundente."
       },
       {
         "nombre": "Garras de león",
@@ -6683,7 +6683,7 @@ window.Monstruos =[
       },
       {
         "nombre": "Pinza",
-        "texto": "+7 a golpear, alcance 10 pies. Impacto: 11 (2d6+4) contundante. Si el objetivo es una criatura Grande o menor, queda agarrado (escape CD 16). El chuul tiene dos pinzas."
+        "texto": "+7 a golpear, alcance 10 pies. Impacto: 11 (2d6+4) contundente. Si el objetivo es una criatura Grande o menor, queda agarrado (escape CD 16). El chuul tiene dos pinzas."
       },
       {
         "nombre": "Tentáculos",
@@ -6757,7 +6757,7 @@ window.Monstruos =[
       },
       {
         "nombre": "Golpe",
-        "texto": "+8 a golpear, alcance 5 pies. Impacto: 16 (2d10+5) contundante. Si el objetivo es una criatura, debe superar una salvación de Constitución CD 15 o sus puntos de golpe máximos se reducen en una cantidad igual al daño recibido. El objetivo muere si esto reduce sus puntos de golpe máximos a 0. La reducción persiste hasta que el objetivo complete un descanso largo o reciba el conjuro Mayor Restoration."
+        "texto": "+8 a golpear, alcance 5 pies. Impacto: 16 (2d10+5) contundente. Si el objetivo es una criatura, debe superar una salvación de Constitución CD 15 o sus puntos de golpe máximos se reducen en una cantidad igual al daño recibido. El objetivo muere si esto reduce sus puntos de golpe máximos a 0. La reducción persiste hasta que el objetivo complete un descanso largo o reciba el conjuro Mayor Restoration."
       },
       {
         "nombre": "Acelerar (recarga 5-6)",
