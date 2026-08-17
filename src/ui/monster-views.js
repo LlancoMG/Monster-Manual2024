@@ -1,5 +1,4 @@
 import { ABIL, ABIL_NOMBRE, PELIGRO_COLOR, PELIGRO_NOMBRE, HABITAT_ESTILO } from '../features/constants.js';
-import { crAFraccion, fmtMod, mod, nivelPeligro } from '../features/utils.js';
 import { crAFraccion, fmtMod, mod, nivelPeligro, extraerGruposDano, resaltarGruposDano } from '../features/utils.js';
 
 export function retratoProcedural(monstruo, tipoColor) {

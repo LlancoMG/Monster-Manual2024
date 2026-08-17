@@ -657,8 +657,8 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length) ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => {
       const grupos = extraerGruposDano(r.texto);
-      if (!grupos.length) return `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`;
-      const cuerpo = resaltarGruposDano(r.texto, grupos);
+      if (!grupos.length) return `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`;
+      const cuerpo = envolverDistancias(resaltarGruposDano(r.texto, grupos));
       const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
       return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${r.nombre}"><b>${r.nombre}:</b> ${cuerpo}</div>`;
     }).join('')}`
@@ -679,8 +679,8 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     ${monstruo.legendarias.texto.map((t) => {
       const formateado = formatoTituloDosPuntos(t);
       const grupos = extraerGruposDano(formateado);
-      if (!grupos.length) return `<div class="rasgo">${formateado}</div>`;
-      const cuerpo = resaltarGruposDano(formateado, grupos);
+      if (!grupos.length) return `<div class="rasgo">${envolverDistancias(formateado)}</div>`;
+      const cuerpo = envolverDistancias(resaltarGruposDano(formateado, grupos));
       const datos = JSON.stringify(grupos.map((g) => ({ cantidad: g.cantidad, caras: g.caras, bonus: g.bonus, tipo: g.tipo }))).replace(/"/g, '&quot;');
       const nombreLinea = (formateado.split(':')[0] || 'Acción legendaria').trim();
       return `<div class="rasgo linea-con-dados" data-grupos="${datos}" data-nombre="${nombreLinea}">${cuerpo}</div>`;
