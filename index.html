@@ -275,6 +275,33 @@ button.fantasma:disabled:hover{background:transparent;}
 .seccion-legendarias .rasgo{border-left-color:var(--oro);}
 .seccion-legendarias .rasgo b{color:var(--granate-osc);}
 
+/* ===================== DISTANCIAS CONVERTIBLES (pies / metros / casillas) ===================== */
+/* Cada distancia dentro de la ficha (Velocidad, alcance, radios, etc.) se
+   muestra subrayada como un enlace; al tocarla se abre un popover con sus
+   tres equivalencias, y elegir una cambia TODAS las distancias de la ficha
+   a esa unidad. */
+.dist{
+  text-decoration:underline dotted;
+  text-decoration-color:var(--oro);
+  text-underline-offset:2px;
+  cursor:pointer;
+  border-radius:3px;
+}
+.dist:hover, .dist:focus-visible{background:rgba(184,135,74,.18);}
+.dist-popover{
+  position:absolute; z-index:65;
+  background:var(--pergamino); border:1px solid var(--oro); border-radius:8px;
+  box-shadow:0 10px 24px rgba(0,0,0,.4);
+  padding:5px; display:flex; flex-direction:column; gap:2px; min-width:140px;
+}
+.dist-popover-opcion{
+  font-family:'JetBrains Mono', monospace; font-size:13px;
+  background:transparent; border:none; text-align:left; padding:6px 10px; border-radius:5px;
+  cursor:pointer; color:var(--tinta); width:100%;
+}
+.dist-popover-opcion:hover{background:rgba(184,135,74,.18);}
+.dist-popover-opcion.activa{background:var(--granate); color:#f4e6c8; font-weight:700;}
+
 </style>
 </head>
 <body>

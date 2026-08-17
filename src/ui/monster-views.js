@@ -77,6 +77,19 @@ function formatoTituloDosPuntos(texto) {
   if (indice === -1 || indice > 60) return texto;
   return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
 }
+// Envuelve cada distancia en pies del texto ("30 pies", "80/320 pies", "cono
+// de 15 pies") en un <span class="dist"> subrayado y clicable. El pie base
+// (y el segundo valor si es un alcance doble tipo "80/320 pies") quedan
+// guardados en data-pies / data-pies2 para poder recalcular metros y
+// casillas en el cliente sin volver a tocar el texto original. Solo actúa
+// dentro de la ficha de detalle (no en las tarjetas del listado).
+function envolverDistancias(texto) {
+  if (typeof texto !== 'string') return texto;
+  return texto.replace(/(\d+)(?:\/(\d+))?\s*pies\b/g, (coincidencia, pies1, pies2) => {
+    const atributoPies2 = pies2 ? ` data-pies2="${pies2}"` : '';
+    return `<span class="dist" data-pies="${pies1}"${atributoPies2}>${coincidencia}</span>`;
+  });
+}
 export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFuenteImagen, tipoColor }) {
   if (!monstruoBase) {
     return `<div class="panel"><h2>Monstruo no encontrado</h2>
@@ -104,17 +117,18 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
   const statsRapidasHtml = `<div class="stats-rapidas">
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Clase de Armadura</span><span class="stat-rapida-valor">${valorVisible(monstruo.ca)}</span></div>
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</span></div>
-    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${valorVisible(monstruo.velocidad)}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${envolverDistancias(valorVisible(monstruo.velocidad))}</span></div>
   </div>`;
   // Los títulos de estadísticas (Tiradas de salvación, Sentidos, etc.) ahora
   // terminan en ":" en vez de "." para que se lean como una etiqueta, igual
   // que los nombres de rasgos/acciones más abajo.
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
-    return visible !== '—' ? `<div class="linea-stat"><b>${etiqueta}:</b> ${visible}</div>` : '';
+    if (visible === '—') return '';
+    return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverDistancias(visible)}</div>`;
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${r.texto}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`).join('')}`
     : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
     <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
@@ -129,7 +143,7 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
   const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
     <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${formatoTituloDosPuntos(t)}</div>`).join('')}
+    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverDistancias(formatoTituloDosPuntos(t))}</div>`).join('')}
   </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `

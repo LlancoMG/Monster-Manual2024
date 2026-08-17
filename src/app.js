@@ -7,6 +7,93 @@ import { vistaLista } from './ui/filtros-views.js';
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
 
+// ===================== UNIDADES DE DISTANCIA EN LA FICHA =====================
+// Cada distancia en pies dentro de la ficha (Velocidad, alcance de acciones,
+// radios de conos/esferas, etc.) se envuelve en un <span class="dist"> desde
+// monster-views.js. Acá se maneja la conversión a metros/casillas y el
+// popover que aparece al tocar cualquiera de esas distancias. La unidad
+// elegida se recuerda mientras dure la sesión y se aplica a TODAS las
+// distancias de la ficha (no solo a la que se tocó).
+let unidadDistanciaActual = 'pies';
+// 5 pies = 1 casilla siempre en este compendio, así que la división es exacta.
+function valorSegunUnidad(pies, unidad) {
+  if (unidad === 'metros') return (pies * 0.3048).toFixed(1);
+  if (unidad === 'casillas') return String(pies / 5);
+  return String(pies);
+}
+function sufijoUnidad(unidad, valorUnico) {
+  if (unidad === 'metros') return 'm';
+  if (unidad === 'casillas') return valorUnico === '1' ? 'casilla' : 'casillas';
+  return 'pies';
+}
+function textoDistancia(pies1, pies2, unidad) {
+  const v1 = valorSegunUnidad(pies1, unidad);
+  if (pies2 === null) return `${v1} ${sufijoUnidad(unidad, v1)}`;
+  const v2 = valorSegunUnidad(pies2, unidad);
+  return `${v1}/${v2} ${sufijoUnidad(unidad, null)}`;
+}
+function actualizarTextoDistancias() {
+  document.querySelectorAll('.dist').forEach((span) => {
+    const pies1 = Number(span.dataset.pies);
+    const pies2 = span.dataset.pies2 ? Number(span.dataset.pies2) : null;
+    span.textContent = textoDistancia(pies1, pies2, unidadDistanciaActual);
+  });
+}
+function manejarEscPopoverDistancia(evento) {
+  if (evento.key === 'Escape') cerrarPopoverDistancia();
+}
+function manejarClickFueraPopoverDistancia(evento) {
+  const popover = document.querySelector('.dist-popover');
+  if (popover && !popover.contains(evento.target) && !evento.target.classList.contains('dist')) {
+    cerrarPopoverDistancia();
+  }
+}
+function cerrarPopoverDistancia() {
+  const popover = document.querySelector('.dist-popover');
+  if (popover) popover.remove();
+  document.removeEventListener('keydown', manejarEscPopoverDistancia);
+  document.removeEventListener('click', manejarClickFueraPopoverDistancia, true);
+}
+function abrirPopoverDistancia(span) {
+  cerrarPopoverDistancia();
+  const pies1 = Number(span.dataset.pies);
+  const pies2 = span.dataset.pies2 ? Number(span.dataset.pies2) : null;
+  const popover = document.createElement('div');
+  popover.className = 'dist-popover';
+  popover.setAttribute('role', 'menu');
+  popover.innerHTML = ['pies', 'metros', 'casillas'].map((unidad) => `
+    <button type="button" class="dist-popover-opcion${unidad === unidadDistanciaActual ? ' activa' : ''}" data-unidad="${unidad}" role="menuitem">${textoDistancia(pies1, pies2, unidad)}</button>`).join('');
+  document.body.appendChild(popover);
+  const rectSpan = span.getBoundingClientRect();
+  const anchoPopover = popover.offsetWidth;
+  let izquierda = rectSpan.left + window.scrollX;
+  const limiteDerecho = window.scrollX + document.documentElement.clientWidth - anchoPopover - 8;
+  if (izquierda > limiteDerecho) izquierda = Math.max(8, limiteDerecho);
+  popover.style.left = `${izquierda}px`;
+  popover.style.top = `${rectSpan.bottom + window.scrollY + 4}px`;
+  popover.querySelectorAll('.dist-popover-opcion').forEach((boton) => {
+    boton.onclick = (evento) => {
+      evento.stopPropagation();
+      unidadDistanciaActual = boton.dataset.unidad;
+      actualizarTextoDistancias();
+      cerrarPopoverDistancia();
+    };
+  });
+  document.addEventListener('keydown', manejarEscPopoverDistancia);
+  setTimeout(() => document.addEventListener('click', manejarClickFueraPopoverDistancia, true), 0);
+}
+function enlazarEventosDistancias() {
+  document.querySelectorAll('.dist').forEach((span) => {
+    span.tabIndex = 0;
+    span.setAttribute('role', 'button');
+    span.onclick = (evento) => { evento.stopPropagation(); abrirPopoverDistancia(span); };
+    span.onkeydown = (evento) => {
+      if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); abrirPopoverDistancia(span); }
+    };
+  });
+  actualizarTextoDistancias(); // aplica la unidad ya elegida si no es "pies"
+}
+
 function analizarHash() {
   const hash = location.hash || '#/';
   const partes = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
@@ -135,9 +222,11 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   const selectorVariante = document.getElementById('selector-variante');
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
+  enlazarEventosDistancias();
 }
 function render() {
   cerrarZoomImagen();
+  cerrarPopoverDistancia();
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
