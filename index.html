@@ -302,6 +302,307 @@ button.fantasma:disabled:hover{background:transparent;}
 .dist-popover-opcion:hover{background:rgba(184,135,74,.18);}
 .dist-popover-opcion.activa{background:var(--granate); color:#f4e6c8; font-weight:700;}
 
+/* ===================== DADOS INTERACTIVOS EN LA FICHA ===================== */
+.dado-tirable {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  margin: 1px 2px;
+  border-radius: 4px;
+  background: rgba(184, 135, 74, 0.12);
+  border: 1px dashed var(--oro);
+  color: var(--granate-osc);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.14s ease;
+  user-select: none;
+  vertical-align: baseline;
+}
+.dado-tirable:hover, .dado-tirable:focus-visible {
+  background: var(--granate);
+  color: #fff3db;
+  border-style: solid;
+  border-color: var(--oro-claro);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(122, 30, 43, 0.35);
+}
+.dado-icono {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Variantes temáticas sutiles de dados según daño */
+.dado-tirable-fuego { border-color: #d90429; color: #9e2a2b; background: rgba(217, 4, 41, 0.08); }
+.dado-tirable-fuego:hover { background: #c1121f; color: #fff; }
+
+.dado-tirable-frio { border-color: #0077b6; color: #023e8a; background: rgba(0, 119, 182, 0.08); }
+.dado-tirable-frio:hover { background: #0077b6; color: #fff; }
+
+.dado-tirable-rayo { border-color: #0096c7; color: #03045e; background: rgba(0, 150, 199, 0.08); }
+.dado-tirable-rayo:hover { background: #023e8a; color: #ffd166; }
+
+.dado-tirable-acido { border-color: #38b000; color: #208b00; background: rgba(56, 176, 0, 0.08); }
+.dado-tirable-acido:hover { background: #38b000; color: #fff; }
+
+.dado-tirable-veneno { border-color: #2d6a4f; color: #1b4332; background: rgba(45, 106, 79, 0.08); }
+.dado-tirable-veneno:hover { background: #1b4332; color: #fff; }
+
+.dado-tirable-necrotico { border-color: #5a189a; color: #3c096c; background: rgba(90, 24, 154, 0.08); }
+.dado-tirable-necrotico:hover { background: #3c096c; color: #f3c4fb; }
+
+.dado-tirable-radiante { border-color: #b8860b; color: #855800; background: rgba(184, 134, 11, 0.1); }
+.dado-tirable-radiante:hover { background: #b8860b; color: #fffde7; }
+
+.dado-tirable-fuerza { border-color: #7209b7; color: #560bad; background: rgba(114, 9, 183, 0.08); }
+.dado-tirable-fuerza:hover { background: #7209b7; color: #fff; }
+
+.dado-tirable-psiquico { border-color: #b5179e; color: #7209b7; background: rgba(181, 23, 158, 0.08); }
+.dado-tirable-psiquico:hover { background: #b5179e; color: #fff; }
+
+.dado-tirable-ataque { border-color: var(--granate); color: var(--granate-osc); background: rgba(122, 30, 43, 0.1); font-weight: 700; }
+.dado-tirable-ataque:hover { background: var(--granate-osc); color: var(--oro-claro); }
+
+.dado-tirable-pg { border-color: #2d6a4f; color: #2d6a4f; background: rgba(45, 106, 79, 0.1); }
+.dado-tirable-pg:hover { background: #2d6a4f; color: #fff; }
+
+/* ===================== MODAL DE DADOS 3D (CANASTA D&D) ===================== */
+.modal-dados-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(10, 7, 4, 0.88);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: zoom-fondo-entrada 0.18s ease-out;
+}
+
+.modal-dados-caja {
+  background: var(--pergamino);
+  border: 2px solid var(--oro);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(184, 135, 74, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-dados-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 16px 10px;
+  background: linear-gradient(180deg, rgba(122, 30, 43, 0.12), rgba(122, 30, 43, 0.02));
+  border-bottom: 1px solid var(--oro);
+  gap: 10px;
+}
+
+.modal-dados-titulos {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-dados-titulo-monstruo {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  margin: 0;
+  color: var(--granate-osc);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal-dados-subtitulo {
+  font-size: 13.5px;
+  margin: 2px 0 0;
+  color: var(--tinta-suave);
+}
+
+.modal-dados-controles-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sonido-tirada {
+  background: transparent;
+  border: 1px solid var(--oro);
+  color: var(--tinta);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.btn-sonido-tirada:hover {
+  background: rgba(184, 135, 74, 0.15);
+}
+
+.modal-dados-cerrar {
+  background: var(--granate);
+  color: #f4e6c8;
+  border: 1px solid var(--oro);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-family: 'EB Garamond', serif;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+.modal-dados-cerrar:hover {
+  background: var(--granate-osc);
+  transform: scale(1.05);
+}
+
+.modal-dados-canvas-wrapper {
+  width: 100%;
+  height: 280px;
+  position: relative;
+  background: #0d0a07;
+  overflow: hidden;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9);
+}
+
+#canvas-dados-3d {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.modal-dados-panel-resultado {
+  padding: 12px 16px;
+  background: #f4ebd5;
+  border-top: 1px solid var(--oro);
+  border-bottom: 1px solid var(--oro);
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.resultado-cargando {
+  font-style: italic;
+  color: var(--tinta-suave);
+  text-align: center;
+  font-size: 14px;
+}
+
+.resultado-fila-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.resultado-etiqueta-dano {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.resultado-total-cifra {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--granate-osc);
+  background: rgba(122, 30, 43, 0.08);
+  border: 1px solid var(--oro);
+  padding: 4px 14px;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.resultado-desglose {
+  font-size: 13.5px;
+  color: var(--tinta);
+}
+
+.chip-dado-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  background: var(--pergamino-osc);
+  border: 1px solid #b8a878;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.chip-mod-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--granate);
+}
+
+.insignia-critico {
+  background: linear-gradient(90deg, #d4af37, #f7d070, #d4af37);
+  color: #3b2405;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
+  letter-spacing: 0.5px;
+  animation: pulso-critico 1s infinite alternate ease-in-out;
+}
+
+.insignia-pifia {
+  background: #2b0c10;
+  color: #ff8585;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulso-critico {
+  from { transform: scale(0.98); filter: brightness(1); }
+  to { transform: scale(1.02); filter: brightness(1.15); }
+}
+
+.resumen-dados-extendido {
+  font-size: 11.5px;
+  color: var(--tinta-suave);
+  font-family: 'JetBrains Mono', monospace;
+  word-break: break-all;
+  margin-top: 2px;
+}
+
+.modal-dados-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--pergamino);
+}
+
 </style>
 </head>
 <body>
@@ -312,6 +613,7 @@ button.fantasma:disabled:hover{background:transparent;}
 </div>
 
 <div class="contenedor" id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="./monstruos.legacy.js"></script>
 <script src="./src/app.bundle.js"></script>
 </body>

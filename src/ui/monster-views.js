@@ -1,5 +1,6 @@
 import { ABIL, ABIL_NOMBRE, PELIGRO_COLOR, PELIGRO_NOMBRE, HABITAT_ESTILO } from '../features/constants.js';
 import { crAFraccion, fmtMod, mod, nivelPeligro } from '../features/utils.js';
+import { envolverTiradasDados } from '../features/dice-parser.js';
 
 export function retratoProcedural(monstruo, tipoColor) {
   const iniciales = (monstruo.nombre || '?').split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase();
@@ -34,9 +35,6 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
     ? `<div class="variantes-cr">${variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')}</div>`
     : '';
   const nombreEn = monstruo.nombre_en ? ` · <i>${monstruo.nombre_en}</i>` : '';
-  // Se usa <a> (con href real al hash de la ficha) en vez de <button> para que
-  // el clic derecho ofrezca "Abrir en una pestaña nueva", "Abrir en ventana
-  // nueva", etc., como cualquier enlace normal.
   return `<a class="tarjeta" href="#/monstruo/${encodeURIComponent(monstruo.id)}" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
     <div class="miniatura">${marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor)}</div>
     <div class="cuerpo">
@@ -66,29 +64,23 @@ export function construirPanelResultados({ todos, resultados, paginaActual, tamP
     ${resultados.length ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}` : '<div class="vacio">Ningún monstruo coincide con estos filtros.<br><button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>'}`;
   return { html, pagina, totalPaginas };
 }
-// Convierte el patrón habitual de los bloques de estadísticas ("Nombre. resto
-// del texto") en "Nombre: resto del texto", igual que se hace con los
-// nombres de rasgos/acciones. Solo actúa si el ". " aparece cerca del
-// principio del texto (se asume que es el separador título/cuerpo y no un
-// punto cualquiera dentro de una oración larga).
 function formatoTituloDosPuntos(texto) {
   if (typeof texto !== 'string') return texto;
   const indice = texto.indexOf('. ');
   if (indice === -1 || indice > 60) return texto;
   return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
 }
-// Envuelve cada distancia en pies del texto ("30 pies", "80/320 pies", "cono
-// de 15 pies") en un <span class="dist"> subrayado y clicable. El pie base
-// (y el segundo valor si es un alcance doble tipo "80/320 pies") quedan
-// guardados en data-pies / data-pies2 para poder recalcular metros y
-// casillas en el cliente sin volver a tocar el texto original. Solo actúa
-// dentro de la ficha de detalle (no en las tarjetas del listado).
 function envolverDistancias(texto) {
   if (typeof texto !== 'string') return texto;
   return texto.replace(/(\d+)(?:\/(\d+))?\s*pies\b/g, (coincidencia, pies1, pies2) => {
     const atributoPies2 = pies2 ? ` data-pies2="${pies2}"` : '';
     return `<span class="dist" data-pies="${pies1}"${atributoPies2}>${coincidencia}</span>`;
   });
+}
+function envolverTextoFicha(texto, contexto = {}) {
+  if (typeof texto !== 'string') return texto;
+  const conDistancias = envolverDistancias(texto);
+  return envolverTiradasDados(conDistancias, contexto);
 }
 export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFuenteImagen, tipoColor }) {
   if (!monstruoBase) {
@@ -111,39 +103,37 @@ export function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obt
   const atributosHtml = ABIL.map((a) => `<div class="cel-atributo">
       <div class="n">${ABIL_NOMBRE[a]}</div><div class="v">${valorVisible(monstruo.atributos[a])}</div>
       <div class="m">${fmtMod(mod(monstruo.atributos[a]))}</div></div>`).join('');
-  // Clase de Armadura / Puntos de Golpe / Velocidad ahora se muestran como
-  // "estadísticas rápidas" en fichas individuales (misma familia visual que
-  // la tabla de atributos), en vez de simples líneas de texto sueltas.
+  
+  const dadosPgHtml = dadosPgVisible !== '—'
+    ? ` (${envolverTiradasDados(dadosPgVisible, { tipoDano: 'pg' })})`
+    : '';
+
   const statsRapidasHtml = `<div class="stats-rapidas">
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Clase de Armadura</span><span class="stat-rapida-valor">${valorVisible(monstruo.ca)}</span></div>
-    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgHtml}</span></div>
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${envolverDistancias(valorVisible(monstruo.velocidad))}</span></div>
   </div>`;
-  // Los títulos de estadísticas (Tiradas de salvación, Sentidos, etc.) ahora
-  // terminan en ":" en vez de "." para que se lean como una etiqueta, igual
-  // que los nombres de rasgos/acciones más abajo.
+  
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
     if (visible === '—') return '';
-    return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverDistancias(visible)}</div>`;
+    return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverTextoFicha(visible)}</div>`;
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo" data-nombre-accion="${r.nombre}"><b>${r.nombre}:</b> ${envolverTextoFicha(r.texto, { nombreAccion: r.nombre })}</div>`).join('')}`
     : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
     <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
     ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
     ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
-  // Reacciones y Acciones legendarias ahora son categorías visualmente
-  // separadas (cajas con acento de color propio), en vez de mezclarse con el
-  // resto de rasgos/acciones. Acciones legendarias usa tonos dorados.
+  
   const reaccionesHtml = (monstruo.reacciones && monstruo.reacciones.length)
     ? `<div class="seccion-reacciones">${listaRasgos('Reacciones', monstruo.reacciones)}</div>`
     : '';
   const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
     <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverDistancias(formatoTituloDosPuntos(t))}</div>`).join('')}
+    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverTextoFicha(formatoTituloDosPuntos(t))}</div>`).join('')}
   </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `

@@ -3,6 +3,7 @@ import { crearCompendio } from './features/monster-model.js';
 import { imagenesListas } from './features/storage.js';
 import { construirPanelResultados, retratoProcedural, vistaDetalle } from './ui/monster-views.js';
 import { vistaLista } from './ui/filtros-views.js';
+import { abrirModalDados, cerrarModalDados } from './ui/dice-modal.js';
 
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
@@ -92,6 +93,38 @@ function enlazarEventosDistancias() {
     };
   });
   actualizarTextoDistancias(); // aplica la unidad ya elegida si no es "pies"
+}
+
+// ===================== ENLACE DE EVENTOS PARA DADOS 3D =====================
+function enlazarEventosDados(nombreMonstruo) {
+  document.querySelectorAll('.dado-tirable').forEach((elem) => {
+    const activarTirada = (evento) => {
+      evento.stopPropagation();
+      try {
+        const rawJson = elem.getAttribute('data-roll');
+        if (!rawJson) return;
+        const configTirada = JSON.parse(decodeURIComponent(rawJson));
+        
+        // Obtener nombre de la acción/rasgo contenedor si existe
+        const contenedorRasgo = elem.closest('.rasgo');
+        const nombreAccion = (contenedorRasgo && contenedorRasgo.getAttribute('data-nombre-accion'))
+          || (contenedorRasgo && contenedorRasgo.querySelector('b') && contenedorRasgo.querySelector('b').textContent.replace(':', '').trim())
+          || '';
+
+        abrirModalDados({ configTirada, nombreMonstruo, nombreAccion });
+      } catch (err) {
+        console.error('Error al iniciar tirada de dados:', err);
+      }
+    };
+
+    elem.onclick = activarTirada;
+    elem.onkeydown = (evento) => {
+      if (evento.key === 'Enter' || evento.key === ' ') {
+        evento.preventDefault();
+        activarTirada(evento);
+      }
+    };
+  });
 }
 
 function analizarHash() {
@@ -223,10 +256,12 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
   enlazarEventosDistancias();
+  enlazarEventosDados(nombreMonstruo);
 }
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
+  cerrarModalDados();
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {

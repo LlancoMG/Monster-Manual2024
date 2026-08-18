@@ -1,5 +1,5 @@
 // Versión legacy completa: define `window.Monstruos`.
-window.Monstruos =[
+window.Monstruos = [
   {
     "id": "goblin",
     "nombre": "Goblin",
@@ -667,7 +667,7 @@ window.Monstruos =[
     "descripcion_breve": "Mente ancestral de las profundidades que esclaviza pueblos enteros con telepatía, recuerdos robados y servidumbre abisal.",
     "pagina": 12,
     "notas": "",
-    "imagen": "img/aboleth.jpg",
+    "imagen": "img/aboleth.png",
     "fuente": "MM24"
   },
   {
@@ -30168,5 +30168,5 @@ window.Monstruos =[
     "notas": "",
     "imagen": "img/dragones_hada.jpg",
     "fuente": "MM24"
-    }
+  }
 ]

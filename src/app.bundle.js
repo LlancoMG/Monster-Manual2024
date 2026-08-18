@@ -1,4 +1,4 @@
-// Bundle generado automáticamente con: node scripts/crear-bundle.js
+// Bundle generado automáticamente con scripts/crear-bundle.py
 // ---- src/features/constants.js ----
 const TIPOS = ['Aberración', 'Bestia', 'Celestial', 'Constructo', 'Dragón', 'Elemental', 'Feérica', 'Fiel', 'Gigante', 'Humanoide', 'Monstruosidad', 'Limo', 'Planta', 'No muerto'];
 const TIPO_COLOR = {
@@ -272,6 +272,1130 @@ function cargarImportados() {
 function guardarImportados(lista) {
   localStorage.setItem(CLAVE_IMPORTADOS, JSON.stringify(lista));
 }
+// ---- src/features/dice-audio.js ----
+// src/features/dice-audio.js
+// Síntesis de sonido procedural para tiradas de dados mediante Web Audio API.
+// No requiere archivos de audio externos y produce impactos y rodadas realistas
+// contra madera y fieltro.
+
+let audioCtx = null;
+let sonidoSilenciado = false;
+
+function obtenerAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function alternarSilencioSonido() {
+  sonidoSilenciado = !sonidoSilenciado;
+  return sonidoSilenciado;
+}
+
+function estaSonidoSilenciado() {
+  return sonidoSilenciado;
+}
+
+function reproducirImpactoDado(intensidad = 1, esPared = false) {
+  if (sonidoSilenciado) return;
+  try {
+    const ctx = obtenerAudioContext();
+    if (!ctx) return;
+
+    const ahora = ctx.currentTime;
+    const ganancia = ctx.createGain();
+    
+    // Nivel de volumen proporcional a la velocidad del impacto
+    const volumen = Math.min(0.28, Math.max(0.04, 0.15 * intensidad));
+    ganancia.gain.setValueAtTime(volumen, ahora);
+    ganancia.gain.exponentialRampToValueAtTime(0.001, ahora + (esPared ? 0.08 : 0.05));
+
+    // Generador de ruido para el chasquido del impacto
+    const duracionRuido = esPared ? 0.06 : 0.04;
+    const bufferRuido = ctx.createBuffer(1, ctx.sampleRate * duracionRuido, ctx.sampleRate);
+    const salidaRuido = bufferRuido.getChannelData(0);
+    for (let i = 0; i < salidaRuido.length; i++) {
+      salidaRuido[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.015));
+    }
+    const fuenteRuido = ctx.createBufferSource();
+    fuenteRuido.buffer = bufferRuido;
+
+    // Filtro para simular resonancia de madera/fieltro
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = 'bandpass';
+    filtro.frequency.setValueAtTime(esPared ? (380 + Math.random() * 220) : (240 + Math.random() * 160), ahora);
+    filtro.Q.setValueAtTime(3.5, ahora);
+
+    // Oscilador de tono sordo (cuerpo de madera)
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    const frecBase = esPared ? (180 + Math.random() * 60) : (110 + Math.random() * 40);
+    osc.frequency.setValueAtTime(frecBase, ahora);
+    osc.frequency.exponentialRampToValueAtTime(40, ahora + 0.07);
+
+    const gananciaOsc = ctx.createGain();
+    gananciaOsc.gain.setValueAtTime(volumen * 0.8, ahora);
+    gananciaOsc.gain.exponentialRampToValueAtTime(0.001, ahora + 0.07);
+
+    fuenteRuido.connect(filtro);
+    filtro.connect(ganancia);
+    osc.connect(gananciaOsc);
+    gananciaOsc.connect(ctx.destination);
+    ganancia.connect(ctx.destination);
+
+    fuenteRuido.start(ahora);
+    osc.start(ahora);
+    fuenteRuido.stop(ahora + duracionRuido);
+    osc.stop(ahora + 0.08);
+  } catch (e) {
+    // Si el navegador bloquea audio, continuar silenciosamente
+  }
+}
+
+function reproducirCritico() {
+  if (sonidoSilenciado) return;
+  try {
+    const ctx = obtenerAudioContext();
+    if (!ctx) return;
+    const ahora = ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.50].forEach((frec, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(frec, ahora + idx * 0.07);
+      gain.gain.setValueAtTime(0.12, ahora + idx * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, ahora + idx * 0.07 + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ahora + idx * 0.07);
+      osc.stop(ahora + idx * 0.07 + 0.4);
+    });
+  } catch (e) {}
+}
+
+function reproducirPifia() {
+  if (sonidoSilenciado) return;
+  try {
+    const ctx = obtenerAudioContext();
+    if (!ctx) return;
+    const ahora = ctx.currentTime;
+    [320, 260, 200, 150].forEach((frec, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(frec, ahora + idx * 0.09);
+      gain.gain.setValueAtTime(0.09, ahora + idx * 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.001, ahora + idx * 0.09 + 0.28);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ahora + idx * 0.09);
+      osc.stop(ahora + idx * 0.09 + 0.3);
+    });
+  } catch (e) {}
+}
+// ---- src/features/dice-parser.js ----
+// src/features/dice-parser.js
+// Reconocimiento, análisis léxico y envoltura de tiradas de dados en textos
+// de fichas de monstruos (ataques, daños individuales o compuestos, rasgos,
+// dados de vida y tiradas varias con o sin daño promedio fijo).
+
+const DANOS_INFO = {
+  fuego: {
+    nombre: 'Fuego', icono: '🔥',
+    colorPrincipal: '#c1121f', colorSecundario: '#f77f00', colorTexto: '#ffffff',
+    luz: '#ff5400', bandeja: '#38040e', descripcion: 'Llamas ardientes'
+  },
+  frío: {
+    nombre: 'Frío', icono: '❄️',
+    colorPrincipal: '#0077b6', colorSecundario: '#90e0ef', colorTexto: '#ffffff',
+    luz: '#48cae4', bandeja: '#03045e', descripcion: 'Escarcha gélida'
+  },
+  rayo: {
+    nombre: 'Rayo', icono: '⚡',
+    colorPrincipal: '#023e8a', colorSecundario: '#ffd166', colorTexto: '#ffffff',
+    luz: '#ffd60a', bandeja: '#001845', descripcion: 'Descarga eléctrica'
+  },
+  trueno: {
+    nombre: 'Trueno', icono: '💥',
+    colorPrincipal: '#3a0ca3', colorSecundario: '#7209b7', colorTexto: '#ffffff',
+    luz: '#4361ee', bandeja: '#10002b', descripcion: 'Onda de choque sónica'
+  },
+  ácido: {
+    nombre: 'Ácido', icono: '🧪',
+    colorPrincipal: '#38b000', colorSecundario: '#70e000', colorTexto: '#ffffff',
+    luz: '#9ef01a', bandeja: '#0d2818', descripcion: 'Sustancia corrosiva'
+  },
+  veneno: {
+    nombre: 'Veneno', icono: '☠️',
+    colorPrincipal: '#1b4332', colorSecundario: '#2d6a4f', colorTexto: '#ffffff',
+    luz: '#52b788', bandeja: '#081c15', descripcion: 'Toxina letal'
+  },
+  necrótico: {
+    nombre: 'Necrótico', icono: '💀',
+    colorPrincipal: '#3c096c', colorSecundario: '#5a189a', colorTexto: '#ffffff',
+    luz: '#7b2cbf', bandeja: '#1b0336', descripcion: 'Energía marchitante'
+  },
+  radiante: {
+    nombre: 'Radiante', icono: '✨',
+    colorPrincipal: '#b8860b', colorSecundario: '#ffb703', colorTexto: '#ffffff',
+    luz: '#fff3b0', bandeja: '#493108', descripcion: 'Luz sagrada y solar'
+  },
+  fuerza: {
+    nombre: 'Fuerza', icono: '🌀',
+    colorPrincipal: '#7209b7', colorSecundario: '#f72585', colorTexto: '#ffffff',
+    luz: '#4cc9f0', bandeja: '#240046', descripcion: 'Energía mágica pura'
+  },
+  psíquico: {
+    nombre: 'Psíquico', icono: '👁️',
+    colorPrincipal: '#b5179e', colorSecundario: '#f72585', colorTexto: '#ffffff',
+    luz: '#ff70a6', bandeja: '#380036', descripcion: 'Ataque mental'
+  },
+  cortante: {
+    nombre: 'Cortante', icono: '⚔️',
+    colorPrincipal: '#7a1e2b', colorSecundario: '#a4161a', colorTexto: '#ffffff',
+    luz: '#e5383b', bandeja: '#2b090e', descripcion: 'Filo acerado'
+  },
+  perforante: {
+    nombre: 'Perforante', icono: '🗡️',
+    colorPrincipal: '#7f4f24', colorSecundario: '#936639', colorTexto: '#ffffff',
+    luz: '#b08968', bandeja: '#362110', descripcion: 'Punta punzante'
+  },
+  contundente: {
+    nombre: 'Contundente', icono: '🔨',
+    colorPrincipal: '#495057', colorSecundario: '#6c757d', colorTexto: '#ffffff',
+    luz: '#adb5bd', bandeja: '#212529', descripcion: 'Impacto aplastante'
+  },
+  ataque: {
+    nombre: 'Ataque', icono: '🎯',
+    colorPrincipal: '#7a1e2b', colorSecundario: '#b8874a', colorTexto: '#ffffff',
+    luz: '#d9b477', bandeja: '#2b090e', descripcion: 'Tirada de impacto (d20)'
+  },
+  pg: {
+    nombre: 'Puntos de Golpe', icono: '❤️',
+    colorPrincipal: '#2d6a4f', colorSecundario: '#52b788', colorTexto: '#ffffff',
+    luz: '#74c69d', bandeja: '#081c15', descripcion: 'Tirada de vida'
+  },
+  general: {
+    nombre: 'Tirada', icono: '🎲',
+    colorPrincipal: '#5a4c33', colorSecundario: '#b8874a', colorTexto: '#ffffff',
+    luz: '#d9b477', bandeja: '#1f1913', descripcion: 'Tirada de dados'
+  }
+};
+
+const TIPOS_DANO_REGEX = /\b(fuego|fr[ií]o|rayo|rel[aá]mpago|trueno|[aá]cido|veneno|necr[oó]tico|radiante|fuerza|ps[ií]quico|cortante|perforante|contundente)\b/i;
+
+function normalizarTipoDano(str) {
+  if (!str) return 'general';
+  const s = str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (s.includes('fuego')) return 'fuego';
+  if (s.includes('frio')) return 'frío';
+  if (s.includes('rayo') || s.includes('relampago')) return 'rayo';
+  if (s.includes('trueno')) return 'trueno';
+  if (s.includes('acido')) return 'ácido';
+  if (s.includes('veneno')) return 'veneno';
+  if (s.includes('necrotico')) return 'necrótico';
+  if (s.includes('radiante')) return 'radiante';
+  if (s.includes('fuerza')) return 'fuerza';
+  if (s.includes('psiquico')) return 'psíquico';
+  if (s.includes('cortante')) return 'cortante';
+  if (s.includes('perforante')) return 'perforante';
+  if (s.includes('contundente')) return 'contundente';
+  if (s.includes('ataque')) return 'ataque';
+  if (s.includes('pg') || s.includes('vida') || s.includes('golpe')) return 'pg';
+  return 'general';
+}
+
+function parsearFormulaDados(formula, tipoDanoSugerido = null) {
+  if (typeof formula !== 'string') return null;
+  let limpia = formula.trim();
+
+  // Caso 1: Tirada de ataque (+X a golpear)
+  const coincidenciaAtaque = limpia.match(/^[+]?(-?\d+)\s+a\s+golpear/i);
+  if (coincidenciaAtaque) {
+    const mod = parseInt(coincidenciaAtaque[1], 10);
+    return {
+      cantidad: 1,
+      caras: 20,
+      mod: isNaN(mod) ? 0 : mod,
+      tipoDano: 'ataque',
+      tipoTirada: 'ataque',
+      etiqueta: `Tirada de ataque (${mod >= 0 ? '+' : ''}${mod})`,
+      formulaOriginal: limpia
+    };
+  }
+
+  // Extraer si viene con formato '13 (4d6+2)' o '(4d6+2)'
+  const coincidenciaPromedio = limpia.match(/^(?:\d+\s*)?\(([^)]+)\)(.*)$/);
+  if (coincidenciaPromedio) {
+    limpia = coincidenciaPromedio[1] + (coincidenciaPromedio[2] || '');
+  }
+
+  // Caso 2: Notación NdX o NdX+M / NdX-M
+  const coincidenciaDados = limpia.match(/^(\d+)?d(\d+)(?:\s*([+-])\s*(\d+))?(.*)$/i);
+  if (coincidenciaDados) {
+    const cantidad = coincidenciaDados[1] ? parseInt(coincidenciaDados[1], 10) : 1;
+    const caras = parseInt(coincidenciaDados[2], 10);
+    const signo = coincidenciaDados[3];
+    const valorMod = coincidenciaDados[4] ? parseInt(coincidenciaDados[4], 10) : 0;
+    const mod = signo === '-' ? -valorMod : valorMod;
+    const resto = coincidenciaDados[5] || '';
+
+    let tipoDano = tipoDanoSugerido;
+    if (!tipoDano) {
+      const matchTipo = resto.match(TIPOS_DANO_REGEX);
+      if (matchTipo) {
+        tipoDano = normalizarTipoDano(matchTipo[1]);
+      } else {
+        tipoDano = 'general';
+      }
+    } else {
+      tipoDano = normalizarTipoDano(tipoDano);
+    }
+
+    const infoDano = DANOS_INFO[tipoDano] || DANOS_INFO.general;
+    const formulaLimpia = `${cantidad}d${caras}${mod !== 0 ? (mod > 0 ? `+${mod}` : `${mod}`) : ''}`;
+
+    return {
+      cantidad,
+      caras,
+      mod,
+      tipoDano,
+      tipoTirada: tipoDano === 'pg' ? 'pg' : 'daño',
+      etiqueta: `${infoDano.nombre} (${formulaLimpia})`,
+      formulaOriginal: formula.trim()
+    };
+  }
+
+  return null;
+}
+
+// Envuelve tiradas en una sola pasada unificada por nodo de texto puro
+// para evitar cualquier posibilidad de anidamiento de etiquetas HTML.
+function envolverTiradasDados(texto, contexto = {}) {
+  if (typeof texto !== 'string' || !texto) return texto;
+
+  // Dividimos el texto en trozos para NO tocar el contenido dentro de etiquetas HTML (<...>)
+  const partes = texto.split(/(<[^>]+>)/g);
+
+  // Regex unificada:
+  // Grupo 1: Ataque (+X a golpear)
+  // Grupo 2 y 3: Daño con promedio fijo tipo '13 (4d6+2) de fuego' o '52 (15d6) de daño de fuego'
+  // Grupo 4 y 5: Fórmula directa tipo '1d6+2 cortante' o '2d10 perforante'
+  const REGEX_UNIFICADA = /(?:([+]?\d+\s+a\s+golpear)|(\b\d+\s*\(\s*\d*d\d+(?:\s*[+-]\s*\d+)?\s*\))(?:\s*(?:de\s+daño\s+(?:de\s+)?|daño\s+(?:de\s+)?|de\s+)?(fuego|fr[ií]o|rayo|rel[aá]mpago|trueno|[aá]cido|veneno|necr[oó]tico|radiante|fuerza|ps[ií]quico|cortante|perforante|contundente))?|(\b\d*d\d+(?:\s*[+-]\s*\d+)?)(?:\s*(?:de\s+daño\s+(?:de\s+)?|daño\s+(?:de\s+)?|de\s+)?(fuego|fr[ií]o|rayo|rel[aá]mpago|trueno|[aá]cido|veneno|necr[oó]tico|radiante|fuerza|ps[ií]quico|cortante|perforante|contundente))?)/gi;
+
+  for (let p = 0; p < partes.length; p++) {
+    // Si es una etiqueta HTML existente, saltar
+    if (partes[p].startsWith('<') && partes[p].endsWith('>')) continue;
+
+    partes[p] = partes[p].replace(REGEX_UNIFICADA, (match, matchAtaque, formulaPromedio, tipoPromedio, formulaDirecta, tipoDirecto) => {
+      // 1. Tirada de ataque (+X a golpear)
+      if (matchAtaque) {
+        const parsed = parsearFormulaDados(matchAtaque, 'ataque');
+        if (!parsed) return match;
+        const json = encodeURIComponent(JSON.stringify(parsed));
+        return `<span class="dado-tirable dado-tirable-ataque" data-roll="${json}" role="button" tabindex="0" title="Tirar ${parsed.etiqueta}"><span class="dado-icono">🎯</span>${match}</span>`;
+      }
+
+      // 2. Daño con promedio fijo: ej. "13 (4d6) de fuego"
+      if (formulaPromedio) {
+        const tipo = tipoPromedio ? normalizarTipoDano(tipoPromedio) : (contexto.tipoDano || 'general');
+        const parsed = parsearFormulaDados(match, tipo);
+        if (!parsed) return match;
+
+        const info = DANOS_INFO[parsed.tipoDano] || DANOS_INFO.general;
+        const json = encodeURIComponent(JSON.stringify(parsed));
+        const icono = info.icono ? `<span class="dado-icono">${info.icono}</span>` : '';
+        return `<span class="dado-tirable dado-tirable-${parsed.tipoDano}" data-roll="${json}" role="button" tabindex="0" title="Tirar ${parsed.etiqueta}">${icono}${match}</span>`;
+      }
+
+      // 3. Fórmula directa: ej. "1d6+2 cortante"
+      if (formulaDirecta) {
+        const tipo = tipoDirecto ? normalizarTipoDano(tipoDirecto) : (contexto.tipoDano || 'general');
+        const parsed = parsearFormulaDados(match, tipo);
+        if (!parsed) return match;
+
+        const info = DANOS_INFO[parsed.tipoDano] || DANOS_INFO.general;
+        const json = encodeURIComponent(JSON.stringify(parsed));
+        const icono = info.icono ? `<span class="dado-icono">${info.icono}</span>` : '';
+        return `<span class="dado-tirable dado-tirable-${parsed.tipoDano}" data-roll="${json}" role="button" tabindex="0" title="Tirar ${parsed.etiqueta}">${icono}${match}</span>`;
+      }
+
+      return match;
+    });
+  }
+
+  return partes.join('');
+}
+// ---- src/features/dice-3d.js ----
+// src/features/dice-3d.js
+// Motor 3D con Three.js para tiradas de dados poliédricos (d4, d6, d8, d10, d12, d20)
+// dentro de una canasta/bandeja octogonal de madera noble y terciopelo temático.
+// Genera geometrías poliédricas con grupos de materiales y mapeo UV explícito
+// por cara para que CADA número (del 1 al N) sea nítido, de alto contraste y visible.
+
+
+let escena = null;
+let camara = null;
+let renderizador = null;
+let idAnimacion = null;
+let dadosActivos = [];
+let lucesTematicas = [];
+let bandejaMalla = null;
+let callbackFinTirada = null;
+let tiradaCompletada = false;
+
+// Generador de texturas dinámicas para caras de dados
+const cacheTexturas = new Map();
+
+function crearTexturaCara(numero, colorFondo, colorTexto, colorBorde, forma = 'cuadrado') {
+  const clave = `${numero}_${colorFondo}_${colorTexto}_${colorBorde}_${forma}`;
+  if (cacheTexturas.has(clave)) return cacheTexturas.get(clave);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Fondo del dado con degradé radial rico
+  const grad = ctx.createRadialGradient(256, 256, 20, 256, 256, 256);
+  grad.addColorStop(0, colorFondo);
+  grad.addColorStop(1, oscurecerColor(colorFondo, 0.4));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Dibujar borde según la forma geométrica de la cara
+  ctx.strokeStyle = colorBorde;
+  ctx.lineWidth = 14;
+
+  if (forma === 'triangulo') {
+    ctx.beginPath();
+    ctx.moveTo(256, 35);
+    ctx.lineTo(475, 460);
+    ctx.lineTo(37, 460);
+    ctx.closePath();
+    ctx.stroke();
+    // Borde interno fino
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(256, 75);
+    ctx.lineTo(440, 440);
+    ctx.lineTo(72, 440);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (forma === 'pentagono') {
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+      const px = 256 + 215 * Math.cos(a);
+      const py = 256 + 215 * Math.sin(a);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  } else if (forma === 'cometa') {
+    ctx.beginPath();
+    ctx.moveTo(256, 30);
+    ctx.lineTo(465, 230);
+    ctx.lineTo(256, 480);
+    ctx.lineTo(47, 230);
+    ctx.closePath();
+    ctx.stroke();
+  } else {
+    // Cuadrado (d6)
+    ctx.strokeRect(28, 28, 456, 456);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(46, 46, 420, 420);
+  }
+
+  // Número grabado de alta definición
+  ctx.fillStyle = colorTexto;
+  const tamFuente = numero > 99 ? 180 : numero > 9 ? 220 : 250;
+  ctx.font = `bold ${tamFuente}px "Cinzel", "EB Garamond", serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Sombra profunda para relieve tallado
+  ctx.shadowColor = 'rgba(0,0,0,0.85)';
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetX = 4;
+  ctx.shadowOffsetY = 6;
+
+  // Centro vertical ajustado para triángulos (el centroide está más abajo)
+  const yOffset = forma === 'triangulo' ? 310 : (forma === 'cometa' ? 245 : 260);
+  ctx.fillText(String(numero), 256, yOffset);
+
+  // Subrayado para el 6 y el 9
+  if (numero === 6 || numero === 9) {
+    ctx.shadowBlur = 4;
+    ctx.fillRect(186, yOffset + tamFuente * 0.45, 140, 14);
+  }
+
+  const textura = new THREE.CanvasTexture(canvas);
+  textura.anisotropy = 4;
+  cacheTexturas.set(clave, textura);
+  return textura;
+}
+
+function oscurecerColor(hex, factor) {
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map((x) => x + x).join('');
+  const num = parseInt(c, 16);
+  let r = (num >> 16) * (1 - factor);
+  let g = ((num >> 8) & 0x00FF) * (1 - factor);
+  let b = (num & 0x0000FF) * (1 - factor);
+  return `rgb(${Math.max(0, Math.floor(r))},${Math.max(0, Math.floor(g))},${Math.max(0, Math.floor(b))})`;
+}
+
+// ===================== GENERACIÓN DE GEOMETRÍAS POLIÉDRICAS =====================
+
+function construirDadoD4(radio = 1.0) {
+  const s = radio / Math.sqrt(3);
+  const v = [
+    new THREE.Vector3(s, s, s),
+    new THREE.Vector3(-s, -s, s),
+    new THREE.Vector3(-s, s, -s),
+    new THREE.Vector3(s, -s, -s)
+  ];
+  const carasIndices = [
+    [0, 2, 1], // Cara 1
+    [0, 1, 3], // Cara 2
+    [0, 3, 2], // Cara 3
+    [1, 2, 3]  // Cara 4
+  ];
+  return ensamblarPolihedroTriangulos(v, carasIndices, 4, 'triangulo');
+}
+
+function construirDadoD6(radio = 1.0) {
+  const geom = new THREE.BoxGeometry(radio * 1.35, radio * 1.35, radio * 1.35);
+  // BoxGeometry ya tiene 6 grupos de materiales por defecto (0..5)
+  return { geom, normalesCaras: [
+    new THREE.Vector3(1, 0, 0),  // Cara 1
+    new THREE.Vector3(-1, 0, 0), // Cara 6
+    new THREE.Vector3(0, 1, 0),  // Cara 2
+    new THREE.Vector3(0, -1, 0), // Cara 5
+    new THREE.Vector3(0, 0, 1),  // Cara 3
+    new THREE.Vector3(0, 0, -1)  // Cara 4
+  ], ordenNumeros: [1, 6, 2, 5, 3, 4] };
+}
+
+function construirDadoD8(radio = 1.0) {
+  const r = radio * 1.15;
+  const v = [
+    new THREE.Vector3(0, r, 0),  // 0: top
+    new THREE.Vector3(0, -r, 0), // 1: bottom
+    new THREE.Vector3(r, 0, 0),  // 2: +X
+    new THREE.Vector3(0, 0, r),  // 3: +Z
+    new THREE.Vector3(-r, 0, 0), // 4: -X
+    new THREE.Vector3(0, 0, -r)  // 5: -Z
+  ];
+  const carasIndices = [
+    [0, 2, 3], // 1
+    [0, 3, 4], // 2
+    [0, 4, 5], // 3
+    [0, 5, 2], // 4
+    [1, 3, 2], // 5
+    [1, 4, 3], // 6
+    [1, 5, 4], // 7
+    [1, 2, 5]  // 8
+  ];
+  return ensamblarPolihedroTriangulos(v, carasIndices, 8, 'triangulo');
+}
+
+function construirDadoD10(radio = 1.0) {
+  const h = radio * 1.35;
+  const r = radio * 1.05;
+  const hMid = radio * 0.2;
+  const vTop = new THREE.Vector3(0, h, 0);
+  const vBot = new THREE.Vector3(0, -h, 0);
+
+  const ringTop = [];
+  const ringBot = [];
+  for (let i = 0; i < 5; i++) {
+    const a1 = (i * 2 * Math.PI) / 5;
+    ringTop.push(new THREE.Vector3(r * Math.cos(a1), hMid, r * Math.sin(a1)));
+    const a2 = ((i * 2 + 1) * Math.PI) / 5;
+    ringBot.push(new THREE.Vector3(r * Math.cos(a2), -hMid, r * Math.sin(a2)));
+  }
+
+  const posiciones = [];
+  const normales = [];
+  const uvs = [];
+  const normalesCaras = [];
+  const geom = new THREE.BufferGeometry();
+
+  for (let i = 0; i < 5; i++) {
+    const t1 = ringTop[i];
+    const t2 = ringTop[(i + 1) % 5];
+    const b1 = ringBot[i];
+    const bPrev = ringBot[(i + 4) % 5];
+
+    // Cara superior i (1, 3, 5, 7, 9)
+    const normSup = new THREE.Vector3().add(vTop).add(t1).add(b1).add(t2).normalize();
+    normalesCaras.push(normSup);
+
+    // Triángulo 1
+    posiciones.push(vTop.x, vTop.y, vTop.z, t1.x, t1.y, t1.z, b1.x, b1.y, b1.z);
+    normales.push(normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z);
+    uvs.push(0.5, 0.95, 0.05, 0.5, 0.5, 0.05);
+
+    // Triángulo 2
+    posiciones.push(vTop.x, vTop.y, vTop.z, b1.x, b1.y, b1.z, t2.x, t2.y, t2.z);
+    normales.push(normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z);
+    uvs.push(0.5, 0.95, 0.5, 0.05, 0.95, 0.5);
+
+    geom.addGroup(i * 6, 6, i);
+
+    // Cara inferior i (2, 4, 6, 8, 10)
+    const normInf = new THREE.Vector3().add(vBot).add(b1).add(t2).add(bPrev).normalize();
+    normalesCaras.push(normInf);
+
+    const idxInf = 5 + i;
+    posiciones.push(vBot.x, vBot.y, vBot.z, b1.x, b1.y, b1.z, t2.x, t2.y, t2.z);
+    normales.push(normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z);
+    uvs.push(0.5, 0.05, 0.05, 0.5, 0.5, 0.95);
+
+    posiciones.push(vBot.x, vBot.y, vBot.z, t2.x, t2.y, t2.z, ringBot[(i + 1) % 5].x, ringBot[(i + 1) % 5].y, ringBot[(i + 1) % 5].z);
+    normales.push(normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z);
+    uvs.push(0.5, 0.05, 0.5, 0.95, 0.95, 0.5);
+
+    geom.addGroup(idxInf * 6, 6, idxInf);
+  }
+
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+  geom.setAttribute('normal', new THREE.Float32BufferAttribute(normales, 3));
+  geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+  return { geom, normalesCaras, ordenNumeros: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] };
+}
+
+function construirDadoD12(radio = 1.0) {
+  const phi = (1 + Math.sqrt(5)) / 2;
+  const invPhi = 1 / phi;
+  const s = radio * 0.95 / Math.sqrt(3);
+
+  // 20 vértices de dodecaedro
+  const v = [
+    new THREE.Vector3( s,  s,  s), new THREE.Vector3( s,  s, -s), new THREE.Vector3( s, -s,  s), new THREE.Vector3( s, -s, -s),
+    new THREE.Vector3(-s,  s,  s), new THREE.Vector3(-s,  s, -s), new THREE.Vector3(-s, -s,  s), new THREE.Vector3(-s, -s, -s),
+    new THREE.Vector3(0,  s*invPhi,  s*phi), new THREE.Vector3(0,  s*invPhi, -s*phi), new THREE.Vector3(0, -s*invPhi,  s*phi), new THREE.Vector3(0, -s*invPhi, -s*phi),
+    new THREE.Vector3( s*invPhi,  s*phi, 0), new THREE.Vector3( s*invPhi, -s*phi, 0), new THREE.Vector3(-s*invPhi,  s*phi, 0), new THREE.Vector3(-s*invPhi, -s*phi, 0),
+    new THREE.Vector3( s*phi, 0,  s*invPhi), new THREE.Vector3( s*phi, 0, -s*invPhi), new THREE.Vector3(-s*phi, 0,  s*invPhi), new THREE.Vector3(-s*phi, 0, -s*invPhi)
+  ];
+
+  // 12 caras pentagonales
+  const pentagonos = [
+    [0, 8, 4, 14, 12],
+    [0, 12, 1, 17, 16],
+    [0, 16, 2, 10, 8],
+    [12, 14, 5, 9, 1],
+    [8, 10, 6, 18, 4],
+    [16, 17, 3, 13, 2],
+    [7, 11, 3, 13, 15],
+    [7, 15, 6, 18, 19],
+    [7, 19, 5, 9, 11],
+    [2, 13, 15, 6, 10],
+    [1, 9, 11, 3, 17],
+    [4, 18, 19, 5, 14]
+  ];
+
+  const posiciones = [];
+  const normales = [];
+  const uvs = [];
+  const normalesCaras = [];
+  const geom = new THREE.BufferGeometry();
+
+  pentagonos.forEach((pent, caraIdx) => {
+    const centro = new THREE.Vector3();
+    pent.forEach((vi) => centro.add(v[vi]));
+    centro.multiplyScalar(0.2);
+
+    const normal = centro.clone().normalize();
+    normalesCaras.push(normal);
+
+    const startIdx = posiciones.length / 3;
+
+    for (let i = 0; i < 5; i++) {
+      const p1 = v[pent[i]];
+      const p2 = v[pent[(i + 1) % 5]];
+
+      const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+      const a2 = (((i + 1) % 5) * 2 * Math.PI) / 5 - Math.PI / 2;
+
+      posiciones.push(centro.x, centro.y, centro.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+      normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+      uvs.push(0.5, 0.5, 0.5 + 0.45 * Math.cos(a1), 0.5 + 0.45 * Math.sin(a1), 0.5 + 0.45 * Math.cos(a2), 0.5 + 0.45 * Math.sin(a2));
+    }
+
+    geom.addGroup(startIdx, 15, caraIdx);
+  });
+
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+  geom.setAttribute('normal', new THREE.Float32BufferAttribute(normales, 3));
+  geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+  return { geom, normalesCaras, ordenNumeros: Array.from({ length: 12 }, (_, i) => i + 1) };
+}
+
+function construirDadoD20(radio = 1.0) {
+  const phi = (1 + Math.sqrt(5)) / 2;
+  const s = radio * 1.15 / Math.sqrt(1 + phi * phi);
+
+  // 12 vértices de icosaedro
+  const v = [
+    new THREE.Vector3(0,  s,  s*phi), new THREE.Vector3(0,  s, -s*phi), new THREE.Vector3(0, -s,  s*phi), new THREE.Vector3(0, -s, -s*phi),
+    new THREE.Vector3( s,  s*phi, 0), new THREE.Vector3( s, -s*phi, 0), new THREE.Vector3(-s,  s*phi, 0), new THREE.Vector3(-s, -s*phi, 0),
+    new THREE.Vector3( s*phi, 0,  s), new THREE.Vector3(-s*phi, 0,  s), new THREE.Vector3( s*phi, 0, -s), new THREE.Vector3(-s*phi, 0, -s)
+  ];
+
+  // 20 caras triangulares
+  const carasIndices = [
+    [0, 8, 4],   // 1
+    [0, 4, 6],   // 2
+    [0, 6, 9],   // 3
+    [0, 9, 2],   // 4
+    [0, 2, 8],   // 5
+    [4, 8, 10],  // 6
+    [8, 2, 5],   // 7
+    [2, 9, 7],   // 8
+    [9, 6, 11],  // 9
+    [6, 4, 1],   // 10
+    [1, 10, 4],  // 11
+    [10, 5, 8],  // 12
+    [5, 7, 2],   // 13
+    [7, 11, 9],  // 14
+    [11, 1, 6],  // 15
+    [3, 10, 1],  // 16
+    [3, 5, 10],  // 17
+    [3, 7, 5],   // 18
+    [3, 11, 7],  // 19
+    [3, 1, 11]   // 20
+  ];
+
+  return ensamblarPolihedroTriangulos(v, carasIndices, 20, 'triangulo');
+}
+
+function ensamblarPolihedroTriangulos(vertices, carasIndices, totalCaras, formaCara = 'triangulo') {
+  const posiciones = [];
+  const normales = [];
+  const uvs = [];
+  const normalesCaras = [];
+  const geom = new THREE.BufferGeometry();
+
+  carasIndices.forEach((cara, idx) => {
+    const p0 = vertices[cara[0]];
+    const p1 = vertices[cara[1]];
+    const p2 = vertices[cara[2]];
+
+    const edge1 = new THREE.Vector3().subVectors(p1, p0);
+    const edge2 = new THREE.Vector3().subVectors(p2, p0);
+    const normal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
+    normalesCaras.push(normal);
+
+    posiciones.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+    normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+    uvs.push(0.5, 0.95, 0.05, 0.1, 0.95, 0.1);
+
+    geom.addGroup(idx * 3, 3, idx);
+  });
+
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+  geom.setAttribute('normal', new THREE.Float32BufferAttribute(normales, 3));
+  geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+  return { geom, normalesCaras, ordenNumeros: Array.from({ length: totalCaras }, (_, i) => i + 1) };
+}
+
+// ===================== CANASTA / BANDEJA 3D =====================
+
+function construirBandeja(tipoDano = 'general') {
+  const grupoBandeja = new THREE.Group();
+  const infoDano = DANOS_INFO[tipoDano] || DANOS_INFO.general;
+  const radioBandeja = 5.6;
+  const alturaPared = 1.8;
+  const lados = 8;
+
+  // 1. Piso acolchado de terciopelo/cuero
+  const geomFondo = new THREE.CylinderGeometry(radioBandeja - 0.2, radioBandeja - 0.2, 0.4, lados);
+  const matFondo = new THREE.MeshStandardMaterial({
+    color: infoDano.bandeja || '#1f1913',
+    roughness: 0.85,
+    metalness: 0.1
+  });
+  const fondoFieltro = new THREE.Mesh(geomFondo, matFondo);
+  fondoFieltro.position.y = 0.2;
+  fondoFieltro.receiveShadow = true;
+  grupoBandeja.add(fondoFieltro);
+
+  // 2. Anillo de orla dorada interior en el piso
+  const geomOrla = new THREE.RingGeometry(radioBandeja - 0.7, radioBandeja - 0.5, lados);
+  const matOrla = new THREE.MeshStandardMaterial({
+    color: '#d9b477',
+    metalness: 0.8,
+    roughness: 0.35,
+    side: THREE.DoubleSide
+  });
+  const mallaOrla = new THREE.Mesh(geomOrla, matOrla);
+  mallaOrla.rotation.x = -Math.PI / 2;
+  mallaOrla.position.y = 0.41;
+  mallaOrla.receiveShadow = true;
+  grupoBandeja.add(mallaOrla);
+
+  // 3. Paredes octogonales de madera noble
+  const matMadera = new THREE.MeshStandardMaterial({
+    color: '#382212',
+    roughness: 0.45,
+    metalness: 0.2
+  });
+  const matMolduraOro = new THREE.MeshStandardMaterial({
+    color: '#b8874a',
+    roughness: 0.3,
+    metalness: 0.85
+  });
+
+  for (let i = 0; i < lados; i++) {
+    const angulo = (i * 2 * Math.PI) / lados + Math.PI / lados;
+    const anchoPared = 2 * radioBandeja * Math.sin(Math.PI / lados);
+    const geomPared = new THREE.BoxGeometry(anchoPared + 0.15, alturaPared, 0.5);
+    const pared = new THREE.Mesh(geomPared, matMadera);
+    const distCentro = radioBandeja * Math.cos(Math.PI / lados);
+    pared.position.x = distCentro * Math.cos(angulo);
+    pared.position.z = distCentro * Math.sin(angulo);
+    pared.position.y = alturaPared / 2 + 0.1;
+    pared.rotation.y = -angulo + Math.PI / 2;
+    pared.castShadow = true;
+    pared.receiveShadow = true;
+    grupoBandeja.add(pared);
+
+    // Moldura dorada superior
+    const geomMoldura = new THREE.BoxGeometry(anchoPared + 0.2, 0.16, 0.62);
+    const moldura = new THREE.Mesh(geomMoldura, matMolduraOro);
+    moldura.position.copy(pared.position);
+    moldura.position.y = alturaPared + 0.18;
+    moldura.rotation.copy(pared.rotation);
+    grupoBandeja.add(moldura);
+  }
+
+  bandejaMalla = grupoBandeja;
+  return grupoBandeja;
+}
+
+// ===================== DADOS 3D CON MATERIALES Y TEXTURAS =====================
+
+function obtenerConstruccionDado(caras, radio = 1.0) {
+  switch (caras) {
+    case 4: return { ...construirDadoD4(radio), formaCara: 'triangulo' };
+    case 6: return { ...construirDadoD6(radio), formaCara: 'cuadrado' };
+    case 8: return { ...construirDadoD8(radio), formaCara: 'triangulo' };
+    case 10:
+    case 100: return { ...construirDadoD10(radio), formaCara: 'cometa' };
+    case 12: return { ...construirDadoD12(radio), formaCara: 'pentagono' };
+    case 20:
+    default: return { ...construirDadoD20(radio), formaCara: 'triangulo' };
+  }
+}
+
+function crearMaterialesPolihedro(ordenNumeros, tipoDano, formaCara) {
+  const infoDano = DANOS_INFO[tipoDano] || DANOS_INFO.general;
+  const colorFondo = infoDano.colorPrincipal;
+  const colorTexto = infoDano.colorTexto || '#ffffff';
+  const colorBorde = infoDano.colorSecundario || '#d9b477';
+
+  return ordenNumeros.map((num) => {
+    const tex = crearTexturaCara(num, colorFondo, colorTexto, colorBorde, formaCara);
+    return new THREE.MeshStandardMaterial({
+      map: tex,
+      roughness: 0.2,
+      metalness: 0.3
+    });
+  });
+}
+
+// ===================== CONFIGURACIÓN Y FÍSICA DE TIRADA =====================
+
+function inicializarEscenaDados(contenedorCanvas, ancho, alto) {
+  limpiarEscenaDados();
+
+  escena = new THREE.Scene();
+  escena.background = new THREE.Color('#0d0a07');
+
+  camara = new THREE.PerspectiveCamera(40, ancho / alto, 0.1, 100);
+  camara.position.set(0, 9.8, 7.6);
+  camara.lookAt(0, 0.4, 0);
+
+  renderizador = new THREE.WebGLRenderer({ canvas: contenedorCanvas, antialias: true, alpha: true });
+  renderizador.setSize(ancho, alto);
+  renderizador.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderizador.shadowMap.enabled = true;
+  renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  // Iluminación ambiental cálida
+  const luzAmbiente = new THREE.AmbientLight('#fff5e4', 0.9);
+  escena.add(luzAmbiente);
+
+  // Luz direccional principal con sombras nítidas
+  const luzSol = new THREE.DirectionalLight('#fffdf5', 1.5);
+  luzSol.position.set(5, 12, 6);
+  luzSol.castShadow = true;
+  luzSol.shadow.mapSize.width = 1024;
+  luzSol.shadow.mapSize.height = 1024;
+  luzSol.shadow.camera.near = 0.5;
+  luzSol.shadow.camera.far = 25;
+  const d = 6.5;
+  luzSol.shadow.camera.left = -d;
+  luzSol.shadow.camera.right = d;
+  luzSol.shadow.camera.top = d;
+  luzSol.shadow.camera.bottom = -d;
+  luzSol.shadow.bias = -0.001;
+  escena.add(luzSol);
+
+  return { escena, camara, renderizador };
+}
+
+function ejecutarTirada3D({
+  cantidad = 1,
+  caras = 20,
+  mod = 0,
+  tipoDano = 'general',
+  resultadosForzados = null,
+  alTerminar = null
+}) {
+  if (!escena) return;
+
+  callbackFinTirada = alTerminar;
+  tiradaCompletada = false;
+
+  // Limpiar dados previos y luces temáticas
+  dadosActivos.forEach((d) => escena.remove(d.malla));
+  dadosActivos = [];
+  lucesTematicas.forEach((l) => escena.remove(l));
+  lucesTematicas = [];
+
+  // Reconstruir bandeja con el tema del tipo de daño
+  if (bandejaMalla) escena.remove(bandejaMalla);
+  const bandeja = construirBandeja(tipoDano);
+  escena.add(bandeja);
+
+  // Luz puntual temática del tipo de daño
+  const infoDano = DANOS_INFO[tipoDano] || DANOS_INFO.general;
+  const luzTema = new THREE.PointLight(infoDano.luz || '#ffaa00', 1.8, 14);
+  luzTema.position.set(0, 4.5, 0);
+  escena.add(luzTema);
+  lucesTematicas.push(luzTema);
+
+  // Determinar cuántos dados 3D mostrar (máx 5 visibles)
+  const cantidad3D = Math.min(cantidad, 5);
+  const resultados = resultadosForzados || Array.from({ length: cantidad }, () => Math.floor(Math.random() * caras) + 1);
+
+  // Vector de orientación final hacia la cámara (arriba + ligera inclinación hacia el jugador)
+  const dirCamaraFrente = new THREE.Vector3(0, 0.88, 0.47).normalize();
+
+  // Crear dados 3D
+  for (let i = 0; i < cantidad3D; i++) {
+    const resultado = resultados[i];
+    const { geom, normalesCaras, ordenNumeros, formaCara } = obtenerConstruccionDado(caras, 0.85);
+    const materiales = crearMaterialesPolihedro(ordenNumeros, tipoDano, formaCara);
+    const malla = new THREE.Mesh(geom, materiales);
+    malla.castShadow = true;
+    malla.receiveShadow = true;
+
+    // Calcular cuaternión objetivo para que la cara con el número resultado quede hacia la cámara
+    const indiceCara = ordenNumeros.indexOf(resultado);
+    const normalCaraLocal = (indiceCara !== -1 && normalesCaras[indiceCara])
+      ? normalesCaras[indiceCara].clone()
+      : new THREE.Vector3(0, 1, 0);
+
+    const quatObjetivo = new THREE.Quaternion().setFromUnitVectors(normalCaraLocal, dirCamaraFrente);
+
+    // Posición inicial elevada y distribuida
+    const offsetAngulo = (i / cantidad3D) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
+    const radioSpawn = 2.0 + Math.random() * 0.8;
+    const posX = Math.cos(offsetAngulo) * radioSpawn;
+    const posZ = Math.sin(offsetAngulo) * radioSpawn - 1.2;
+    const posY = 5.2 + i * 0.4 + Math.random() * 0.5;
+
+    malla.position.set(posX, posY, posZ);
+
+    // Impulso y rotación caótica inicial hacia el centro
+    const velX = -posX * (1.2 + Math.random() * 0.8) + (Math.random() - 0.5) * 1.5;
+    const velZ = -posZ * (1.2 + Math.random() * 0.8) + (Math.random() - 0.5) * 1.5;
+    const velY = -1.8 - Math.random() * 1.5;
+
+    const rotVelX = (Math.random() - 0.5) * 35;
+    const rotVelY = (Math.random() - 0.5) * 35;
+    const rotVelZ = (Math.random() - 0.5) * 35;
+
+    escena.add(malla);
+
+    dadosActivos.push({
+      malla,
+      caras,
+      resultado,
+      pos: malla.position,
+      vel: new THREE.Vector3(velX, velY, velZ),
+      rotVel: new THREE.Vector3(rotVelX, rotVelY, rotVelZ),
+      quatObjetivo,
+      asentado: false,
+      rebotes: 0
+    });
+  }
+
+  tiempoInicioTirada = performance.now();
+
+  // Iniciar loop de animación
+  if (!idAnimacion) {
+    bucleAnimacion();
+  }
+
+  return {
+    dados: resultados,
+    total: resultados.reduce((a, b) => a + b, 0) + mod,
+    mod,
+    tipoDano
+  };
+}
+
+function bucleAnimacion() {
+  idAnimacion = requestAnimationFrame(bucleAnimacion);
+
+  const dt = 0.016; // ~60fps
+  const gravedad = 30;
+  const radioPiso = 0.68;
+  const radioPared = 4.4;
+  const ahora = performance.now();
+  const tTranscurrido = (ahora - tiempoInicioTirada) / 1000;
+  let todosAsentados = dadosActivos.length > 0;
+
+  for (let i = 0; i < dadosActivos.length; i++) {
+    const d = dadosActivos[i];
+    if (d.asentado) continue;
+
+    // Aplicar gravedad
+    d.vel.y -= gravedad * dt;
+
+    // Actualizar posición
+    d.pos.x += d.vel.x * dt;
+    d.pos.y += d.vel.y * dt;
+    d.pos.z += d.vel.z * dt;
+
+    // Actualizar rotación física mientras rueda
+    d.malla.rotation.x += d.rotVel.x * dt;
+    d.malla.rotation.y += d.rotVel.y * dt;
+    d.malla.rotation.z += d.rotVel.z * dt;
+
+    // Colisión con piso
+    if (d.pos.y <= radioPiso) {
+      d.pos.y = radioPiso;
+      if (Math.abs(d.vel.y) > 0.8 && tTranscurrido < 0.9) {
+        reproducirImpactoDado(Math.abs(d.vel.y) / 6, false);
+      }
+      d.vel.y = -d.vel.y * 0.42; // Rebote elástico
+      d.vel.x *= 0.80; // Fricción piso
+      d.vel.z *= 0.80;
+      d.rotVel.multiplyScalar(0.75);
+      d.rebotes++;
+    }
+
+    // Colisión con paredes octogonales
+    const distCentro = Math.sqrt(d.pos.x * d.pos.x + d.pos.z * d.pos.z);
+    if (distCentro > radioPared) {
+      const normalX = d.pos.x / distCentro;
+      const normalZ = d.pos.z / distCentro;
+      
+      d.pos.x = normalX * radioPared;
+      d.pos.z = normalZ * radioPared;
+
+      const dot = d.vel.x * normalX + d.vel.z * normalZ;
+      if (dot > 0) {
+        d.vel.x -= 2 * dot * normalX;
+        d.vel.z -= 2 * dot * normalZ;
+        d.vel.multiplyScalar(0.7);
+        if (Math.abs(dot) > 0.8 && tTranscurrido < 0.9) {
+          reproducirImpactoDado(Math.abs(dot) / 4, true);
+        }
+      }
+    }
+
+    // Desaceleración progresiva a medida que avanza el tiempo
+    if (tTranscurrido > 0.5) {
+      d.vel.x *= 0.94;
+      d.vel.z *= 0.94;
+      d.rotVel.multiplyScalar(0.92);
+    }
+    if (tTranscurrido > 0.85) {
+      d.vel.multiplyScalar(0.85);
+      d.rotVel.multiplyScalar(0.82);
+      // Suave orientación hacia la cara con el número obtenido
+      d.malla.quaternion.slerp(d.quatObjetivo, 0.22);
+    }
+
+    // Criterio de reposo garantizado a los ~1.2 segundos
+    const velTotal = d.vel.length();
+    const rotTotal = d.rotVel.length();
+    if (tTranscurrido >= 1.2 || (d.pos.y <= radioPiso + 0.12 && velTotal < 0.25 && rotTotal < 0.35)) {
+      d.asentado = true;
+      d.pos.y = radioPiso;
+      d.malla.quaternion.copy(d.quatObjetivo);
+      d.vel.set(0, 0, 0);
+      d.rotVel.set(0, 0, 0);
+    } else {
+      todosAsentados = false;
+    }
+  }
+
+  // Notificar cuando todos los dados terminaron de rodar
+  if (todosAsentados && !tiradaCompletada && dadosActivos.length > 0) {
+    tiradaCompletada = true;
+    
+    // Si era d20 y sacó 20 o 1, reproducir sonido de crítico/pifia
+    if (dadosActivos.length === 1 && dadosActivos[0].caras === 20) {
+      if (dadosActivos[0].resultado === 20) reproducirCritico();
+      else if (dadosActivos[0].resultado === 1) reproducirPifia();
+    }
+
+    if (callbackFinTirada) {
+      const cb = callbackFinTirada;
+      callbackFinTirada = null;
+      cb();
+    }
+  }
+
+  if (renderizador && escena && camara) {
+    renderizador.render(escena, camara);
+  }
+}
+
+function redimensionarEscenaDados(ancho, alto) {
+  if (!camara || !renderizador) return;
+  camara.aspect = ancho / alto;
+  camara.updateProjectionMatrix();
+  renderizador.setSize(ancho, alto);
+}
+
+function limpiarEscenaDados() {
+  if (idAnimacion) {
+    cancelAnimationFrame(idAnimacion);
+    idAnimacion = null;
+  }
+  dadosActivos = [];
+  lucesTematicas = [];
+  bandejaMalla = null;
+  if (renderizador) {
+    renderizador.dispose();
+    renderizador = null;
+  }
+  escena = null;
+  camara = null;
+}
 // ---- src/features/monster-model.js ----
 function normalizarCamposMonstruo(data) {
   if (!data || typeof data !== 'object') return {};
@@ -467,6 +1591,195 @@ function crearCompendio(baseMonstruos) {
     obtenerVarianteSeleccionada, aplicarVariante, obtenerVariantesConCr, obtenerCrsFiltrables
   };
 }
+// ---- src/ui/dice-modal.js ----
+// src/ui/dice-modal.js
+// Modal centrado para la visualización y ejecución interactiva de tiradas de dados 3D.
+// Se despliega de forma similar al zoom de imagen, centrado en el bloque de la ficha.
+
+
+let modalAbierto = false;
+let configTiradaActual = null;
+let resultadoActual = null;
+let tiradaIdActual = 0;
+
+function manejarEscModalDados(evento) {
+  if (evento.key === 'Escape') cerrarModalDados();
+}
+
+function manejarResizeModalDados() {
+  const canvas = document.getElementById('canvas-dados-3d');
+  if (!canvas) return;
+  const ancho = canvas.clientWidth;
+  const alto = canvas.clientHeight;
+  if (ancho > 0 && alto > 0) {
+    redimensionarEscenaDados(ancho, alto);
+  }
+}
+
+function cerrarModalDados() {
+  const fondo = document.querySelector('.modal-dados-fondo');
+  if (fondo) fondo.remove();
+  limpiarEscenaDados();
+  modalAbierto = false;
+  configTiradaActual = null;
+  resultadoActual = null;
+  document.removeEventListener('keydown', manejarEscModalDados);
+  window.removeEventListener('resize', manejarResizeModalDados);
+}
+
+function abrirModalDados({ configTirada, nombreMonstruo = '', nombreAccion = '' }) {
+  cerrarModalDados(); // Evitar duplicados
+
+  configTiradaActual = configTirada;
+  modalAbierto = true;
+
+  const infoDano = DANOS_INFO[configTirada.tipoDano] || DANOS_INFO.general;
+
+  const fondo = document.createElement('div');
+  fondo.className = 'modal-dados-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Tirada de dados para ${configTirada.etiqueta}`);
+
+  fondo.innerHTML = `
+    <div class="modal-dados-caja" style="--color-tema:${infoDano.colorPrincipal}; --color-luz:${infoDano.luz};">
+      <div class="modal-dados-cabecera">
+        <div class="modal-dados-titulos">
+          <h3 class="modal-dados-titulo-monstruo">${nombreMonstruo || 'Compendio D&D 2024'}</h3>
+          <p class="modal-dados-subtitulo">${nombreAccion ? `<b>${nombreAccion}</b> — ` : ''}${configTirada.etiqueta}</p>
+        </div>
+        <div class="modal-dados-controles-top">
+          <button type="button" class="btn-sonido-tirada" id="btn-sonido-dados" aria-label="Silenciar o activar sonido" title="Alternar sonido">${estaSonidoSilenciado() ? '🔇' : '🔊'}</button>
+          <button type="button" class="modal-dados-cerrar" id="btn-cerrar-dados" aria-label="Cerrar tirada de dados">×</button>
+        </div>
+      </div>
+
+      <div class="modal-dados-canvas-wrapper">
+        <canvas id="canvas-dados-3d"></canvas>
+      </div>
+
+      <div class="modal-dados-panel-resultado" id="panel-resultado-dados">
+        <div class="resultado-cargando">Lanzando dados en la canasta...</div>
+      </div>
+
+      <div class="modal-dados-acciones">
+        <button type="button" class="accion" id="btn-retirar-dados">🎲 Volver a tirar</button>
+        <button type="button" class="accion fantasma" id="btn-cerrar-dados-pie">Cerrar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(fondo);
+
+  // Enlazar eventos de cierre y sonido
+  fondo.onclick = (evento) => {
+    if (evento.target === fondo) cerrarModalDados();
+  };
+  document.getElementById('btn-cerrar-dados').onclick = cerrarModalDados;
+  document.getElementById('btn-cerrar-dados-pie').onclick = cerrarModalDados;
+
+  const btnSonido = document.getElementById('btn-sonido-dados');
+  if (btnSonido) {
+    btnSonido.onclick = () => {
+      const silenciado = alternarSilencioSonido();
+      btnSonido.textContent = silenciado ? '🔇' : '🔊';
+    };
+  }
+
+  const btnRetirar = document.getElementById('btn-retirar-dados');
+  if (btnRetirar) {
+    btnRetirar.onclick = () => realizarLanzamiento();
+  }
+
+  document.addEventListener('keydown', manejarEscModalDados);
+  window.addEventListener('resize', manejarResizeModalDados);
+
+  // Inicializar Three.js en el canvas
+  const canvas = document.getElementById('canvas-dados-3d');
+  const ancho = canvas.clientWidth || 440;
+  const alto = canvas.clientHeight || 280;
+  inicializarEscenaDados(canvas, ancho, alto);
+
+  // Realizar primer lanzamiento
+  realizarLanzamiento();
+}
+
+function realizarLanzamiento() {
+  if (!configTiradaActual) return;
+
+  const esteTiradaId = ++tiradaIdActual;
+  const panel = document.getElementById('panel-resultado-dados');
+  if (panel) {
+    panel.innerHTML = `
+      <div class="resultado-cargando" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <span style="animation: pulso-critico 0.6s infinite alternate ease-in-out;">🎲</span>
+        <span>Lanzando ${configTiradaActual.etiqueta}...</span>
+      </div>`;
+  }
+
+  const { cantidad, caras, mod, tipoDano } = configTiradaActual;
+
+  resultadoActual = ejecutarTirada3D({
+    cantidad,
+    caras,
+    mod,
+    tipoDano,
+    alTerminar: () => {
+      if (esteTiradaId === tiradaIdActual) {
+        actualizarPanelResultadoFinal(resultadoActual, configTiradaActual);
+      }
+    }
+  });
+
+  // Temporizador de respaldo garantizado: asegura que el total se muestre siempre
+  setTimeout(() => {
+    if (esteTiradaId === tiradaIdActual) {
+      actualizarPanelResultadoFinal(resultadoActual, configTiradaActual);
+    }
+  }, 1250);
+}
+
+function actualizarPanelResultadoFinal(res, config) {
+  const panel = document.getElementById('panel-resultado-dados');
+  if (!panel || !res) return;
+
+  const { dados, total, mod, tipoDano } = res;
+  const infoDano = DANOS_INFO[tipoDano] || DANOS_INFO.general;
+  const esAtaque = config.tipoTirada === 'ataque';
+
+  let avisoEspecialHtml = '';
+  if (esAtaque && dados.length === 1 && config.caras === 20) {
+    if (dados[0] === 20) {
+      avisoEspecialHtml = '<div class="insignia-critico">⭐ ¡GOLPE CRÍTICO! (20 Natural) ⭐</div>';
+    } else if (dados[0] === 1) {
+      avisoEspecialHtml = '<div class="insignia-pifia">💀 ¡PIFIA AUTOMÁTICA! (1 Natural) 💀</div>';
+    }
+  }
+
+  // Desglose de dados
+  const formulaDadosStr = dados.map((d) => `<span class="chip-dado-val">${d}</span>`).join(' + ');
+  const modStr = mod !== 0 ? ` ${mod > 0 ? '+' : '-'} <span class="chip-mod-val">${Math.abs(mod)}</span>` : '';
+  const sumaDados = dados.reduce((a, b) => a + b, 0);
+
+  let resumenDetalle = '';
+  if (dados.length > 5) {
+    resumenDetalle = `<div class="resumen-dados-extendido"><b>Todos los dados (${dados.length}):</b> [${dados.join(', ')}] = ${sumaDados}</div>`;
+  }
+
+  panel.innerHTML = `
+    ${avisoEspecialHtml}
+    <div class="resultado-fila-principal">
+      <div class="resultado-etiqueta-dano" style="background:${infoDano.colorPrincipal}; color:${infoDano.colorTexto};">
+        ${infoDano.icono} ${infoDano.nombre.toUpperCase()}
+      </div>
+      <div class="resultado-total-cifra">${total}</div>
+    </div>
+    <div class="resultado-desglose">
+      <span class="resultado-formula-texto"><b>Total:</b> ${formulaDadosStr}${modStr} = <b style="font-size:16px; color:${infoDano.colorPrincipal};">${total}</b></span>
+    </div>
+    ${resumenDetalle}
+  `;
+}
 // ---- src/ui/monster-views.js ----
 function retratoProcedural(monstruo, tipoColor) {
   const iniciales = (monstruo.nombre || '?').split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase();
@@ -501,9 +1814,6 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
     ? `<div class="variantes-cr">${variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')}</div>`
     : '';
   const nombreEn = monstruo.nombre_en ? ` · <i>${monstruo.nombre_en}</i>` : '';
-  // Se usa <a> (con href real al hash de la ficha) en vez de <button> para que
-  // el clic derecho ofrezca "Abrir en una pestaña nueva", "Abrir en ventana
-  // nueva", etc., como cualquier enlace normal.
   return `<a class="tarjeta" href="#/monstruo/${encodeURIComponent(monstruo.id)}" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
     <div class="miniatura">${marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor)}</div>
     <div class="cuerpo">
@@ -533,29 +1843,23 @@ function construirPanelResultados({ todos, resultados, paginaActual, tamPagina, 
     ${resultados.length ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}` : '<div class="vacio">Ningún monstruo coincide con estos filtros.<br><button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>'}`;
   return { html, pagina, totalPaginas };
 }
-// Convierte el patrón habitual de los bloques de estadísticas ("Nombre. resto
-// del texto") en "Nombre: resto del texto", igual que se hace con los
-// nombres de rasgos/acciones. Solo actúa si el ". " aparece cerca del
-// principio del texto (se asume que es el separador título/cuerpo y no un
-// punto cualquiera dentro de una oración larga).
 function formatoTituloDosPuntos(texto) {
   if (typeof texto !== 'string') return texto;
   const indice = texto.indexOf('. ');
   if (indice === -1 || indice > 60) return texto;
   return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
 }
-// Envuelve cada distancia en pies del texto ("30 pies", "80/320 pies", "cono
-// de 15 pies") en un <span class="dist"> subrayado y clicable. El pie base
-// (y el segundo valor si es un alcance doble tipo "80/320 pies") quedan
-// guardados en data-pies / data-pies2 para poder recalcular metros y
-// casillas en el cliente sin volver a tocar el texto original. Solo actúa
-// dentro de la ficha de detalle (no en las tarjetas del listado).
 function envolverDistancias(texto) {
   if (typeof texto !== 'string') return texto;
   return texto.replace(/(\d+)(?:\/(\d+))?\s*pies\b/g, (coincidencia, pies1, pies2) => {
     const atributoPies2 = pies2 ? ` data-pies2="${pies2}"` : '';
     return `<span class="dist" data-pies="${pies1}"${atributoPies2}>${coincidencia}</span>`;
   });
+}
+function envolverTextoFicha(texto, contexto = {}) {
+  if (typeof texto !== 'string') return texto;
+  const conDistancias = envolverDistancias(texto);
+  return envolverTiradasDados(conDistancias, contexto);
 }
 function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFuenteImagen, tipoColor }) {
   if (!monstruoBase) {
@@ -578,39 +1882,37 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
   const atributosHtml = ABIL.map((a) => `<div class="cel-atributo">
       <div class="n">${ABIL_NOMBRE[a]}</div><div class="v">${valorVisible(monstruo.atributos[a])}</div>
       <div class="m">${fmtMod(mod(monstruo.atributos[a]))}</div></div>`).join('');
-  // Clase de Armadura / Puntos de Golpe / Velocidad ahora se muestran como
-  // "estadísticas rápidas" en fichas individuales (misma familia visual que
-  // la tabla de atributos), en vez de simples líneas de texto sueltas.
+  
+  const dadosPgHtml = dadosPgVisible !== '—'
+    ? ` (${envolverTiradasDados(dadosPgVisible, { tipoDano: 'pg' })})`
+    : '';
+
   const statsRapidasHtml = `<div class="stats-rapidas">
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Clase de Armadura</span><span class="stat-rapida-valor">${valorVisible(monstruo.ca)}</span></div>
-    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgVisible !== '—' ? ` (${dadosPgVisible})` : ''}</span></div>
+    <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgHtml}</span></div>
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${envolverDistancias(valorVisible(monstruo.velocidad))}</span></div>
   </div>`;
-  // Los títulos de estadísticas (Tiradas de salvación, Sentidos, etc.) ahora
-  // terminan en ":" en vez de "." para que se lean como una etiqueta, igual
-  // que los nombres de rasgos/acciones más abajo.
+  
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
     if (visible === '—') return '';
-    return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverDistancias(visible)}</div>`;
+    return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverTextoFicha(visible)}</div>`;
   };
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo"><b>${r.nombre}:</b> ${envolverDistancias(r.texto)}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo" data-nombre-accion="${r.nombre}"><b>${r.nombre}:</b> ${envolverTextoFicha(r.texto, { nombreAccion: r.nombre })}</div>`).join('')}`
     : '';
   const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
     <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
     ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
     ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
-  // Reacciones y Acciones legendarias ahora son categorías visualmente
-  // separadas (cajas con acento de color propio), en vez de mezclarse con el
-  // resto de rasgos/acciones. Acciones legendarias usa tonos dorados.
+  
   const reaccionesHtml = (monstruo.reacciones && monstruo.reacciones.length)
     ? `<div class="seccion-reacciones">${listaRasgos('Reacciones', monstruo.reacciones)}</div>`
     : '';
   const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
     <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
     <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverDistancias(formatoTituloDosPuntos(t))}</div>`).join('')}
+    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverTextoFicha(formatoTituloDosPuntos(t))}</div>`).join('')}
   </div>` : '';
   const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
   return `
@@ -649,7 +1951,7 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     ${legendariasHtml}
     ${monstruo.descripcion_breve ? `<div class="seccion-titulo">Descripción</div><p>${monstruo.descripcion_breve}</p>` : ''}
     ${monstruo.notas ? `<div class="notas-usuario"><b>Notas personales:</b> ${monstruo.notas}</div>` : ''}
-    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : ''}</p>
+    <p class="pagina-manual">${monstruo.pagina ? `Manual de Monstruos 2024, pág. ${monstruo.pagina}` : 'Página del manual sin completar — edítala en el JSON.'}</p>
   </div>`;
 }
 // ---- src/ui/filtros-views.js ----
@@ -741,7 +2043,7 @@ function vistaLista({ filtros, crsExactos, panelResultadosHtml }) {
     <div class="fila">
       <div class="campo-filtro" style="flex:2;min-width:260px;">
         <label>Nombre (español o inglés)</label>
-        <input type="text" id="f-q" class="control-filtro" value="${filtros.q}" placeholder="ej. dragón, goblin, beholder, owlbear...">
+        <input type="text" id="f-q" class="control-filtro" value="${filtros.q}" placeholder="ej. dragón, goblin, beholder, dragon...">
       </div>
       ${dropdownSimpleHtml({ id: 'rango', etiqueta: 'Rango de peligro', opciones: opcionesRango, valorActual: filtros.rango, textoActual: textoRango })}
       ${dropdownSimpleHtml({ id: 'cr-exacto', etiqueta: 'CR exacto', opciones: opcionesCr, valorActual: filtros.crExacto, textoActual: textoCr, columnas: 4, compacto: true })}
@@ -848,6 +2150,38 @@ function enlazarEventosDistancias() {
     };
   });
   actualizarTextoDistancias(); // aplica la unidad ya elegida si no es "pies"
+}
+
+// ===================== ENLACE DE EVENTOS PARA DADOS 3D =====================
+function enlazarEventosDados(nombreMonstruo) {
+  document.querySelectorAll('.dado-tirable').forEach((elem) => {
+    const activarTirada = (evento) => {
+      evento.stopPropagation();
+      try {
+        const rawJson = elem.getAttribute('data-roll');
+        if (!rawJson) return;
+        const configTirada = JSON.parse(decodeURIComponent(rawJson));
+        
+        // Obtener nombre de la acción/rasgo contenedor si existe
+        const contenedorRasgo = elem.closest('.rasgo');
+        const nombreAccion = (contenedorRasgo && contenedorRasgo.getAttribute('data-nombre-accion'))
+          || (contenedorRasgo && contenedorRasgo.querySelector('b') && contenedorRasgo.querySelector('b').textContent.replace(':', '').trim())
+          || '';
+
+        abrirModalDados({ configTirada, nombreMonstruo, nombreAccion });
+      } catch (err) {
+        console.error('Error al iniciar tirada de dados:', err);
+      }
+    };
+
+    elem.onclick = activarTirada;
+    elem.onkeydown = (evento) => {
+      if (evento.key === 'Enter' || evento.key === ' ') {
+        evento.preventDefault();
+        activarTirada(evento);
+      }
+    };
+  });
 }
 
 function analizarHash() {
@@ -979,10 +2313,12 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
   enlazarEventosDistancias();
+  enlazarEventosDados(nombreMonstruo);
 }
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
+  cerrarModalDados();
   const ruta = analizarHash();
   const app = document.getElementById('app');
   if (ruta.vista === 'detalle') {
