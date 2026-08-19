@@ -63,7 +63,7 @@ function dropdownHabitatHtml(seleccionados) {
       <summary class="control-filtro">${resumen}</summary>
       <div class="dd-panel dd-panel-rejilla">
         ${HABITATS.map((h) => {
-          const estilo = HABITAT_ESTILO[h] || {};
+          const estilo = obtenerEstiloHabitat(h);
           return `
           <label class="chip-opcion chip-opcion-compacta" style="background:${estilo.fondo || '#fbf6e9'};border-color:${estilo.borde || '#b8a878'};color:${estilo.texto || 'var(--tinta-suave)'}">
             <input type="checkbox" class="f-habitat-item" value="${h}" ${seleccionados.includes(h) ? 'checked' : ''}>${h}

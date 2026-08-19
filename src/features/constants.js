@@ -7,7 +7,7 @@ export const TIPO_COLOR = {
   'feérica': 'var(--t-feerica)', planta: 'var(--t-planta)'
 };
 export const TAMANOS = ['Diminuto', 'Pequeño', 'Mediano', 'Grande', 'Enorme', 'Gigantesco'];
-export const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas'];
+export const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural"];
 export const HABITAT_ESTILO = {
   Ártico: { fondo: '#dceaf5', borde: '#9cb8cc', texto: '#1d3f5d' },
   Costa: { fondo: '#d9ede9', borde: '#89b9b0', texto: '#1f4f4a' },
@@ -26,7 +26,13 @@ export const HABITAT_ESTILO = {
   Cielo: { fondo: '#d4edf5', borde: '#7fb8cd', texto: '#1f5164' },
   Llanura: { fondo: '#ebe4d3', borde: '#b8a27e', texto: '#5f4f35' },
   Cualquiera: { fondo: '#f0f0f0', borde: '#cccccc', texto: '#333333' },
-  Ruinas: { fondo: '#e2ddef', borde: '#a59abf', texto: '#4b3d70' }
+  Ruinas: { fondo: '#e2ddef', borde: '#a59abf', texto: '#4b3d70' },
+  Cementerio: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
+  Volcán: { fondo: '#f2c9c9', borde: '#d97b7b', texto: '#6a1b1b' },
+  Cueva: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
+  Río: { fondo: '#c8e6f5', borde: '#7bb4d8', texto: '#1e5e8c' },
+  Tundra: { fondo: '#e0f2f1', borde: '#80cbc4', texto: '#00695f' },
+  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' }
 };
 export const ABIL = ['fue', 'des', 'con', 'int', 'sab', 'car'];
 export const ABIL_NOMBRE = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };

@@ -1,3 +1,4 @@
+import { HABITAT_ESTILO } from './constants.js';
 // Convierte un número de CR a su representación en fracción legible.
 export function crAFraccion(cr) {
   if (cr === 0.125) return '1/8';
@@ -58,4 +59,20 @@ export function fraccionANumero(valor) {
   }
   const decimal = Number(txt.replace(',', '.'));
   return Number.isFinite(decimal) ? decimal : valor;
+}
+// Mapa de estilos de hábitat indexado por su versión sin paréntesis y
+// normalizada (minúsculas, sin tildes), para que un hábitat como
+// "Subterráneo (cuevas)" o "Bosque (tropical)" herede el mismo color
+// que su categoría base ("Subterráneo", "Bosque").
+const HABITAT_ESTILO_POR_CLAVE = Object.keys(HABITAT_ESTILO).reduce((acc, clave) => {
+  acc[quitarParentesis(clave)] = HABITAT_ESTILO[clave];
+  return acc;
+}, {});
+
+// Devuelve el estilo {fondo, borde, texto} de un hábitat, resolviendo
+// primero por coincidencia exacta y, si no existe, por su categoría base
+// (quitando el texto entre paréntesis y sin distinguir mayúsculas/tildes).
+export function obtenerEstiloHabitat(habitat) {
+  if (!habitat) return {};
+  return HABITAT_ESTILO[habitat] || HABITAT_ESTILO_POR_CLAVE[quitarParentesis(habitat)] || {};
 }

@@ -9,7 +9,7 @@ const TIPO_COLOR = {
   'feérica': 'var(--t-feerica)', planta: 'var(--t-planta)'
 };
 const TAMANOS = ['Diminuto', 'Pequeño', 'Mediano', 'Grande', 'Enorme', 'Gigantesco'];
-const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas'];
+const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural"];
 const HABITAT_ESTILO = {
   Ártico: { fondo: '#dceaf5', borde: '#9cb8cc', texto: '#1d3f5d' },
   Costa: { fondo: '#d9ede9', borde: '#89b9b0', texto: '#1f4f4a' },
@@ -28,7 +28,13 @@ const HABITAT_ESTILO = {
   Cielo: { fondo: '#d4edf5', borde: '#7fb8cd', texto: '#1f5164' },
   Llanura: { fondo: '#ebe4d3', borde: '#b8a27e', texto: '#5f4f35' },
   Cualquiera: { fondo: '#f0f0f0', borde: '#cccccc', texto: '#333333' },
-  Ruinas: { fondo: '#e2ddef', borde: '#a59abf', texto: '#4b3d70' }
+  Ruinas: { fondo: '#e2ddef', borde: '#a59abf', texto: '#4b3d70' },
+  Cementerio: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
+  Volcán: { fondo: '#f2c9c9', borde: '#d97b7b', texto: '#6a1b1b' },
+  Cueva: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
+  Río: { fondo: '#c8e6f5', borde: '#7bb4d8', texto: '#1e5e8c' },
+  Tundra: { fondo: '#e0f2f1', borde: '#80cbc4', texto: '#00695f' },
+  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' }
 };
 const ABIL = ['fue', 'des', 'con', 'int', 'sab', 'car'];
 const ABIL_NOMBRE = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };
@@ -183,6 +189,22 @@ function fraccionANumero(valor) {
   }
   const decimal = Number(txt.replace(',', '.'));
   return Number.isFinite(decimal) ? decimal : valor;
+}
+// Mapa de estilos de hábitat indexado por su versión sin paréntesis y
+// normalizada (minúsculas, sin tildes), para que un hábitat como
+// "Subterráneo (cuevas)" o "Bosque (tropical)" herede el mismo color
+// que su categoría base ("Subterráneo", "Bosque").
+const HABITAT_ESTILO_POR_CLAVE = Object.keys(HABITAT_ESTILO).reduce((acc, clave) => {
+  acc[quitarParentesis(clave)] = HABITAT_ESTILO[clave];
+  return acc;
+}, {});
+
+// Devuelve el estilo {fondo, borde, texto} de un hábitat, resolviendo
+// primero por coincidencia exacta y, si no existe, por su categoría base
+// (quitando el texto entre paréntesis y sin distinguir mayúsculas/tildes).
+function obtenerEstiloHabitat(habitat) {
+  if (!habitat) return {};
+  return HABITAT_ESTILO[habitat] || HABITAT_ESTILO_POR_CLAVE[quitarParentesis(habitat)] || {};
 }
 // ---- src/features/storage.js ----
 const CLAVE_VARIANTES = 'compendio_variantes_seleccionadas';
@@ -1886,8 +1908,8 @@ function marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor) {
 }
 
 function estiloInlineHabitat(habitat) {
-  const estilo = HABITAT_ESTILO[habitat];
-  if (!estilo) return '';
+  const estilo = obtenerEstiloHabitat(habitat);
+  if (!estilo.fondo) return '';
   return `style="background:${estilo.fondo};border-color:${estilo.borde};color:${estilo.texto}"`;
 }
 
@@ -2160,7 +2182,7 @@ function dropdownHabitatHtml(seleccionados) {
       <summary class="control-filtro">${resumen}</summary>
       <div class="dd-panel dd-panel-rejilla">
         ${HABITATS.map((h) => {
-          const estilo = HABITAT_ESTILO[h] || {};
+          const estilo = obtenerEstiloHabitat(h);
           return `
           <label class="chip-opcion chip-opcion-compacta" style="background:${estilo.fondo || '#fbf6e9'};border-color:${estilo.borde || '#b8a878'};color:${estilo.texto || 'var(--tinta-suave)'}">
             <input type="checkbox" class="f-habitat-item" value="${h}" ${seleccionados.includes(h) ? 'checked' : ''}>${h}

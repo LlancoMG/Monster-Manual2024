@@ -1,5 +1,5 @@
 import { ABIL, ABIL_NOMBRE, PELIGRO_COLOR, PELIGRO_NOMBRE, HABITAT_ESTILO } from '../features/constants.js';
-import { crAFraccion, fmtMod, mod, nivelPeligro } from '../features/utils.js';
+import { crAFraccion, fmtMod, mod, nivelPeligro, obtenerEstiloHabitat } from '../features/utils.js';
 import { envolverTiradasDados } from '../features/dice-parser.js';
 
 export function retratoProcedural(monstruo, tipoColor) {
@@ -21,8 +21,8 @@ export function marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor) 
 }
 
 function estiloInlineHabitat(habitat) {
-  const estilo = HABITAT_ESTILO[habitat];
-  if (!estilo) return '';
+  const estilo = obtenerEstiloHabitat(habitat);
+  if (!estilo.fondo) return '';
   return `style="background:${estilo.fondo};border-color:${estilo.borde};color:${estilo.texto}"`;
 }
 
