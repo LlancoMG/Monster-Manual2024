@@ -16,6 +16,7 @@ let lucesTematicas = [];
 let bandejaMalla = null;
 let callbackFinTirada = null;
 let tiradaCompletada = false;
+let tiempoInicioTirada = 0;
 
 // Generador de texturas dinámicas para caras de dados
 const cacheTexturas = new Map();

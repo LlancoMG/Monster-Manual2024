@@ -123,32 +123,45 @@ const NOMBRES_INGLES = {
   zombis: 'Zombies', dragones_hada: 'Faerie Dragons'
 };
 // ---- src/features/utils.js ----
+// Convierte un número de CR a su representación en fracción legible.
 function crAFraccion(cr) {
   if (cr === 0.125) return '1/8';
   if (cr === 0.25) return '1/4';
   if (cr === 0.5) return '1/2';
   return String(cr);
 }
+
+// Clasifica un CR en un nivel de peligro descriptivo.
 function nivelPeligro(cr) {
   if (cr <= 4) return 'bajo';
   if (cr <= 10) return 'medio';
   if (cr <= 16) return 'alto';
   return 'mortal';
 }
+
+// Calcula el modificador de un atributo a partir de su valor (score).
 function mod(score) {
-  return (typeof score === 'number' && Number.isFinite(score)) ? Math.floor((score - 10) / 2) : null;
+  return (typeof score === 'number' && Number.isFinite(score))
+    ? Math.floor((score - 10) / 2)
+    : null;
 }
+
+// Formatea un modificador con su signo (ej. +3, -1).
 function fmtMod(modificador) {
   if (typeof modificador !== 'number' || !Number.isFinite(modificador)) return '—';
   return `${modificador >= 0 ? '+' : ''}${modificador}`;
 }
+
+// Normaliza texto: minúsculas y sin diacríticos.
 function normalizar(texto) {
   return (texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+
 // Quita el contenido entre paréntesis para comparar "humanoide (orco)" contra "humanoide".
 function quitarParentesis(texto) {
   return normalizar(texto).replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
 }
+
 // Compara un campo del monstruo (con o sin paréntesis) contra un valor de filtro limpio.
 function coincideCampo(valorCampo, valorFiltro) {
   if (!valorCampo || !valorFiltro) return false;
@@ -157,6 +170,8 @@ function coincideCampo(valorCampo, valorFiltro) {
   if (campoSinParentesis === filtroNormalizado) return true;
   return normalizar(valorCampo).includes(filtroNormalizado);
 }
+
+// Convierte una fracción textual ("1/2", "0.5") a número.
 function fraccionANumero(valor) {
   if (typeof valor === 'number') return valor;
   const txt = String(valor || '').trim();
@@ -650,6 +665,7 @@ let lucesTematicas = [];
 let bandejaMalla = null;
 let callbackFinTirada = null;
 let tiradaCompletada = false;
+let tiempoInicioTirada = 0;
 
 // Generador de texturas dinámicas para caras de dados
 const cacheTexturas = new Map();
@@ -1400,44 +1416,61 @@ function limpiarEscenaDados() {
 function normalizarCamposMonstruo(data) {
   if (!data || typeof data !== 'object') return {};
   const m = { ...data };
-  if (m.vulnerabilidadesdano && !m.vulnerabilidades_dano) m.vulnerabilidades_dano = m.vulnerabilidadesdano;
-  if (m.resistenciasdano && !m.resistencias_dano) m.resistencias_dano = m.resistenciasdano;
-  if (m.inmunidadesdano && !m.inmunidades_dano) m.inmunidades_dano = m.inmunidadesdano;
-  if (m.inmunidadesestado && !m.inmunidades_estado) m.inmunidades_estado = m.inmunidadesestado;
+  if (m.vulnerabilidadesdano && !m.vulnerabilidades_dano)  m.vulnerabilidades_dano = m.vulnerabilidadesdano;
+  if (m.resistenciasdano    && !m.resistencias_dano)        m.resistencias_dano    = m.resistenciasdano;
+  if (m.inmunidadesdano     && !m.inmunidades_dano)         m.inmunidades_dano     = m.inmunidadesdano;
+  if (m.inmunidadesestado   && !m.inmunidades_estado)       m.inmunidades_estado   = m.inmunidadesestado;
   return m;
 }
+
+// Extrae parámetros estructurados (CR, PG, CA, etc.) del campo de notas libre
+// de una variante, para casos donde no vienen en el objeto `parametros`.
 function extraerParametrosDesdeNotas(variante) {
   if (!variante || typeof variante.notas !== 'string') return {};
   const parametros = {};
-  const cr = variante.notas.match(/\bCR\s+(\d+(?:\/\d+)?(?:[.,]\d+)?)/i);
-  if (cr) parametros.cr = fraccionANumero(cr[1]);
-  const pg = variante.notas.match(/\b(\d+)\s*pg\b/i);
-  if (pg) parametros.pg = Number(pg[1]);
-  const px = variante.notas.match(/\b(\d+)\s*px\b/i);
-  if (px) parametros.px = Number(px[1]);
-  const ca = variante.notas.match(/\bCA\s+([^,.;]+)/i);
-  if (ca) parametros.ca = ca[1].trim();
-  const tamano = variante.notas.match(/\btama(?:ñ|n)o\s+([A-Za-zÁÉÍÓÚáéíóúÑñ ]+)/i);
-  if (tamano) parametros['tamaño'] = tamano[1].trim();
+  const cr       = variante.notas.match(/\bCR\s+(\d+(?:\/\d+)?(?:[.,]\d+)?)/i);
+  const pg       = variante.notas.match(/\b(\d+)\s*pg\b/i);
+  const px       = variante.notas.match(/\b(\d+)\s*px\b/i);
+  const ca       = variante.notas.match(/\bCA\s+([^,.;]+)/i);
+  const tamano   = variante.notas.match(/\btama(?:ñ|n)o\s+([A-Za-zÁÉÍÓÚáéíóúÑñ ]+)/i);
   const velocidad = variante.notas.match(/\bvelocidad\s+([^,.;]+)/i);
-  if (velocidad) parametros.velocidad = velocidad[1].trim();
+  if (cr)       parametros.cr           = fraccionANumero(cr[1]);
+  if (pg)       parametros.pg           = Number(pg[1]);
+  if (px)       parametros.px           = Number(px[1]);
+  if (ca)       parametros.ca           = ca[1].trim();
+  if (tamano)   parametros['tamaño']    = tamano[1].trim();
+  if (velocidad) parametros.velocidad   = velocidad[1].trim();
   return parametros;
 }
+
+// Infiere acciones (ataques y alientos) desde el texto libre de notas.
 function extraerAccionesDesdeNotas(variante) {
   if (!variante || typeof variante.notas !== 'string') return [];
-  const notas = variante.notas;
+  const notas   = variante.notas;
   const acciones = [];
-  const ataques = [...notas.matchAll(/([A-Za-zÁÉÍÓÚáéíóúÑñ' ]+)\s*\+(\d+)\s*a golpear[^.]*(?:para|Impacto:)\s*([0-9dD+ ]+)\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/g)];
+
+  const ataques = [...notas.matchAll(
+    /([A-Za-zÁÉÍÓÚáéíóúÑñ' ]+)\s*\+(\d+)\s*a golpear[^.]*(?:para|Impacto:)\s*([0-9dD+ ]+)\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)/g
+  )];
   ataques.forEach((m) => {
     const nombre = m[1].trim().replace(/\s+/g, ' ');
     acciones.push({ nombre, texto: `+${m[2]} a golpear. Impacto: ${m[3].trim()} ${m[4].trim()}.` });
   });
+
   const aliento = notas.match(/aliento\s+([A-Za-zÁÉÍÓÚáéíóúÑñ ]+)[^()]*\(([^)]+)\)/i);
   if (aliento) acciones.push({ nombre: `Aliento de ${aliento[1].trim()}`, texto: aliento[2].trim() });
+
   return acciones;
 }
-function esObjetoPlano(valor) { return valor && typeof valor === 'object' && !Array.isArray(valor); }
-function esCrFiltrable(cr) { return typeof cr === 'number' && Number.isFinite(cr); }
+
+function esObjetoPlano(valor) {
+  return valor && typeof valor === 'object' && !Array.isArray(valor);
+}
+
+function esCrFiltrable(cr) {
+  return typeof cr === 'number' && Number.isFinite(cr);
+}
+
 function extraerSobrescriturasPermitidas(origen) {
   if (!esObjetoPlano(origen)) return {};
   const sobrescrituras = {};
@@ -1449,54 +1482,82 @@ function extraerSobrescriturasPermitidas(origen) {
 function aplicarVariante(monstruoBase, variante) {
   const base = normalizarCamposMonstruo(monstruoBase);
   if (!variante) return { ...base, atributos: { ...(base.atributos || {}) } };
-  const varianteNormalizada = normalizarCamposMonstruo(variante);
-  const parametrosExplicitos = normalizarCamposMonstruo(varianteNormalizada.parametros || varianteNormalizada.estadisticas || {});
-  const parametrosInferidos = extraerParametrosDesdeNotas(varianteNormalizada);
-  const accionesDesdeNotas = extraerAccionesDesdeNotas(varianteNormalizada);
-  const sobrescriturasDirectas = extraerSobrescriturasPermitidas(varianteNormalizada);
-  const sobrescriturasInferidas = extraerSobrescriturasPermitidas(parametrosInferidos);
+
+  const varianteNormalizada   = normalizarCamposMonstruo(variante);
+  const parametrosExplicitos  = normalizarCamposMonstruo(
+    varianteNormalizada.parametros || varianteNormalizada.estadisticas || {}
+  );
+  const parametrosInferidos   = extraerParametrosDesdeNotas(varianteNormalizada);
+  const accionesDesdeNotas    = extraerAccionesDesdeNotas(varianteNormalizada);
+
+  const sobrescriturasDirectas   = extraerSobrescriturasPermitidas(varianteNormalizada);
+  const sobrescriturasInferidas  = extraerSobrescriturasPermitidas(parametrosInferidos);
   const sobrescriturasExplicitas = extraerSobrescriturasPermitidas(parametrosExplicitos);
+  // Prioridad: explícitas > directas > inferidas
   const sobrescrituras = { ...sobrescriturasInferidas, ...sobrescriturasDirectas, ...sobrescriturasExplicitas };
+
   const combinado = { ...base, ...sobrescrituras };
-  combinado.atributos = { ...(base.atributos || {}), ...(esObjetoPlano(sobrescrituras.atributos) ? sobrescrituras.atributos : {}) };
+  combinado.atributos = {
+    ...(base.atributos || {}),
+    ...(esObjetoPlano(sobrescrituras.atributos) ? sobrescrituras.atributos : {})
+  };
+
   if (esObjetoPlano(base.legendarias) && esObjetoPlano(sobrescrituras.legendarias)) {
     combinado.legendarias = { ...base.legendarias, ...sobrescrituras.legendarias };
   }
+
+  // Las listas de rasgos/acciones son acumulables: se suman al base, no lo reemplazan.
   const listasAcumulables = ['rasgos', 'acciones', 'acciones_adicionales', 'reacciones'];
   listasAcumulables.forEach((campo) => {
-    const listaDirecta = Array.isArray(sobrescriturasDirectas[campo]) ? sobrescriturasDirectas[campo] : null;
+    const listaDirecta   = Array.isArray(sobrescriturasDirectas[campo])   ? sobrescriturasDirectas[campo]   : null;
     const listaExplicita = Array.isArray(sobrescriturasExplicitas[campo]) ? sobrescriturasExplicitas[campo] : null;
-    if (listaDirecta) combinado[campo] = [...(base[campo] || []), ...listaDirecta];
+    if (listaDirecta)   combinado[campo] = [...(base[campo] || []), ...listaDirecta];
     if (listaExplicita) {
       combinado[campo] = listaDirecta
         ? [...combinado[campo], ...listaExplicita]
         : [...(base[campo] || []), ...listaExplicita];
     }
   });
+
+  // Añadir acciones inferidas desde notas solo si no hay acciones explícitas.
   const tieneAccionesExplicitas =
-    (Array.isArray(sobrescriturasDirectas.acciones) && sobrescriturasDirectas.acciones.length > 0) ||
+    (Array.isArray(sobrescriturasDirectas.acciones)   && sobrescriturasDirectas.acciones.length   > 0) ||
     (Array.isArray(sobrescriturasExplicitas.acciones) && sobrescriturasExplicitas.acciones.length > 0);
+
   if (accionesDesdeNotas.length && !tieneAccionesExplicitas) {
-    const actuales = Array.isArray(combinado.acciones) ? combinado.acciones : [];
+    const actuales   = Array.isArray(combinado.acciones) ? combinado.acciones : [];
     const existentes = new Set(actuales.map((a) => `${a.nombre}|${a.texto}`));
     accionesDesdeNotas.forEach((accion) => {
       const clave = `${accion.nombre}|${accion.texto}`;
-      if (!existentes.has(clave)) { actuales.push(accion); existentes.add(clave); }
+      if (!existentes.has(clave)) {
+        actuales.push(accion);
+        existentes.add(clave);
+      }
     });
     combinado.acciones = actuales;
   }
+
   return combinado;
 }
 function crearCompendio(baseMonstruos) {
   const filtros = { ...FILTROS_POR_DEFECTO };
   let paginaActual = 1;
+
+  // Combina los monstruos del bundle con los importados manualmente,
+  // y enriquece cada uno con su nombre en inglés si existe.
   function obtenerTodosMonstruos() {
     const mapa = new Map(baseMonstruos.map((m) => [m.id, m]));
     cargarImportados().forEach((m) => { if (m && m.id) mapa.set(m.id, m); });
-    // Fusiona el nombre en inglés (del JSON si existe, o del mapa de respaldo).
-    return Array.from(mapa.values()).map((m) => ({ ...m, nombre_en: m.nombre_en || NOMBRES_INGLES[m.id] || '' }));
+    return Array.from(mapa.values()).map((m) => ({
+      ...m,
+      nombre_en: m.nombre_en || NOMBRES_INGLES[m.id] || ''
+    }));
   }
-  function obtenerMonstruoPorId(id) { return obtenerTodosMonstruos().find((m) => m.id === id); }
+
+  function obtenerMonstruoPorId(id) {
+    return obtenerTodosMonstruos().find((m) => m.id === id);
+  }
+
   function obtenerVariantesConCr(monstruoBase) {
     if (!monstruoBase || !Array.isArray(monstruoBase.variantes) || !monstruoBase.variantes.length) return [];
     return monstruoBase.variantes
@@ -1506,30 +1567,36 @@ function crearCompendio(baseMonstruos) {
       })
       .filter((variante) => esCrFiltrable(variante.cr));
   }
+
+  // Devuelve todos los CRs numéricos válidos de un monstruo (base + variantes).
   function obtenerCrsFiltrables(monstruoBase) {
     const crs = [];
     if (monstruoBase && esCrFiltrable(monstruoBase.cr)) crs.push(monstruoBase.cr);
     obtenerVariantesConCr(monstruoBase).forEach((v) => crs.push(v.cr));
     return [...new Set(crs)];
   }
+
   function monstruoPasaFiltros(m) {
     if (filtros.q) {
-      const q = normalizar(filtros.q);
-      const enEspanol = normalizar(m.nombre).includes(q);
-      const enIngles = normalizar(m.nombre_en || '').includes(q);
+      const q          = normalizar(filtros.q);
+      const enEspanol  = normalizar(m.nombre).includes(q);
+      const enIngles   = normalizar(m.nombre_en || '').includes(q);
       if (!enEspanol && !enIngles) return false;
     }
     const crsFiltrables = obtenerCrsFiltrables(m);
-    if (filtros.rango === '0-4' && !crsFiltrables.some((cr) => cr <= 4)) return false;
-    if (filtros.rango === '5-10' && !crsFiltrables.some((cr) => cr >= 5 && cr <= 10)) return false;
-    if (filtros.rango === '11-16' && !crsFiltrables.some((cr) => cr >= 11 && cr <= 16)) return false;
-    if (filtros.rango === '17+' && !crsFiltrables.some((cr) => cr >= 17)) return false;
+    if (filtros.rango === '0-4'   && !crsFiltrables.some((cr) => cr <= 4))                    return false;
+    if (filtros.rango === '5-10'  && !crsFiltrables.some((cr) => cr >= 5  && cr <= 10))       return false;
+    if (filtros.rango === '11-16' && !crsFiltrables.some((cr) => cr >= 11 && cr <= 16))       return false;
+    if (filtros.rango === '17+'   && !crsFiltrables.some((cr) => cr >= 17))                   return false;
     if (filtros.crExacto !== 'todos' && !crsFiltrables.some((cr) => String(cr) === filtros.crExacto)) return false;
-    if (filtros.tipo !== 'todos' && !coincideCampo(m.tipo, filtros.tipo)) return false;
-    if (filtros.tamano !== 'todos' && !coincideCampo(m['tamaño'], filtros.tamano)) return false;
-    if (filtros.habitat.length && !filtros.habitat.every((sel) => (m.habitat || []).some((h) => coincideCampo(h, sel)))) return false;
+    if (filtros.tipo   !== 'todos' && !coincideCampo(m.tipo,        filtros.tipo))   return false;
+    if (filtros.tamano !== 'todos' && !coincideCampo(m['tamaño'],   filtros.tamano)) return false;
+    if (filtros.habitat.length && !filtros.habitat.every(
+      (sel) => (m.habitat || []).some((h) => coincideCampo(h, sel))
+    )) return false;
     return true;
   }
+
   // Para ordenar por CR se usa el CR "representativo" de cada monstruo: si tiene
   // variantes con CR numérico, se compara contra el mínimo (orden ascendente) o
   // el máximo (orden descendente) de todos sus CR filtrables (base + variantes).
@@ -1537,8 +1604,9 @@ function crearCompendio(baseMonstruos) {
   // y los empates se resuelven por nombre.
   function ordenarMonstruos(lista) {
     const ordenada = [...lista];
-    const esAsc = filtros.orden === 'cr_asc';
+    const esAsc  = filtros.orden === 'cr_asc';
     const esDesc = filtros.orden === 'cr_desc';
+
     if (esAsc || esDesc) {
       const crParaOrden = new Map();
       lista.forEach((m) => {
@@ -1549,46 +1617,64 @@ function crearCompendio(baseMonstruos) {
         const ca = crParaOrden.get(a.id);
         const cb = crParaOrden.get(b.id);
         if (ca === null && cb === null) return a.nombre.localeCompare(b.nombre);
-        if (ca === null) return 1;
+        if (ca === null) return  1;
         if (cb === null) return -1;
         return (esAsc ? ca - cb : cb - ca) || a.nombre.localeCompare(b.nombre);
       });
       return ordenada;
     }
+
     switch (filtros.orden) {
-      case 'nombre_asc': ordenada.sort((a, b) => a.nombre.localeCompare(b.nombre)); break;
+      case 'nombre_asc':  ordenada.sort((a, b) => a.nombre.localeCompare(b.nombre)); break;
       case 'nombre_desc': ordenada.sort((a, b) => b.nombre.localeCompare(a.nombre)); break;
       default: break;
     }
     return ordenada;
   }
-  function calcularResultados() { return ordenarMonstruos(obtenerTodosMonstruos().filter(monstruoPasaFiltros)); }
+
+  function calcularResultados() {
+    return ordenarMonstruos(obtenerTodosMonstruos().filter(monstruoPasaFiltros));
+  }
+
   function obtenerFuenteImagen(monstruo) {
     const custom = cargarImagenesCustom()[monstruo.id];
     if (custom) return custom;
     if (monstruo.imagen) return monstruo.imagen;
     return null;
   }
+
   function importarMonstruos(datos) {
     const actuales = cargarImportados();
     const mapa = new Map(actuales.map((m) => [m.id, m]));
     datos.forEach((m) => { if (m && m.id) mapa.set(m.id, m); });
     guardarImportados(Array.from(mapa.values()));
   }
+
   function obtenerVarianteSeleccionada(monstruoBase) {
     if (!monstruoBase || !monstruoBase.variantes || !monstruoBase.variantes.length) return null;
     const guardadas = cargarVariantesSeleccionadas();
-    return monstruoBase.variantes.find((v) => v.id === guardadas[monstruoBase.id]) || monstruoBase.variantes[0];
+    return monstruoBase.variantes.find((v) => v.id === guardadas[monstruoBase.id])
+      || monstruoBase.variantes[0];
   }
+
   return {
     filtros,
-    getPaginaActual: () => paginaActual,
-    setPaginaActual: (pagina) => { paginaActual = pagina; },
-    resetPagina: () => { paginaActual = 1; },
-    resetFiltros: () => { Object.assign(filtros, FILTROS_POR_DEFECTO, { habitat: [] }); paginaActual = 1; },
-    obtenerTodosMonstruos, obtenerMonstruoPorId, calcularResultados, obtenerFuenteImagen,
-    importarMonstruos, guardarImagenCustom, borrarImagenCustom, guardarVarianteSeleccionada,
-    obtenerVarianteSeleccionada, aplicarVariante, obtenerVariantesConCr, obtenerCrsFiltrables
+    getPaginaActual:   () => paginaActual,
+    setPaginaActual:   (pagina) => { paginaActual = pagina; },
+    resetPagina:       () => { paginaActual = 1; },
+    resetFiltros:      () => { Object.assign(filtros, FILTROS_POR_DEFECTO, { habitat: [] }); paginaActual = 1; },
+    obtenerTodosMonstruos,
+    obtenerMonstruoPorId,
+    calcularResultados,
+    obtenerFuenteImagen,
+    importarMonstruos,
+    guardarImagenCustom,
+    borrarImagenCustom,
+    guardarVarianteSeleccionada,
+    obtenerVarianteSeleccionada,
+    aplicarVariante,
+    obtenerVariantesConCr,
+    obtenerCrsFiltrables,
   };
 }
 // ---- src/ui/dice-modal.js ----
@@ -1792,28 +1878,36 @@ function retratoProcedural(monstruo, tipoColor) {
     <text x="100" y="108" font-family="Cinzel, serif" font-size="46" font-weight="700" fill="#f4e6c8" text-anchor="middle">${iniciales}</text>
     <polygon points="30,175 100,155 170,175 170,200 30,200" fill="#b8874a" opacity=".55"/></svg>`;
 }
+
 function marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor) {
   const src = obtenerFuenteImagen(monstruo);
   if (src) return `<img src="${src}" alt="Retrato de ${monstruo.nombre}" loading="lazy" onerror="manejarErrorImagen(this,'${monstruo.id}')">`;
   return retratoProcedural(monstruo, tipoColor);
 }
+
 function estiloInlineHabitat(habitat) {
   const estilo = HABITAT_ESTILO[habitat];
   if (!estilo) return '';
   return `style="background:${estilo.fondo};border-color:${estilo.borde};color:${estilo.texto}"`;
 }
+
 function chipHabitatHtml(habitat) {
   return `<span class="chip-hab"${estiloInlineHabitat(habitat)}>${habitat}</span>`;
 }
 function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesConCr) {
-  const esCrVariable = typeof monstruo.cr !== 'number' || !Number.isFinite(monstruo.cr);
-  const peligro = nivelPeligro(monstruo.cr);
-  const colorInsigniaCr = esCrVariable ? 'var(--cr-variable)' : PELIGRO_COLOR[peligro];
-  const variantesConCr = obtenerVariantesConCr(monstruo);
+  const esCrVariable      = typeof monstruo.cr !== 'number' || !Number.isFinite(monstruo.cr);
+  const peligro           = nivelPeligro(monstruo.cr);
+  const colorInsigniaCr   = esCrVariable ? 'var(--cr-variable)' : PELIGRO_COLOR[peligro];
+  const variantesConCr    = obtenerVariantesConCr(monstruo);
+
   const variantesCrHtml = variantesConCr.length
-    ? `<div class="variantes-cr">${variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')}</div>`
+    ? `<div class="variantes-cr">${
+        variantesConCr.map((v) => `<span class="chip-cr-variante">${v.nombre}: CR ${crAFraccion(v.cr)}</span>`).join('')
+      }</div>`
     : '';
+
   const nombreEn = monstruo.nombre_en ? ` · <i>${monstruo.nombre_en}</i>` : '';
+
   return `<a class="tarjeta" href="#/monstruo/${encodeURIComponent(monstruo.id)}" data-id="${monstruo.id}" aria-label="Ver ficha de ${monstruo.nombre}">
     <div class="miniatura">${marcadoImagenConError(monstruo, obtenerFuenteImagen, tipoColor)}</div>
     <div class="cuerpo">
@@ -1825,22 +1919,38 @@ function tarjetaHtml(monstruo, obtenerFuenteImagen, tipoColor, obtenerVariantesC
       <div>${(monstruo.habitat || []).map((h) => chipHabitatHtml(h)).join('')}</div>
     </div></a>`;
 }
+
 function construirPanelResultados({ todos, resultados, paginaActual, tamPagina, obtenerFuenteImagen, tipoColor, obtenerVariantesConCr }) {
-  const totalPaginas = Math.max(1, Math.ceil(resultados.length / tamPagina));
-  const pagina = Math.max(1, Math.min(paginaActual, totalPaginas));
-  const inicio = (pagina - 1) * tamPagina;
+  const totalPaginas  = Math.max(1, Math.ceil(resultados.length / tamPagina));
+  const pagina        = Math.max(1, Math.min(paginaActual, totalPaginas));
+  const inicio        = (pagina - 1) * tamPagina;
   const paginaResultados = resultados.slice(inicio, inicio + tamPagina);
-  const tarjetasHtml = paginaResultados.map((m) => tarjetaHtml(m, obtenerFuenteImagen, tipoColor, obtenerVariantesConCr)).join('');
-  const controlesPaginacion = resultados.length > tamPagina ? `<div class="paginacion">
+
+  const tarjetasHtml = paginaResultados
+    .map((m) => tarjetaHtml(m, obtenerFuenteImagen, tipoColor, obtenerVariantesConCr))
+    .join('');
+
+  const controlesPaginacion = resultados.length > tamPagina
+    ? `<div class="paginacion">
       <button class="accion fantasma" id="btn-pag-anterior" ${pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">← Anterior</button>
       <span class="pagina-info">Página ${pagina} de ${totalPaginas}</span>
       <button class="accion fantasma" id="btn-pag-siguiente" ${pagina >= totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">Siguiente →</button>
-    </div>` : '';
+    </div>`
+    : '';
+
   const rangoTexto = paginaResultados.length
     ? `Mostrando ${inicio + 1}–${inicio + paginaResultados.length} de ${resultados.length} monstruo(s) (${todos.length} en total)`
     : `0 de ${todos.length} monstruo(s)`;
+
+  const vacios = `<div class="vacio">Ningún monstruo coincide con estos filtros.<br>
+    <button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>`;
+
   const html = `<h2>Resultados</h2><p class="contador">${rangoTexto}</p>
-    ${resultados.length ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}` : '<div class="vacio">Ningún monstruo coincide con estos filtros.<br><button class="accion fantasma" id="btn-limpiar-vacio" style="margin-top:10px;">Limpiar filtros</button></div>'}`;
+    ${resultados.length
+      ? `<div class="rejilla">${tarjetasHtml}</div>${controlesPaginacion}`
+      : vacios
+    }`;
+
   return { html, pagina, totalPaginas };
 }
 function formatoTituloDosPuntos(texto) {
@@ -1849,6 +1959,7 @@ function formatoTituloDosPuntos(texto) {
   if (indice === -1 || indice > 60) return texto;
   return `${texto.slice(0, indice)}:${texto.slice(indice + 1)}`;
 }
+
 function envolverDistancias(texto) {
   if (typeof texto !== 'string') return texto;
   return texto.replace(/(\d+)(?:\/(\d+))?\s*pies\b/g, (coincidencia, pies1, pies2) => {
@@ -1856,6 +1967,7 @@ function envolverDistancias(texto) {
     return `<span class="dist" data-pies="${pies1}"${atributoPies2}>${coincidencia}</span>`;
   });
 }
+
 function envolverTextoFicha(texto, contexto = {}) {
   if (typeof texto !== 'string') return texto;
   const conDistancias = envolverDistancias(texto);
@@ -1867,22 +1979,30 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
       <p>No existe ningún monstruo con ese identificador.</p>
       <button class="accion" id="btn-volver">Volver al listado</button></div>`;
   }
+
   const esTextoVariable = (valor) => typeof valor === 'string' && /\bvariable\b/i.test(valor);
-  const valorVisible = (valor) => {
+  const valorVisible    = (valor) => {
     if (valor === null || valor === undefined || valor === '') return '—';
     return esTextoVariable(valor) ? '—' : valor;
   };
-  const peligro = nivelPeligro(typeof monstruo.cr === 'number' ? monstruo.cr : 0);
-  const crVisible = valorVisible(monstruo.cr);
-  const pxVisible = valorVisible(monstruo.px);
-  const subpartes = [valorVisible(monstruo['tamaño']), valorVisible(monstruo.tipo), valorVisible(monstruo.alineamiento)].filter((v) => v !== '—');
-  const subtituloFicha = subpartes.join(', ');
-  const pgVisible = valorVisible(monstruo.pg);
+
+  const peligro        = nivelPeligro(typeof monstruo.cr === 'number' ? monstruo.cr : 0);
+  const crVisible      = valorVisible(monstruo.cr);
+  const pxVisible      = valorVisible(monstruo.px);
+  const pgVisible      = valorVisible(monstruo.pg);
   const dadosPgVisible = valorVisible(monstruo.dados_pg);
+
+  const subpartes = [
+    valorVisible(monstruo['tamaño']),
+    valorVisible(monstruo.tipo),
+    valorVisible(monstruo.alineamiento)
+  ].filter((v) => v !== '—');
+  const subtituloFicha = subpartes.join(', ');
+
   const atributosHtml = ABIL.map((a) => `<div class="cel-atributo">
       <div class="n">${ABIL_NOMBRE[a]}</div><div class="v">${valorVisible(monstruo.atributos[a])}</div>
       <div class="m">${fmtMod(mod(monstruo.atributos[a]))}</div></div>`).join('');
-  
+
   const dadosPgHtml = dadosPgVisible !== '—'
     ? ` (${envolverTiradasDados(dadosPgVisible, { tipoDano: 'pg' })})`
     : '';
@@ -1892,29 +2012,54 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Puntos de Golpe</span><span class="stat-rapida-valor">${pgVisible}${dadosPgHtml}</span></div>
     <div class="stat-rapida"><span class="stat-rapida-etiqueta">Velocidad</span><span class="stat-rapida-valor">${envolverDistancias(valorVisible(monstruo.velocidad))}</span></div>
   </div>`;
-  
+
   const bloque = (etiqueta, valor) => {
     const visible = valorVisible(valor);
     if (visible === '—') return '';
     return `<div class="linea-stat"><b>${etiqueta}:</b> ${envolverTextoFicha(visible)}</div>`;
   };
+
   const listaRasgos = (titulo, arr) => (arr && arr.length)
-    ? `<div class="seccion-titulo">${titulo}</div>${arr.map((r) => `<div class="rasgo" data-nombre-accion="${r.nombre}"><b>${r.nombre}:</b> ${envolverTextoFicha(r.texto, { nombreAccion: r.nombre })}</div>`).join('')}`
+    ? `<div class="seccion-titulo">${titulo}</div>${
+        arr.map((r) =>
+          `<div class="rasgo" data-nombre-accion="${r.nombre}"><b>${r.nombre}:</b> ${envolverTextoFicha(r.texto, { nombreAccion: r.nombre })}</div>`
+        ).join('')
+      }`
     : '';
-  const varianteHtml = varianteSeleccionada ? `<div class="seccion-titulo">Variante seleccionada</div>
-    <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
-    ${varianteSeleccionada.presencia ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
-    ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}` : '';
-  
+
+  const varianteHtml = varianteSeleccionada
+    ? `<div class="seccion-titulo">Variante seleccionada</div>
+      <div class="linea-stat"><b>Variante activa:</b> ${varianteSeleccionada.nombre}</div>
+      ${varianteSeleccionada.presencia   ? `<div class="linea-stat"><b>Presencia:</b> ${varianteSeleccionada.presencia}</div>` : ''}
+      ${varianteSeleccionada.apariencias ? `<div class="linea-stat"><b>Apariencias:</b> ${varianteSeleccionada.apariencias}</div>` : ''}`
+    : '';
+
   const reaccionesHtml = (monstruo.reacciones && monstruo.reacciones.length)
     ? `<div class="seccion-reacciones">${listaRasgos('Reacciones', monstruo.reacciones)}</div>`
     : '';
-  const legendariasHtml = monstruo.legendarias ? `<div class="seccion-legendarias">
-    <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
-    <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
-    ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverTextoFicha(formatoTituloDosPuntos(t))}</div>`).join('')}
-  </div>` : '';
-  const nombreEnHtml = monstruo.nombre_en ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>` : '';
+
+  const legendariasHtml = monstruo.legendarias
+    ? `<div class="seccion-legendarias">
+      <div class="seccion-titulo seccion-titulo-legendaria">Acciones legendarias</div>
+      <div class="rasgo">Puede realizar ${monstruo.legendarias.cantidad} acciones legendarias, eligiendo entre las opciones siguientes. Solo puede usar una opción a la vez y solo al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.</div>
+      ${monstruo.legendarias.texto.map((t) => `<div class="rasgo">${envolverTextoFicha(formatoTituloDosPuntos(t))}</div>`).join('')}
+    </div>`
+    : '';
+
+  const nombreEnHtml = monstruo.nombre_en
+    ? `<p class="ficha-sub" style="margin:2px 0 6px;font-style:italic;opacity:.75;">${monstruo.nombre_en}</p>`
+    : '';
+
+  const selectorVarianteHtml = (monstruoBase.variantes && monstruoBase.variantes.length)
+    ? `<div class="fila" style="margin-top:10px;align-items:flex-end">
+        <div style="min-width:260px"><label>Variante</label>
+        <select id="selector-variante">${
+          monstruoBase.variantes.map((v) =>
+            `<option value="${v.id}" ${varianteSeleccionada && varianteSeleccionada.id === v.id ? 'selected' : ''}>${v.nombre}</option>`
+          ).join('')
+        }</select></div></div>`
+    : '';
+
   return `
   <div class="panel"><button class="accion fantasma" id="btn-volver">← Volver al listado</button></div>
   <div class="panel">
@@ -1926,9 +2071,7 @@ function vistaDetalle({ monstruoBase, monstruo, varianteSeleccionada, obtenerFue
         <p class="ficha-sub">${subtituloFicha}</p>
         <span class="insignia-peligro" style="background:${PELIGRO_COLOR[peligro]}">CR ${crVisible === '—' ? '—' : crAFraccion(monstruo.cr)} · ${pxVisible} PX · ${PELIGRO_NOMBRE[peligro]}</span>
         <div class="chips-habitat">${(monstruo.habitat || []).map((h) => chipHabitatHtml(h)).join('')}</div>
-        ${monstruoBase.variantes && monstruoBase.variantes.length ? `<div class="fila" style="margin-top:10px;align-items:flex-end">
-          <div style="min-width:260px"><label>Variante</label>
-          <select id="selector-variante">${monstruoBase.variantes.map((v) => `<option value="${v.id}" ${varianteSeleccionada && varianteSeleccionada.id === v.id ? 'selected' : ''}>${v.nombre}</option>`).join('')}</select></div></div>` : ''}
+        ${selectorVarianteHtml}
       </div>
     </div>
     <hr class="filete">
@@ -2073,23 +2216,27 @@ const compendio = crearCompendio(BASE_CREATURES);
 // elegida se recuerda mientras dure la sesión y se aplica a TODAS las
 // distancias de la ficha (no solo a la que se tocó).
 let unidadDistanciaActual = 'pies';
+
 // 5 pies = 1 casilla siempre en este compendio, así que la división es exacta.
 function valorSegunUnidad(pies, unidad) {
-  if (unidad === 'metros') return (pies * 0.3048).toFixed(1);
+  if (unidad === 'metros')   return (pies * 0.3048).toFixed(1);
   if (unidad === 'casillas') return String(pies / 5);
   return String(pies);
 }
+
 function sufijoUnidad(unidad, valorUnico) {
-  if (unidad === 'metros') return 'm';
+  if (unidad === 'metros')   return 'm';
   if (unidad === 'casillas') return valorUnico === '1' ? 'casilla' : 'casillas';
   return 'pies';
 }
+
 function textoDistancia(pies1, pies2, unidad) {
   const v1 = valorSegunUnidad(pies1, unidad);
   if (pies2 === null) return `${v1} ${sufijoUnidad(unidad, v1)}`;
   const v2 = valorSegunUnidad(pies2, unidad);
   return `${v1}/${v2} ${sufijoUnidad(unidad, null)}`;
 }
+
 function actualizarTextoDistancias() {
   document.querySelectorAll('.dist').forEach((span) => {
     const pies1 = Number(span.dataset.pies);
@@ -2097,38 +2244,45 @@ function actualizarTextoDistancias() {
     span.textContent = textoDistancia(pies1, pies2, unidadDistanciaActual);
   });
 }
+
 function manejarEscPopoverDistancia(evento) {
   if (evento.key === 'Escape') cerrarPopoverDistancia();
 }
+
 function manejarClickFueraPopoverDistancia(evento) {
   const popover = document.querySelector('.dist-popover');
   if (popover && !popover.contains(evento.target) && !evento.target.classList.contains('dist')) {
     cerrarPopoverDistancia();
   }
 }
+
 function cerrarPopoverDistancia() {
   const popover = document.querySelector('.dist-popover');
   if (popover) popover.remove();
   document.removeEventListener('keydown', manejarEscPopoverDistancia);
   document.removeEventListener('click', manejarClickFueraPopoverDistancia, true);
 }
+
 function abrirPopoverDistancia(span) {
   cerrarPopoverDistancia();
   const pies1 = Number(span.dataset.pies);
   const pies2 = span.dataset.pies2 ? Number(span.dataset.pies2) : null;
+
   const popover = document.createElement('div');
   popover.className = 'dist-popover';
   popover.setAttribute('role', 'menu');
   popover.innerHTML = ['pies', 'metros', 'casillas'].map((unidad) => `
     <button type="button" class="dist-popover-opcion${unidad === unidadDistanciaActual ? ' activa' : ''}" data-unidad="${unidad}" role="menuitem">${textoDistancia(pies1, pies2, unidad)}</button>`).join('');
   document.body.appendChild(popover);
-  const rectSpan = span.getBoundingClientRect();
-  const anchoPopover = popover.offsetWidth;
-  let izquierda = rectSpan.left + window.scrollX;
-  const limiteDerecho = window.scrollX + document.documentElement.clientWidth - anchoPopover - 8;
+
+  const rectSpan       = span.getBoundingClientRect();
+  const anchoPopover   = popover.offsetWidth;
+  let izquierda        = rectSpan.left + window.scrollX;
+  const limiteDerecho  = window.scrollX + document.documentElement.clientWidth - anchoPopover - 8;
   if (izquierda > limiteDerecho) izquierda = Math.max(8, limiteDerecho);
   popover.style.left = `${izquierda}px`;
-  popover.style.top = `${rectSpan.bottom + window.scrollY + 4}px`;
+  popover.style.top  = `${rectSpan.bottom + window.scrollY + 4}px`;
+
   popover.querySelectorAll('.dist-popover-opcion').forEach((boton) => {
     boton.onclick = (evento) => {
       evento.stopPropagation();
@@ -2137,16 +2291,21 @@ function abrirPopoverDistancia(span) {
       cerrarPopoverDistancia();
     };
   });
+
   document.addEventListener('keydown', manejarEscPopoverDistancia);
   setTimeout(() => document.addEventListener('click', manejarClickFueraPopoverDistancia, true), 0);
 }
+
 function enlazarEventosDistancias() {
   document.querySelectorAll('.dist').forEach((span) => {
     span.tabIndex = 0;
     span.setAttribute('role', 'button');
-    span.onclick = (evento) => { evento.stopPropagation(); abrirPopoverDistancia(span); };
+    span.onclick  = (evento) => { evento.stopPropagation(); abrirPopoverDistancia(span); };
     span.onkeydown = (evento) => {
-      if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); abrirPopoverDistancia(span); }
+      if (evento.key === 'Enter' || evento.key === ' ') {
+        evento.preventDefault();
+        abrirPopoverDistancia(span);
+      }
     };
   });
   actualizarTextoDistancias(); // aplica la unidad ya elegida si no es "pies"
@@ -2161,7 +2320,7 @@ function enlazarEventosDados(nombreMonstruo) {
         const rawJson = elem.getAttribute('data-roll');
         if (!rawJson) return;
         const configTirada = JSON.parse(decodeURIComponent(rawJson));
-        
+
         // Obtener nombre de la acción/rasgo contenedor si existe
         const contenedorRasgo = elem.closest('.rasgo');
         const nombreAccion = (contenedorRasgo && contenedorRasgo.getAttribute('data-nombre-accion'))
@@ -2174,7 +2333,7 @@ function enlazarEventosDados(nombreMonstruo) {
       }
     };
 
-    elem.onclick = activarTirada;
+    elem.onclick   = activarTirada;
     elem.onkeydown = (evento) => {
       if (evento.key === 'Enter' || evento.key === ' ') {
         evento.preventDefault();
@@ -2185,53 +2344,65 @@ function enlazarEventosDados(nombreMonstruo) {
 }
 
 function analizarHash() {
-  const hash = location.hash || '#/';
+  const hash   = location.hash || '#/';
   const partes = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (partes[0] === 'monstruo' && partes[1]) return { vista: 'detalle', id: decodeURIComponent(partes[1]) };
   return { vista: 'lista' };
 }
+
 function irA(hash) { location.hash = hash; }
+
+// Las tarjetas son <a href="#/monstruo/..."> reales, por lo que ctrl/cmd+clic,
+// clic central y clic derecho funcionan sin JS adicional.
 function enlazarEventosPanelResultados() {
-  // Las tarjetas ahora son <a href="#/monstruo/..."> reales (ver monster-views.js),
-  // así que la navegación con clic izquierdo, ctrl/cmd+clic, clic central y
-  // clic derecho → "Abrir en pestaña nueva" ya funciona sola, sin JS.
-  const btnAnterior = document.getElementById('btn-pag-anterior');
+  const btnAnterior  = document.getElementById('btn-pag-anterior');
   const btnSiguiente = document.getElementById('btn-pag-siguiente');
-  if (btnAnterior) btnAnterior.onclick = () => { compendio.setPaginaActual(compendio.getPaginaActual() - 1); actualizarPanelResultados(); };
+  if (btnAnterior)  btnAnterior.onclick  = () => { compendio.setPaginaActual(compendio.getPaginaActual() - 1); actualizarPanelResultados(); };
   if (btnSiguiente) btnSiguiente.onclick = () => { compendio.setPaginaActual(compendio.getPaginaActual() + 1); actualizarPanelResultados(); };
   const btnLimpiarVacio = document.getElementById('btn-limpiar-vacio');
   if (btnLimpiarVacio) btnLimpiarVacio.onclick = () => { compendio.resetFiltros(); render(); };
 }
+
 function actualizarPanelResultados() {
   const panelResultados = document.querySelectorAll('.panel')[1];
-  const todos = compendio.obtenerTodosMonstruos();
+  const todos      = compendio.obtenerTodosMonstruos();
   const resultados = compendio.calcularResultados();
   const panel = construirPanelResultados({
-    todos, resultados, paginaActual: compendio.getPaginaActual(), tamPagina: TAM_PAGINA,
-    obtenerFuenteImagen: compendio.obtenerFuenteImagen, tipoColor: TIPO_COLOR,
-    obtenerVariantesConCr: compendio.obtenerVariantesConCr
+    todos,
+    resultados,
+    paginaActual: compendio.getPaginaActual(),
+    tamPagina: TAM_PAGINA,
+    obtenerFuenteImagen: compendio.obtenerFuenteImagen,
+    tipoColor: TIPO_COLOR,
+    obtenerVariantesConCr: compendio.obtenerVariantesConCr,
   });
   compendio.setPaginaActual(panel.pagina);
   panelResultados.innerHTML = panel.html;
   enlazarEventosPanelResultados();
 }
 function refrescarSoloResultados() { compendio.resetPagina(); actualizarPanelResultados(); }
+
 function enlazarDropdownSimple(nombre, aplicar) {
   document.querySelectorAll(`input[name="${nombre}"]`).forEach((radio) => {
     radio.onchange = (e) => { aplicar(e.target.value); compendio.resetPagina(); render(); };
   });
 }
+
 function enlazarEventosLista() {
   const byId = (id) => document.getElementById(id);
+
   byId('f-q').oninput = (e) => { compendio.filtros.q = e.target.value; refrescarSoloResultados(); };
-  enlazarDropdownSimple('f-rango', (v) => { compendio.filtros.rango = v; });
+  enlazarDropdownSimple('f-rango',     (v) => { compendio.filtros.rango    = v; });
   enlazarDropdownSimple('f-cr-exacto', (v) => { compendio.filtros.crExacto = v; });
-  enlazarDropdownSimple('f-tipo', (v) => { compendio.filtros.tipo = v; });
-  enlazarDropdownSimple('f-tamano', (v) => { compendio.filtros.tamano = v; });
-  enlazarDropdownSimple('f-orden', (v) => { compendio.filtros.orden = v; });
+  enlazarDropdownSimple('f-tipo',      (v) => { compendio.filtros.tipo     = v; });
+  enlazarDropdownSimple('f-tamano',    (v) => { compendio.filtros.tamano   = v; });
+  enlazarDropdownSimple('f-orden',     (v) => { compendio.filtros.orden    = v; });
+
   document.querySelectorAll('.f-habitat-item').forEach((chk) => {
     chk.onchange = () => {
-      compendio.filtros.habitat = Array.from(document.querySelectorAll('.f-habitat-item:checked')).map((c) => c.value);
+      compendio.filtros.habitat = Array.from(
+        document.querySelectorAll('.f-habitat-item:checked')
+      ).map((c) => c.value);
       const resumen = document.querySelector('#dd-habitat summary');
       if (resumen) {
         resumen.textContent = compendio.filtros.habitat.length === 0 ? 'Todos'
@@ -2241,9 +2412,11 @@ function enlazarEventosLista() {
       refrescarSoloResultados();
     };
   });
+
   byId('btn-limpiar').onclick = () => { compendio.resetFiltros(); render(); };
   enlazarEventosPanelResultados();
-  const btnImportar = byId('btn-importar');
+
+  const btnImportar  = byId('btn-importar');
   const inputImportar = byId('input-importar');
   if (btnImportar && inputImportar) {
     btnImportar.onclick = () => inputImportar.click();
@@ -2259,7 +2432,9 @@ function enlazarEventosLista() {
           alert(`Se importaron ${datos.length} monstruo(s) correctamente.`);
           compendio.resetPagina();
           render();
-        } catch (error) { alert(`No se pudo importar el archivo: ${error.message}`); }
+        } catch (error) {
+          alert(`No se pudo importar el archivo: ${error.message}`);
+        }
       };
       lector.readAsText(archivo);
     };
@@ -2267,21 +2442,20 @@ function enlazarEventosLista() {
 }
 // ===================== ZOOM DE IMAGEN DE LA FICHA =====================
 // El retrato ampliado se muestra en un overlay `position:fixed` centrado en
-// pantalla (no un transform sobre el propio elemento de la ficha), para que
-// la imagen completa siempre entre en cualquier resolución y quede centrada.
+// pantalla, para que la imagen completa siempre entre en cualquier resolución.
 // Se cierra con Escape, con clic fuera de la imagen o con el botón ×.
-// Importante: esto NO toca el marcado ni los estilos de `.ficha-imagen`
-// (el retrato sin ampliar dentro de la ficha queda intacto).
 function manejarEscZoomImagen(evento) {
   if (evento.key === 'Escape') cerrarZoomImagen();
 }
+
 function cerrarZoomImagen() {
   const fondo = document.querySelector('.zoom-imagen-fondo');
   if (fondo) fondo.remove();
   document.removeEventListener('keydown', manejarEscZoomImagen);
 }
+
 function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
-  cerrarZoomImagen(); // por si quedó uno abierto
+  cerrarZoomImagen();
   const fondo = document.createElement('div');
   fondo.className = 'zoom-imagen-fondo';
   fondo.setAttribute('role', 'dialog');
@@ -2291,26 +2465,33 @@ function abrirZoomImagen(contenidoHtml, nombreMonstruo) {
     <button type="button" class="zoom-imagen-cerrar" aria-label="Cerrar imagen ampliada">×</button>
     <div class="zoom-imagen-contenido">${contenidoHtml}</div>`;
   document.body.appendChild(fondo);
-  // Clic en el fondo oscuro (fuera de la imagen) cierra el zoom.
   fondo.onclick = (evento) => { if (evento.target === fondo) cerrarZoomImagen(); };
   fondo.querySelector('.zoom-imagen-cerrar').onclick = cerrarZoomImagen;
   document.addEventListener('keydown', manejarEscZoomImagen);
   fondo.querySelector('.zoom-imagen-cerrar').focus();
 }
+
 function enlazarEventosZoomImagenFicha(nombreMonstruo) {
   const imagenFicha = document.getElementById('ficha-imagen-principal');
   if (!imagenFicha) return;
   const activarZoom = () => abrirZoomImagen(imagenFicha.innerHTML, nombreMonstruo || '');
-  imagenFicha.onclick = activarZoom;
+  imagenFicha.onclick   = activarZoom;
   imagenFicha.onkeydown = (evento) => {
-    if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); activarZoom(); }
+    if (evento.key === 'Enter' || evento.key === ' ') {
+      evento.preventDefault();
+      activarZoom();
+    }
   };
 }
+
 function enlazarEventosDetalle(id, nombreMonstruo) {
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) btnVolver.onclick = () => irA('#/');
   const selectorVariante = document.getElementById('selector-variante');
-  if (selectorVariante) selectorVariante.onchange = (e) => { compendio.guardarVarianteSeleccionada(id, e.target.value); render(); };
+  if (selectorVariante) selectorVariante.onchange = (e) => {
+    compendio.guardarVarianteSeleccionada(id, e.target.value);
+    render();
+  };
   enlazarEventosZoomImagenFicha(nombreMonstruo);
   enlazarEventosDistancias();
   enlazarEventosDados(nombreMonstruo);
@@ -2319,36 +2500,50 @@ function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
   cerrarModalDados();
+
   const ruta = analizarHash();
-  const app = document.getElementById('app');
+  const app  = document.getElementById('app');
+
   if (ruta.vista === 'detalle') {
-    const base = compendio.obtenerMonstruoPorId(ruta.id);
+    const base     = compendio.obtenerMonstruoPorId(ruta.id);
     const variante = compendio.obtenerVarianteSeleccionada(base);
     const monstruo = base ? compendio.aplicarVariante(base, variante) : null;
     app.innerHTML = vistaDetalle({
-      monstruoBase: base, monstruo, varianteSeleccionada: variante,
-      obtenerFuenteImagen: compendio.obtenerFuenteImagen, tipoColor: TIPO_COLOR
+      monstruoBase: base,
+      monstruo,
+      varianteSeleccionada: variante,
+      obtenerFuenteImagen: compendio.obtenerFuenteImagen,
+      tipoColor: TIPO_COLOR,
     });
     enlazarEventosDetalle(ruta.id, monstruo && monstruo.nombre);
   } else {
-    const todos = compendio.obtenerTodosMonstruos();
+    const todos      = compendio.obtenerTodosMonstruos();
     const resultados = compendio.calcularResultados();
     const panel = construirPanelResultados({
-      todos, resultados, paginaActual: compendio.getPaginaActual(), tamPagina: TAM_PAGINA,
-      obtenerFuenteImagen: compendio.obtenerFuenteImagen, tipoColor: TIPO_COLOR,
-      obtenerVariantesConCr: compendio.obtenerVariantesConCr
+      todos,
+      resultados,
+      paginaActual: compendio.getPaginaActual(),
+      tamPagina: TAM_PAGINA,
+      obtenerFuenteImagen: compendio.obtenerFuenteImagen,
+      tipoColor: TIPO_COLOR,
+      obtenerVariantesConCr: compendio.obtenerVariantesConCr,
     });
     compendio.setPaginaActual(panel.pagina);
-    const crsExactos = [...new Set(todos.flatMap((m) => compendio.obtenerCrsFiltrables(m)))].sort((a, b) => a - b);
+    const crsExactos = [...new Set(
+      todos.flatMap((m) => compendio.obtenerCrsFiltrables(m))
+    )].sort((a, b) => a - b);
     app.innerHTML = vistaLista({ filtros: compendio.filtros, crsExactos, panelResultadosHtml: panel.html });
     enlazarEventosLista();
   }
+
   window.scrollTo(0, 0);
 }
+
 window.manejarErrorImagen = (imgEl, id) => {
   const monstruo = compendio.obtenerMonstruoPorId(id);
   if (monstruo) imgEl.outerHTML = retratoProcedural(monstruo, TIPO_COLOR);
 };
+
 window.addEventListener('hashchange', render);
 imagenesListas.then(() => {
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', render);
