@@ -9,7 +9,7 @@ const TIPO_COLOR = {
   'feérica': 'var(--t-feerica)', planta: 'var(--t-planta)'
 };
 const TAMANOS = ['Diminuto', 'Pequeño', 'Mediano', 'Grande', 'Enorme', 'Gigantesco'];
-const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural"];
+const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural", "Pradera", "Alcantarilla", "Templo"];
 const HABITAT_ESTILO = {
   Ártico: { fondo: '#dceaf5', borde: '#9cb8cc', texto: '#1d3f5d' },
   Costa: { fondo: '#d9ede9', borde: '#89b9b0', texto: '#1f4f4a' },
@@ -34,7 +34,10 @@ const HABITAT_ESTILO = {
   Cueva: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
   Río: { fondo: '#c8e6f5', borde: '#7bb4d8', texto: '#1e5e8c' },
   Tundra: { fondo: '#e0f2f1', borde: '#80cbc4', texto: '#00695f' },
-  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' }
+  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' },
+  Pradera: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' },
+  Templo: { fondo: '#f0f0f0', borde: '#cccccc', texto: '#333333' },
+  Alcantarilla: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' }
 };
 const ABIL = ['fue', 'des', 'con', 'int', 'sab', 'car'];
 const ABIL_NOMBRE = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };
@@ -169,12 +172,24 @@ function quitarParentesis(texto) {
 }
 
 // Compara un campo del monstruo (con o sin paréntesis) contra un valor de filtro limpio.
+// src/features/utils.js
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function coincideCampo(valorCampo, valorFiltro) {
   if (!valorCampo || !valorFiltro) return false;
   const campoSinParentesis = quitarParentesis(valorCampo);
   const filtroNormalizado = normalizar(valorFiltro).trim();
   if (campoSinParentesis === filtroNormalizado) return true;
-  return normalizar(valorCampo).includes(filtroNormalizado);
+
+  // Coincidencia por subcadena, pero respetando límites de palabra: lo que
+  // esté antes y después del texto buscado no puede ser otra letra o número.
+  // Esto evita falsos positivos como "Río" matcheando dentro de "Cementerio"
+  // o "Planar Superior" (que contiene "...pe-RIO-r").
+  const patron = new RegExp(`(?:^|[^a-z0-9])${escaparRegex(filtroNormalizado)}(?:$|[^a-z0-9])`, 'i');
+  return patron.test(normalizar(valorCampo));
 }
 
 // Convierte una fracción textual ("1/2", "0.5") a número.

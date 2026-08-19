@@ -39,12 +39,24 @@ export function quitarParentesis(texto) {
 }
 
 // Compara un campo del monstruo (con o sin paréntesis) contra un valor de filtro limpio.
+// src/features/utils.js
+
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function coincideCampo(valorCampo, valorFiltro) {
   if (!valorCampo || !valorFiltro) return false;
   const campoSinParentesis = quitarParentesis(valorCampo);
   const filtroNormalizado = normalizar(valorFiltro).trim();
   if (campoSinParentesis === filtroNormalizado) return true;
-  return normalizar(valorCampo).includes(filtroNormalizado);
+
+  // Coincidencia por subcadena, pero respetando límites de palabra: lo que
+  // esté antes y después del texto buscado no puede ser otra letra o número.
+  // Esto evita falsos positivos como "Río" matcheando dentro de "Cementerio"
+  // o "Planar Superior" (que contiene "...pe-RIO-r").
+  const patron = new RegExp(`(?:^|[^a-z0-9])${escaparRegex(filtroNormalizado)}(?:$|[^a-z0-9])`, 'i');
+  return patron.test(normalizar(valorCampo));
 }
 
 // Convierte una fracción textual ("1/2", "0.5") a número.

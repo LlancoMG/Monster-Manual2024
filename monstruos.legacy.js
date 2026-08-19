@@ -1084,7 +1084,7 @@ window.Monstruos = [
       "Montaña",
       "Ártico"
     ],
-    "descripcion_breve": "Versión colosal y casi sagrada del alce, asociada a bosques antiguos y a la protección de lugares silvestres.",
+    "descripcion_breve": "Versión colosal y casi sagrada del alce, asociada a bosque antiguos y a la protección de lugares silvestres.",
     "pagina": "",
     "notas": "",
     "imagen": "img/alce-gigante.jpg",
@@ -3082,7 +3082,7 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Ruinas",
-      "Cementerios"
+      "Cementerio"
     ],
     "descripcion_breve": "Espíritu vengativo de una elfa que murió con un propósito sin cumplir, cuyo grito presagia la muerte.",
     "pagina": 29,
@@ -3319,8 +3319,8 @@ window.Monstruos = [
     "legendarias": null,
     "variantes": [],
     "habitat": [
-      "Cuevas",
-      "Bosques"
+      "Cueva",
+      "Bosque"
     ],
     "descripcion_breve": "Pequeño mamífero volador nocturno que navega mediante ecolocalización.",
     "pagina": "",
@@ -3649,7 +3649,7 @@ window.Monstruos = [
       "Bosque",
       "Montaña"
     ],
-    "descripcion_breve": "Oso omnívoro de pelaje negro que deambula por bosques y montañas en busca de alimento.",
+    "descripcion_breve": "Oso omnívoro de pelaje negro que deambula por Bosque y montañas en busca de alimento.",
     "pagina": 349,
     "notas": "Ficha 2024 basada en el Monster Manual.",
     "imagen": "img/oso-negro.jpg",
@@ -3963,7 +3963,7 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Subterráneo",
-      "Cuevas"
+      "Cueva"
     ],
     "descripcion_breve": "Limo ácido y amorfo que devora todo lo que encuentra, corroyendo metal y carne por igual.",
     "pagina": 42,
@@ -5421,7 +5421,7 @@ window.Monstruos = [
       "Bosque",
       "Montaña"
     ],
-    "descripcion_breve": "Oso grande y poderoso de pelaje pardo que deambula por bosques y montañas en busca de alimento.",
+    "descripcion_breve": "Oso grande y poderoso de pelaje pardo que deambula por bosque y montañas en busca de alimento.",
     "pagina": 350,
     "notas": "Ficha 2024 basada en el Monster Manual.",
     "imagen": "img/oso-pardo.jpg",
@@ -6425,7 +6425,7 @@ window.Monstruos = [
       "Llanura",
       "Pradera"
     ],
-    "descripcion_breve": "Híbridos mitad humano y mitad caballo que viven en tribus nómadas, protectores de los bosques y las llanuras.",
+    "descripcion_breve": "Híbridos mitad humano y mitad caballo que viven en tribus nómadas, protectores de los bosque y las llanuras.",
     "pagina": 67,
     "notas": "Ficha 2024 resumida; el bloque publicado distingue variantes Centaur, Centaur guardián y Centaur tropa.",
     "imagen": "img/centauros.jpeg",
@@ -7504,7 +7504,8 @@ window.Monstruos = [
     "habitat": [
       "Pantano",
       "Costa",
-      "Río"
+      "Río",
+      "Alcantarilla"
     ],
     "descripcion_breve": "Reptil acuático grande que embosca presas en la orilla y las arrastra al agua.",
     "pagina": 352,
@@ -9414,7 +9415,7 @@ window.Monstruos = [
       "Bosque",
       "Pantano"
     ],
-    "descripcion_breve": "Guardián de la naturaleza que canaliza el poder de la tierra y los bosques a través de la magia druídica.",
+    "descripcion_breve": "Guardián de la naturaleza que canaliza el poder de la tierra y los bosque a través de la magia druídica.",
     "pagina": 104,
     "notas": "",
     "imagen": "img/Druida.png",
@@ -11331,7 +11332,7 @@ window.Monstruos = [
       "Subterráneo",
       "Bosque"
     ],
-    "descripcion_breve": "Murciélago del tamaño de un águila que caza en cuevas y bosques oscuros guiándose por ecolocalización.",
+    "descripcion_breve": "Murciélago del tamaño de un águila que caza en Cueva y bosque oscuros guiándose por ecolocalización.",
     "pagina": "",
     "notas": "",
     "imagen": "img/murcielago_gigante.jpg",
@@ -11887,7 +11888,7 @@ window.Monstruos = [
       "Selva",
       "Subterráneo"
     ],
-    "descripcion_breve": "Reptil de gran tamaño que acecha en cuevas y selvas, alimentándose de cualquier criatura que se cruce en su camino.",
+    "descripcion_breve": "Reptil de gran tamaño que acecha en Cueva y selvas, alimentándose de cualquier criatura que se cruce en su camino.",
     "pagina": "",
     "notas": "",
     "imagen": "img/lagarto-gigante.jpg",
@@ -12007,7 +12008,7 @@ window.Monstruos = [
       "Bosque",
       "Montaña"
     ],
-    "descripcion_breve": "Búho del tamaño de un águila, inteligente y leal, que sirve como guardián de los bosques antiguos.",
+    "descripcion_breve": "Búho del tamaño de un águila, inteligente y leal, que sirve como guardián de los bosque antiguos.",
     "pagina": "",
     "notas": "",
     "imagen": "img/buho_gigante.jpg",
@@ -14089,7 +14090,7 @@ window.Monstruos = [
     ],
     "habitat": [
       "Subterráneo",
-      "Cuevas"
+      "Cueva"
     ],
     "descripcion_breve": "Limos corrosivos que se camuflan como rocas húmedas y disuelven metal y carne por igual.",
     "pagina": 151,
@@ -14157,7 +14158,7 @@ window.Monstruos = [
       "Pantano",
       "Bosque"
     ],
-    "descripcion_breve": "Feérico cruel y retorcido que habita en pantanos y bosques oscuros, deleitándose en la corrupción de la naturaleza y en engañar a los viajeros con ilusiones.",
+    "descripcion_breve": "Feérico cruel y retorcido que habita en pantanos y bosque oscuros, deleitándose en la corrupción de la naturaleza y en engañar a los viajeros con ilusiones.",
     "pagina": 156,
     "notas": "",
     "imagen": "img/bruja-verde.png",
@@ -15185,7 +15186,7 @@ window.Monstruos = [
         "id": "ancient_green_dragon",
         "nombre": "Dragón verde anciano",
         "presencia": "—",
-        "apariencias": "Dragón verde colosal y legendario, del tamaño de una casa, cuyo aliento corrompe bosques enteros y cuya astucia es temida por reyes.",
+        "apariencias": "Dragón verde colosal y legendario, del tamaño de una casa, cuyo aliento corrompe bosque enteros y cuya astucia es temida por reyes.",
         "notas": "Etapa anciana; CR 22, 385 pg, CA 21, tamaño Gigantesco, aliento de veneno en cono de 60 pies (22d6 veneno, Con CD 22), Resistencia Legendaria.",
         "parametros": {
           "cr": 22,
@@ -21429,7 +21430,7 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Subterráneo",
-      "Alcantarillado",
+      "Alcantarilla",
       "Pantano"
     ],
     "descripcion_breve": "Aberración carroñera con tres patas, tentáculos prensiles y una boca enorme que habita en la basura y las heces, comunicándose mediante telepatía primitiva.",
@@ -22702,7 +22703,7 @@ window.Monstruos = [
       "Bosque",
       "Planar (Feywild)"
     ],
-    "descripcion_breve": "Hadas diminutas y traviesas que protegen los bosques con magia ilusoria, polvo somnífero y bromas pesadas.",
+    "descripcion_breve": "Hadas diminutas y traviesas que protegen los bosque con magia ilusoria, polvo somnífero y bromas pesadas.",
     "pagina": 244,
     "notas": "",
     "imagen": "img/pixies.jpg",
@@ -23701,7 +23702,8 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Urbano",
-      "Subterráneo"
+      "Subterráneo",
+      "Alcantarilla"
     ],
     "descripcion_breve": "Pequeño roedor que infesta ciudades y alcantarillas, propagando enfermedades y alimentándose de desperdicios.",
     "pagina": "",
@@ -24840,7 +24842,7 @@ window.Monstruos = [
       "Montaña",
       "Bosque"
     ],
-    "descripcion_breve": "Felino prehistórico con colmillos enormes que caza en las tierras heladas y bosques antiguos.",
+    "descripcion_breve": "Felino prehistórico con colmillos enormes que caza en las tierras heladas y bosque antiguos.",
     "pagina": 369,
     "notas": "",
     "imagen": "img/tigre-dientes-de-sable.jpg",
@@ -27496,7 +27498,7 @@ window.Monstruos = [
       "Bosque",
       "Planar (Feywild)"
     ],
-    "descripcion_breve": "Hada diminuta y traviesa que usa su invisibilidad y veneno para proteger los bosques de intrusos.",
+    "descripcion_breve": "Hada diminuta y traviesa que usa su invisibilidad y veneno para proteger los bosque de intrusos.",
     "pagina": 298,
     "notas": "",
     "imagen": "img/sprite.jpg",
@@ -27997,7 +27999,8 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Urbano",
-      "Subterráneo"
+      "Subterráneo",
+      "Alcantarilla"
     ],
     "descripcion_breve": "Una marea de roedores hambrientos que inunda alcantarillas y sótanos, devorando a los incautos con miles de pequeños mordiscos.",
     "pagina": 370,
@@ -28444,7 +28447,7 @@ window.Monstruos = [
         "id": "treant",
         "nombre": "Ent",
         "presencia": "—",
-        "apariencias": "Árbol colosal y ancestral que camina, guardián de los bosques profundos y pastor de los árboles menores.",
+        "apariencias": "Árbol colosal y ancestral que camina, guardián de los bosque profundos y pastor de los árboles menores.",
         "notas": "La versión adulta; CR 9, 138 pg, CA 16, tamaño Enorme, Asedio monstruoso y capacidad de animar otros árboles.",
         "parametros": {
           "cr": 9,
@@ -28497,7 +28500,7 @@ window.Monstruos = [
       "Bosque",
       "Selva"
     ],
-    "descripcion_breve": "Gigantes arbóreos y guardianes ancestrales de los bosques. Hablan con lentitud pero actúan con fuerza devastadora cuando la naturaleza está amenazada.",
+    "descripcion_breve": "Gigantes arbóreos y guardianes ancestrales de los bosque. Hablan con lentitud pero actúan con fuerza devastadora cuando la naturaleza está amenazada.",
     "pagina": 308,
     "notas": "",
     "imagen": "img/ents.jpg",
@@ -29061,7 +29064,8 @@ window.Monstruos = [
     "variantes": [],
     "habitat": [
       "Urbano",
-      "Subterráneo"
+      "Subterráneo",
+      "Alcantarilla"
     ],
     "descripcion_breve": "Lycántropo sigiloso que se esconde en las alcantarillas y sótanos de las ciudades, propagando su maldición con mordiscos infectos.",
     "pagina": "",
@@ -30163,7 +30167,7 @@ window.Monstruos = [
       "Bosque",
       "Planar (Feywild)"
     ],
-    "descripcion_breve": "Diminutos dragones feéricos de colores vivos que cambian de tonalidad con la edad. Traviesos y esquivos, usan su invisibilidad y gas euforizante para jugar bromas y proteger los bosques.",
+    "descripcion_breve": "Diminutos dragones feéricos de colores vivos que cambian de tonalidad con la edad. Traviesos y esquivos, usan su invisibilidad y gas euforizante para jugar bromas y proteger los bosque.",
     "pagina": 117,
     "notas": "",
     "imagen": "img/dragones_hada.jpg",

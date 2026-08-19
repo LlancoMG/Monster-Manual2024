@@ -7,7 +7,7 @@ export const TIPO_COLOR = {
   'feérica': 'var(--t-feerica)', planta: 'var(--t-planta)'
 };
 export const TAMANOS = ['Diminuto', 'Pequeño', 'Mediano', 'Grande', 'Enorme', 'Gigantesco'];
-export const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural"];
+export const HABITATS = ['Ártico', 'Costa', 'Desierto', 'Bosque', 'Colinas', 'Montaña', 'Pantano', 'Subterráneo', 'Urbano', 'Acuático', 'Planar', 'Selva', 'Sabana', 'Océano', 'Cielo', 'Llanura', 'Cualquiera', 'Ruinas', "Cementerio", "Volcán", "Cueva", "Río", "Tundra", "Rural", "Pradera", "Alcantarilla", "Templo"];
 export const HABITAT_ESTILO = {
   Ártico: { fondo: '#dceaf5', borde: '#9cb8cc', texto: '#1d3f5d' },
   Costa: { fondo: '#d9ede9', borde: '#89b9b0', texto: '#1f4f4a' },
@@ -32,7 +32,10 @@ export const HABITAT_ESTILO = {
   Cueva: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' },
   Río: { fondo: '#c8e6f5', borde: '#7bb4d8', texto: '#1e5e8c' },
   Tundra: { fondo: '#e0f2f1', borde: '#80cbc4', texto: '#00695f' },
-  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' }
+  Rural: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' },
+  Pradera: { fondo: '#e8f5e9', borde: '#a5d6a7', texto: '#2e7d32' },
+  Templo: { fondo: '#f0f0f0', borde: '#cccccc', texto: '#333333' },
+  Alcantarilla: { fondo: '#d9d9d9', borde: '#a0a0a0', texto: '#333333' }
 };
 export const ABIL = ['fue', 'des', 'con', 'int', 'sab', 'car'];
 export const ABIL_NOMBRE = { fue: 'FUE', des: 'DES', con: 'CON', int: 'INT', sab: 'SAB', car: 'CAR' };
