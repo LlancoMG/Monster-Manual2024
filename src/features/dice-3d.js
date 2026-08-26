@@ -30,29 +30,34 @@ function crearTexturaCara(numero, colorFondo, colorTexto, colorBorde, forma = 'c
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
-  // Fondo del dado con degradé radial rico
-  const grad = ctx.createRadialGradient(256, 256, 20, 256, 256, 256);
-  grad.addColorStop(0, colorFondo);
-  grad.addColorStop(1, oscurecerColor(colorFondo, 0.4));
+  // 1. Fondo sólido del color temático del dado
+  ctx.fillStyle = colorFondo;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // 2. Degradé radial sutil en los bordes para dar volumen tridimensional
+  const grad = ctx.createRadialGradient(256, 200, 30, 256, 256, 280);
+  grad.addColorStop(0, 'rgba(255,255,255,0.12)');
+  grad.addColorStop(0.6, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.35)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 512, 512);
 
-  // Dibujar borde según la forma geométrica de la cara
+  // 3. Filete/borde geométrico de la cara
   ctx.strokeStyle = colorBorde;
   ctx.lineWidth = 14;
+  ctx.lineJoin = 'round';
 
   if (forma === 'triangulo') {
     ctx.beginPath();
-    ctx.moveTo(256, 35);
-    ctx.lineTo(475, 460);
-    ctx.lineTo(37, 460);
+    ctx.moveTo(256, 42);
+    ctx.lineTo(472, 458);
+    ctx.lineTo(40, 458);
     ctx.closePath();
     ctx.stroke();
-    // Borde interno fino
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(256, 75);
+    ctx.moveTo(256, 80);
     ctx.lineTo(440, 440);
     ctx.lineTo(72, 440);
     ctx.closePath();
@@ -63,52 +68,95 @@ function crearTexturaCara(numero, colorFondo, colorTexto, colorBorde, forma = 'c
       const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
       const px = 256 + 215 * Math.cos(a);
       const py = 256 + 215 * Math.sin(a);
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+      const px = 256 + 188 * Math.cos(a);
+      const py = 256 + 188 * Math.sin(a);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.closePath();
     ctx.stroke();
   } else if (forma === 'cometa') {
     ctx.beginPath();
-    ctx.moveTo(256, 30);
-    ctx.lineTo(465, 230);
-    ctx.lineTo(256, 480);
-    ctx.lineTo(47, 230);
+    ctx.moveTo(256, 32);
+    ctx.lineTo(468, 230);
+    ctx.lineTo(256, 478);
+    ctx.lineTo(44, 230);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(256, 64);
+    ctx.lineTo(440, 228);
+    ctx.lineTo(256, 446);
+    ctx.lineTo(72, 228);
     ctx.closePath();
     ctx.stroke();
   } else {
     // Cuadrado (d6)
-    ctx.strokeRect(28, 28, 456, 456);
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.strokeRect(30, 30, 452, 452);
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 4;
-    ctx.strokeRect(46, 46, 420, 420);
+    ctx.strokeRect(50, 50, 412, 412);
   }
 
-  // Número grabado de alta definición
-  ctx.fillStyle = colorTexto;
-  const tamFuente = numero > 99 ? 180 : numero > 9 ? 220 : 250;
-  ctx.font = `bold ${tamFuente}px "Cinzel", "EB Garamond", serif`;
+  // 4. Posición vertical del número ajustada al centro óptico de cada polígono
+  const yOffset = forma === 'triangulo' ? 314 : (forma === 'cometa' ? 244 : 256);
+
+  // 5. Halo luminoso difuso detrás del número
+  const radHalo = numero > 9 ? 160 : 135;
+  const gradHalo = ctx.createRadialGradient(256, yOffset, 0, 256, yOffset, radHalo);
+  gradHalo.addColorStop(0, 'rgba(255,255,255,0.16)');
+  gradHalo.addColorStop(0.55, 'rgba(255,255,255,0.05)');
+  gradHalo.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gradHalo;
+  ctx.beginPath();
+  ctx.ellipse(256, yOffset, radHalo, radHalo * 0.85, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 6. Tipografía clásica de D&D: Cinzel / Garamond / Georgia serif
+  //    Elegante, nítida y fiel a los dados reales de rol
+  const tamFuente = numero > 99 ? 168 : numero > 9 ? 220 : 256;
+  ctx.font = `700 ${tamFuente}px "Cinzel", "EB Garamond", "Georgia", "Times New Roman", serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  // Sombra profunda para relieve tallado
-  ctx.shadowColor = 'rgba(0,0,0,0.85)';
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetX = 4;
-  ctx.shadowOffsetY = 6;
+  // Perfil oscuro refinado de 14px para dar contraste sin deformar la serifa
+  ctx.strokeStyle = 'rgba(0,0,0,0.88)';
+  ctx.lineWidth = 14;
+  ctx.lineJoin = 'round';
+  ctx.strokeText(String(numero), 256, yOffset);
 
-  // Centro vertical ajustado para triángulos (el centroide está más abajo)
-  const yOffset = forma === 'triangulo' ? 310 : (forma === 'cometa' ? 245 : 260);
+  // Relleno principal del número
+  ctx.fillStyle = colorTexto;
   ctx.fillText(String(numero), 256, yOffset);
 
-  // Subrayado para el 6 y el 9
+  // Relieve sutil superior
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  ctx.fillText(String(numero), 255, yOffset - 3);
+
+  // 7. Subrayado clásico de D&D para el 6 y el 9
   if (numero === 6 || numero === 9) {
-    ctx.shadowBlur = 4;
-    ctx.fillRect(186, yOffset + tamFuente * 0.45, 140, 14);
+    const ySub = yOffset + tamFuente * 0.42;
+    const anchoSub = 110;
+    // Sombra del subrayado
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillRect(256 - anchoSub / 2 - 3, ySub - 3, anchoSub + 6, 14);
+    // Barra de subrayado en color del texto
+    ctx.fillStyle = colorTexto;
+    ctx.fillRect(256 - anchoSub / 2, ySub, anchoSub, 8);
   }
 
   const textura = new THREE.CanvasTexture(canvas);
-  textura.anisotropy = 4;
+  textura.anisotropy = 8;
   cacheTexturas.set(clave, textura);
   return textura;
 }
@@ -145,14 +193,16 @@ function construirDadoD4(radio = 1.0) {
 function construirDadoD6(radio = 1.0) {
   const geom = new THREE.BoxGeometry(radio * 1.35, radio * 1.35, radio * 1.35);
   // BoxGeometry ya tiene 6 grupos de materiales por defecto (0..5)
-  return { geom, normalesCaras: [
-    new THREE.Vector3(1, 0, 0),  // Cara 1
-    new THREE.Vector3(-1, 0, 0), // Cara 6
-    new THREE.Vector3(0, 1, 0),  // Cara 2
-    new THREE.Vector3(0, -1, 0), // Cara 5
-    new THREE.Vector3(0, 0, 1),  // Cara 3
-    new THREE.Vector3(0, 0, -1)  // Cara 4
-  ], ordenNumeros: [1, 6, 2, 5, 3, 4] };
+  return {
+    geom, normalesCaras: [
+      new THREE.Vector3(1, 0, 0),  // Cara 1
+      new THREE.Vector3(-1, 0, 0), // Cara 6
+      new THREE.Vector3(0, 1, 0),  // Cara 2
+      new THREE.Vector3(0, -1, 0), // Cara 5
+      new THREE.Vector3(0, 0, 1),  // Cara 3
+      new THREE.Vector3(0, 0, -1)  // Cara 4
+    ], ordenNumeros: [1, 6, 2, 5, 3, 4]
+  };
 }
 
 function construirDadoD8(radio = 1.0) {
@@ -165,15 +215,16 @@ function construirDadoD8(radio = 1.0) {
     new THREE.Vector3(-r, 0, 0), // 4: -X
     new THREE.Vector3(0, 0, -r)  // 5: -Z
   ];
+  // Caras con orden de vértices antihorario (CCW) visto desde el exterior
   const carasIndices = [
-    [0, 2, 3], // 1
-    [0, 3, 4], // 2
-    [0, 4, 5], // 3
-    [0, 5, 2], // 4
-    [1, 3, 2], // 5
-    [1, 4, 3], // 6
-    [1, 5, 4], // 7
-    [1, 2, 5]  // 8
+    [0, 3, 2], // 1: Top-Front-Right (+X, +Y, +Z)
+    [0, 4, 3], // 2: Top-Front-Left (-X, +Y, +Z)
+    [0, 5, 4], // 3: Top-Back-Left (-X, +Y, -Z)
+    [0, 2, 5], // 4: Top-Back-Right (+X, +Y, -Z)
+    [1, 2, 3], // 5: Bot-Front-Right (+X, -Y, +Z)
+    [1, 3, 4], // 6: Bot-Front-Left (-X, -Y, +Z)
+    [1, 4, 5], // 7: Bot-Back-Left (-X, -Y, -Z)
+    [1, 5, 2]  // 8: Bot-Back-Right (+X, -Y, -Z)
   ];
   return ensamblarPolihedroTriangulos(v, carasIndices, 8, 'triangulo');
 }
@@ -200,42 +251,59 @@ function construirDadoD10(radio = 1.0) {
   const normalesCaras = [];
   const geom = new THREE.BufferGeometry();
 
+  // 5 Caras Superiores (1, 2, 3, 4, 5)
   for (let i = 0; i < 5; i++) {
-    const t1 = ringTop[i];
-    const t2 = ringTop[(i + 1) % 5];
-    const b1 = ringBot[i];
-    const bPrev = ringBot[(i + 4) % 5];
+    const pApex = vTop;
+    const pLeft = ringTop[i];
+    const pBottom = ringBot[i];
+    const pRight = ringTop[(i + 1) % 5];
 
-    // Cara superior i (1, 3, 5, 7, 9)
-    const normSup = new THREE.Vector3().add(vTop).add(t1).add(b1).add(t2).normalize();
-    normalesCaras.push(normSup);
+    // Centroide y normal exterior exacta
+    const centro = new THREE.Vector3().add(pApex).add(pLeft).add(pBottom).add(pRight).multiplyScalar(0.25);
+    const normal = centro.clone().normalize();
+    normalesCaras.push(normal);
 
-    // Triángulo 1
-    posiciones.push(vTop.x, vTop.y, vTop.z, t1.x, t1.y, t1.z, b1.x, b1.y, b1.z);
-    normales.push(normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z);
-    uvs.push(0.5, 0.95, 0.05, 0.5, 0.5, 0.05);
+    const startIdx = posiciones.length / 3;
 
-    // Triángulo 2
-    posiciones.push(vTop.x, vTop.y, vTop.z, b1.x, b1.y, b1.z, t2.x, t2.y, t2.z);
-    normales.push(normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z, normSup.x, normSup.y, normSup.z);
-    uvs.push(0.5, 0.95, 0.5, 0.05, 0.95, 0.5);
+    // Triángulo 1 (Apex, Left, Bottom)
+    posiciones.push(pApex.x, pApex.y, pApex.z, pLeft.x, pLeft.y, pLeft.z, pBottom.x, pBottom.y, pBottom.z);
+    normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+    uvs.push(0.5, 0.95, 0.05, 0.52, 0.5, 0.05);
 
-    geom.addGroup(i * 6, 6, i);
+    // Triángulo 2 (Apex, Bottom, Right)
+    posiciones.push(pApex.x, pApex.y, pApex.z, pBottom.x, pBottom.y, pBottom.z, pRight.x, pRight.y, pRight.z);
+    normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+    uvs.push(0.5, 0.95, 0.5, 0.05, 0.95, 0.52);
 
-    // Cara inferior i (2, 4, 6, 8, 10)
-    const normInf = new THREE.Vector3().add(vBot).add(b1).add(t2).add(bPrev).normalize();
-    normalesCaras.push(normInf);
+    geom.addGroup(startIdx, 6, i);
+  }
 
-    const idxInf = 5 + i;
-    posiciones.push(vBot.x, vBot.y, vBot.z, b1.x, b1.y, b1.z, t2.x, t2.y, t2.z);
-    normales.push(normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z);
-    uvs.push(0.5, 0.05, 0.05, 0.5, 0.5, 0.95);
+  // 5 Caras Inferiores (6, 7, 8, 9, 10)
+  for (let i = 0; i < 5; i++) {
+    const pBotApex = vBot;
+    const pBotLeft = ringBot[i];
+    const pTopApex = ringTop[(i + 1) % 5];
+    const pBotRight = ringBot[(i + 1) % 5];
 
-    posiciones.push(vBot.x, vBot.y, vBot.z, t2.x, t2.y, t2.z, ringBot[(i + 1) % 5].x, ringBot[(i + 1) % 5].y, ringBot[(i + 1) % 5].z);
-    normales.push(normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z, normInf.x, normInf.y, normInf.z);
-    uvs.push(0.5, 0.05, 0.5, 0.95, 0.95, 0.5);
+    // Centroide y normal exterior exacta
+    const centro = new THREE.Vector3().add(pBotApex).add(pBotLeft).add(pTopApex).add(pBotRight).multiplyScalar(0.25);
+    const normal = centro.clone().normalize();
+    normalesCaras.push(normal);
 
-    geom.addGroup(idxInf * 6, 6, idxInf);
+    const faceIdx = 5 + i;
+    const startIdx = posiciones.length / 3;
+
+    // Triángulo 1 (TopApex, BotLeft, BotApex)
+    posiciones.push(pTopApex.x, pTopApex.y, pTopApex.z, pBotLeft.x, pBotLeft.y, pBotLeft.z, pBotApex.x, pBotApex.y, pBotApex.z);
+    normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+    uvs.push(0.5, 0.95, 0.05, 0.52, 0.5, 0.05);
+
+    // Triángulo 2 (TopApex, BotApex, BotRight)
+    posiciones.push(pTopApex.x, pTopApex.y, pTopApex.z, pBotApex.x, pBotApex.y, pBotApex.z, pBotRight.x, pBotRight.y, pBotRight.z);
+    normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
+    uvs.push(0.5, 0.95, 0.5, 0.05, 0.95, 0.52);
+
+    geom.addGroup(startIdx, 6, faceIdx);
   }
 
   geom.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
@@ -252,11 +320,11 @@ function construirDadoD12(radio = 1.0) {
 
   // 20 vértices de dodecaedro
   const v = [
-    new THREE.Vector3( s,  s,  s), new THREE.Vector3( s,  s, -s), new THREE.Vector3( s, -s,  s), new THREE.Vector3( s, -s, -s),
-    new THREE.Vector3(-s,  s,  s), new THREE.Vector3(-s,  s, -s), new THREE.Vector3(-s, -s,  s), new THREE.Vector3(-s, -s, -s),
-    new THREE.Vector3(0,  s*invPhi,  s*phi), new THREE.Vector3(0,  s*invPhi, -s*phi), new THREE.Vector3(0, -s*invPhi,  s*phi), new THREE.Vector3(0, -s*invPhi, -s*phi),
-    new THREE.Vector3( s*invPhi,  s*phi, 0), new THREE.Vector3( s*invPhi, -s*phi, 0), new THREE.Vector3(-s*invPhi,  s*phi, 0), new THREE.Vector3(-s*invPhi, -s*phi, 0),
-    new THREE.Vector3( s*phi, 0,  s*invPhi), new THREE.Vector3( s*phi, 0, -s*invPhi), new THREE.Vector3(-s*phi, 0,  s*invPhi), new THREE.Vector3(-s*phi, 0, -s*invPhi)
+    new THREE.Vector3(s, s, s), new THREE.Vector3(s, s, -s), new THREE.Vector3(s, -s, s), new THREE.Vector3(s, -s, -s),
+    new THREE.Vector3(-s, s, s), new THREE.Vector3(-s, s, -s), new THREE.Vector3(-s, -s, s), new THREE.Vector3(-s, -s, -s),
+    new THREE.Vector3(0, s * invPhi, s * phi), new THREE.Vector3(0, s * invPhi, -s * phi), new THREE.Vector3(0, -s * invPhi, s * phi), new THREE.Vector3(0, -s * invPhi, -s * phi),
+    new THREE.Vector3(s * invPhi, s * phi, 0), new THREE.Vector3(s * invPhi, -s * phi, 0), new THREE.Vector3(-s * invPhi, s * phi, 0), new THREE.Vector3(-s * invPhi, -s * phi, 0),
+    new THREE.Vector3(s * phi, 0, s * invPhi), new THREE.Vector3(s * phi, 0, -s * invPhi), new THREE.Vector3(-s * phi, 0, s * invPhi), new THREE.Vector3(-s * phi, 0, -s * invPhi)
   ];
 
   // 12 caras pentagonales
@@ -292,8 +360,14 @@ function construirDadoD12(radio = 1.0) {
     const startIdx = posiciones.length / 3;
 
     for (let i = 0; i < 5; i++) {
-      const p1 = v[pent[i]];
-      const p2 = v[pent[(i + 1) % 5]];
+      let p1 = v[pent[i]];
+      let p2 = v[pent[(i + 1) % 5]];
+
+      // Verificar que el orden del triángulo sea CCW respecto a la normal exterior
+      const cross = new THREE.Vector3().subVectors(p1, centro).cross(new THREE.Vector3().subVectors(p2, centro));
+      if (cross.dot(normal) < 0) {
+        const tmp = p1; p1 = p2; p2 = tmp;
+      }
 
       const a1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
       const a2 = (((i + 1) % 5) * 2 * Math.PI) / 5 - Math.PI / 2;
@@ -319,9 +393,9 @@ function construirDadoD20(radio = 1.0) {
 
   // 12 vértices de icosaedro
   const v = [
-    new THREE.Vector3(0,  s,  s*phi), new THREE.Vector3(0,  s, -s*phi), new THREE.Vector3(0, -s,  s*phi), new THREE.Vector3(0, -s, -s*phi),
-    new THREE.Vector3( s,  s*phi, 0), new THREE.Vector3( s, -s*phi, 0), new THREE.Vector3(-s,  s*phi, 0), new THREE.Vector3(-s, -s*phi, 0),
-    new THREE.Vector3( s*phi, 0,  s), new THREE.Vector3(-s*phi, 0,  s), new THREE.Vector3( s*phi, 0, -s), new THREE.Vector3(-s*phi, 0, -s)
+    new THREE.Vector3(0, s, s * phi), new THREE.Vector3(0, s, -s * phi), new THREE.Vector3(0, -s, s * phi), new THREE.Vector3(0, -s, -s * phi),
+    new THREE.Vector3(s, s * phi, 0), new THREE.Vector3(s, -s * phi, 0), new THREE.Vector3(-s, s * phi, 0), new THREE.Vector3(-s, -s * phi, 0),
+    new THREE.Vector3(s * phi, 0, s), new THREE.Vector3(-s * phi, 0, s), new THREE.Vector3(s * phi, 0, -s), new THREE.Vector3(-s * phi, 0, -s)
   ];
 
   // 20 caras triangulares
@@ -359,18 +433,27 @@ function ensamblarPolihedroTriangulos(vertices, carasIndices, totalCaras, formaC
   const geom = new THREE.BufferGeometry();
 
   carasIndices.forEach((cara, idx) => {
-    const p0 = vertices[cara[0]];
-    const p1 = vertices[cara[1]];
-    const p2 = vertices[cara[2]];
+    const p0 = vertices[cara[0]].clone();
+    let p1 = vertices[cara[1]].clone();
+    let p2 = vertices[cara[2]].clone();
 
+    // 1. Centroide geométrico de la cara (desde el origen)
+    const centro = new THREE.Vector3().add(p0).add(p1).add(p2).multiplyScalar(1 / 3);
+    // 2. La normal exterior exacta es el vector desde el centro de masa (0,0,0) hacia el centro de la cara
+    const normal = centro.clone().normalize();
+    normalesCaras.push(normal);
+
+    // 3. Garantizar orientación antihoraria (CCW) respecto a la normal exterior
     const edge1 = new THREE.Vector3().subVectors(p1, p0);
     const edge2 = new THREE.Vector3().subVectors(p2, p0);
-    const normal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
-    normalesCaras.push(normal);
+    const cross = new THREE.Vector3().crossVectors(edge1, edge2);
+    if (cross.dot(normal) < 0) {
+      const tmp = p1; p1 = p2; p2 = tmp;
+    }
 
     posiciones.push(p0.x, p0.y, p0.z, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
     normales.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
-    uvs.push(0.5, 0.95, 0.05, 0.1, 0.95, 0.1);
+    uvs.push(0.5, 0.92, 0.06, 0.12, 0.94, 0.12);
 
     geom.addGroup(idx * 3, 3, idx);
   });
@@ -460,14 +543,14 @@ function construirBandeja(tipoDano = 'general') {
 
 function obtenerConstruccionDado(caras, radio = 1.0) {
   switch (caras) {
-    case 4: return { ...construirDadoD4(radio), formaCara: 'triangulo' };
-    case 6: return { ...construirDadoD6(radio), formaCara: 'cuadrado' };
-    case 8: return { ...construirDadoD8(radio), formaCara: 'triangulo' };
+    case 4: return { ...construirDadoD4(radio), formaCara: 'triangulo', radioColision: 0.72 };
+    case 6: return { ...construirDadoD6(radio), formaCara: 'cuadrado', radioColision: 0.96 };
+    case 8: return { ...construirDadoD8(radio), formaCara: 'triangulo', radioColision: 0.86 };
     case 10:
-    case 100: return { ...construirDadoD10(radio), formaCara: 'cometa' };
-    case 12: return { ...construirDadoD12(radio), formaCara: 'pentagono' };
+    case 100: return { ...construirDadoD10(radio), formaCara: 'cometa', radioColision: 0.88 };
+    case 12: return { ...construirDadoD12(radio), formaCara: 'pentagono', radioColision: 0.90 };
     case 20:
-    default: return { ...construirDadoD20(radio), formaCara: 'triangulo' };
+    default: return { ...construirDadoD20(radio), formaCara: 'triangulo', radioColision: 0.83 };
   }
 }
 
@@ -481,8 +564,9 @@ function crearMaterialesPolihedro(ordenNumeros, tipoDano, formaCara) {
     const tex = crearTexturaCara(num, colorFondo, colorTexto, colorBorde, formaCara);
     return new THREE.MeshStandardMaterial({
       map: tex,
-      roughness: 0.2,
-      metalness: 0.3
+      roughness: 0.22,
+      metalness: 0.28,
+      side: THREE.DoubleSide
     });
   });
 }
@@ -506,7 +590,7 @@ export function inicializarEscenaDados(contenedorCanvas, ancho, alto) {
   renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // Iluminación ambiental cálida
-  const luzAmbiente = new THREE.AmbientLight('#fff5e4', 0.9);
+  const luzAmbiente = new THREE.AmbientLight('#fff5e4', 0.95);
   escena.add(luzAmbiente);
 
   // Luz direccional principal con sombras nítidas
@@ -563,25 +647,25 @@ export function ejecutarTirada3D({
   const cantidad3D = Math.min(cantidad, 5);
   const resultados = resultadosForzados || Array.from({ length: cantidad }, () => Math.floor(Math.random() * caras) + 1);
 
-  // Vector de orientación final hacia la cámara (arriba + ligera inclinación hacia el jugador)
-  const dirCamaraFrente = new THREE.Vector3(0, 0.88, 0.47).normalize();
+  // Vector de orientación final: cara con resultado apunta hacia arriba (eje Y+).
+  const dirObjetivo = new THREE.Vector3(0, 1, 0);
 
   // Crear dados 3D
   for (let i = 0; i < cantidad3D; i++) {
     const resultado = resultados[i];
-    const { geom, normalesCaras, ordenNumeros, formaCara } = obtenerConstruccionDado(caras, 0.85);
+    const { geom, normalesCaras, ordenNumeros, formaCara, radioColision } = obtenerConstruccionDado(caras, 0.85);
     const materiales = crearMaterialesPolihedro(ordenNumeros, tipoDano, formaCara);
     const malla = new THREE.Mesh(geom, materiales);
     malla.castShadow = true;
     malla.receiveShadow = true;
 
-    // Calcular cuaternión objetivo para que la cara con el número resultado quede hacia la cámara
+    // Calcular cuaternión objetivo para que la cara con el número resultado quede hacia arriba
     const indiceCara = ordenNumeros.indexOf(resultado);
     const normalCaraLocal = (indiceCara !== -1 && normalesCaras[indiceCara])
       ? normalesCaras[indiceCara].clone()
       : new THREE.Vector3(0, 1, 0);
 
-    const quatObjetivo = new THREE.Quaternion().setFromUnitVectors(normalCaraLocal, dirCamaraFrente);
+    const quatObjetivo = new THREE.Quaternion().setFromUnitVectors(normalCaraLocal, dirObjetivo);
 
     // Posición inicial elevada y distribuida
     const offsetAngulo = (i / cantidad3D) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
@@ -607,11 +691,14 @@ export function ejecutarTirada3D({
       malla,
       caras,
       resultado,
+      radioColision,
       pos: malla.position,
       vel: new THREE.Vector3(velX, velY, velZ),
       rotVel: new THREE.Vector3(rotVelX, rotVelY, rotVelZ),
       quatObjetivo,
-      asentado: false,
+      fase: 'rodando', // 'rodando' | 'alineando' | 'asentado'
+      quatInicioAlineacion: null,
+      tiempoInicioAlineacion: 0,
       rebotes: 0
     });
   }
@@ -636,93 +723,166 @@ function bucleAnimacion() {
 
   const dt = 0.016; // ~60fps
   const gravedad = 30;
-  const radioPiso = 0.68;
-  const radioPared = 4.4;
+  const RADIO_PARED_OCTO = 4.28;
+  const LADOS_OCTO = 8;
   const ahora = performance.now();
   const tTranscurrido = (ahora - tiempoInicioTirada) / 1000;
   let todosAsentados = dadosActivos.length > 0;
 
   for (let i = 0; i < dadosActivos.length; i++) {
     const d = dadosActivos[i];
-    if (d.asentado) continue;
+    if (d.fase === 'asentado') continue;
 
-    // Aplicar gravedad
-    d.vel.y -= gravedad * dt;
+    if (d.fase === 'rodando') {
+      // 1. FÍSICA PURA SIN CORRECCIÓN DE TRAYECTORIA DURANTE LA CAÍDA
+      d.vel.y -= gravedad * dt;
 
-    // Actualizar posición
-    d.pos.x += d.vel.x * dt;
-    d.pos.y += d.vel.y * dt;
-    d.pos.z += d.vel.z * dt;
+      d.pos.x += d.vel.x * dt;
+      d.pos.y += d.vel.y * dt;
+      d.pos.z += d.vel.z * dt;
 
-    // Actualizar rotación física mientras rueda
-    d.malla.rotation.x += d.rotVel.x * dt;
-    d.malla.rotation.y += d.rotVel.y * dt;
-    d.malla.rotation.z += d.rotVel.z * dt;
+      d.malla.rotation.x += d.rotVel.x * dt;
+      d.malla.rotation.y += d.rotVel.y * dt;
+      d.malla.rotation.z += d.rotVel.z * dt;
 
-    // Colisión con piso
-    if (d.pos.y <= radioPiso) {
-      d.pos.y = radioPiso;
-      if (Math.abs(d.vel.y) > 0.8 && tTranscurrido < 0.9) {
-        reproducirImpactoDado(Math.abs(d.vel.y) / 6, false);
+      // Colisión con el piso de la bandeja
+      if (d.pos.y <= d.radioColision) {
+        d.pos.y = d.radioColision;
+        if (Math.abs(d.vel.y) > 0.8 && tTranscurrido < 0.9) {
+          reproducirImpactoDado(Math.abs(d.vel.y) / 6, false);
+        }
+        d.vel.y = -d.vel.y * 0.40; // Rebote elástico
+        d.vel.x *= 0.82;           // Fricción de piso
+        d.vel.z *= 0.82;
+        d.rotVel.multiplyScalar(0.80);
+        d.rebotes++;
       }
-      d.vel.y = -d.vel.y * 0.42; // Rebote elástico
-      d.vel.x *= 0.80; // Fricción piso
-      d.vel.z *= 0.80;
-      d.rotVel.multiplyScalar(0.75);
-      d.rebotes++;
-    }
 
-    // Colisión con paredes octogonales
-    const distCentro = Math.sqrt(d.pos.x * d.pos.x + d.pos.z * d.pos.z);
-    if (distCentro > radioPared) {
-      const normalX = d.pos.x / distCentro;
-      const normalZ = d.pos.z / distCentro;
-      
-      d.pos.x = normalX * radioPared;
-      d.pos.z = normalZ * radioPared;
-
-      const dot = d.vel.x * normalX + d.vel.z * normalZ;
-      if (dot > 0) {
-        d.vel.x -= 2 * dot * normalX;
-        d.vel.z -= 2 * dot * normalZ;
-        d.vel.multiplyScalar(0.7);
-        if (Math.abs(dot) > 0.8 && tTranscurrido < 0.9) {
-          reproducirImpactoDado(Math.abs(dot) / 4, true);
+      // Colisión con las 8 paredes octogonales
+      for (let w = 0; w < LADOS_OCTO; w++) {
+        const angWall = (w * 2 * Math.PI) / LADOS_OCTO + Math.PI / LADOS_OCTO;
+        const wnx = Math.cos(angWall);
+        const wnz = Math.sin(angWall);
+        const proyeccion = d.pos.x * wnx + d.pos.z * wnz;
+        const limPared = RADIO_PARED_OCTO - d.radioColision;
+        const penetracion = proyeccion - limPared;
+        if (penetracion > 0) {
+          d.pos.x -= wnx * penetracion;
+          d.pos.z -= wnz * penetracion;
+          const dot = d.vel.x * wnx + d.vel.z * wnz;
+          if (dot > 0) {
+            d.vel.x -= 2 * dot * wnx;
+            d.vel.z -= 2 * dot * wnz;
+            d.vel.x *= 0.65;
+            d.vel.z *= 0.65;
+            d.rotVel.multiplyScalar(0.80);
+            if (Math.abs(dot) > 0.8 && tTranscurrido < 0.9) {
+              reproducirImpactoDado(Math.abs(dot) / 4, true);
+            }
+          }
         }
       }
+
+      // Fricción aerodinámica natural
+      if (tTranscurrido > 0.4) {
+        d.vel.x *= 0.95;
+        d.vel.z *= 0.95;
+        d.rotVel.multiplyScalar(0.94);
+      }
+
+      // Detección de detención del dado
+      const velTotal = d.vel.length();
+      const rotTotal = d.rotVel.length();
+      const detenido = (d.pos.y <= d.radioColision + 0.08 && velTotal < 0.35 && rotTotal < 0.6 && tTranscurrido > 0.65) || (tTranscurrido >= 1.35);
+
+      if (detenido) {
+        d.fase = 'alineando';
+        d.pos.y = d.radioColision;
+        d.vel.set(0, 0, 0);
+        d.rotVel.set(0, 0, 0);
+        d.quatInicioAlineacion = d.malla.quaternion.clone();
+        d.tiempoInicioAlineacion = ahora;
+      }
     }
 
-    // Desaceleración progresiva a medida que avanza el tiempo
-    if (tTranscurrido > 0.5) {
-      d.vel.x *= 0.94;
-      d.vel.z *= 0.94;
-      d.rotVel.multiplyScalar(0.92);
-    }
-    if (tTranscurrido > 0.85) {
-      d.vel.multiplyScalar(0.85);
-      d.rotVel.multiplyScalar(0.82);
-      // Suave orientación hacia la cara con el número obtenido
-      d.malla.quaternion.slerp(d.quatObjetivo, 0.22);
+    if (d.fase === 'alineando') {
+      // 2. ALINEACIÓN RÁPIDA FINAL (~0.38 segundos) UNA VEZ DETENIDO EN EL PISO
+      const duracionAlineacion = 380;
+      const tRel = Math.min(1, (ahora - d.tiempoInicioAlineacion) / duracionAlineacion);
+      // Curva cúbica ease-out para un movimiento suave y natural
+      const tEase = 1 - Math.pow(1 - tRel, 3);
+      d.malla.quaternion.copy(d.quatInicioAlineacion).slerp(d.quatObjetivo, tEase);
+
+      if (tRel >= 1) {
+        d.fase = 'asentado';
+        d.malla.quaternion.copy(d.quatObjetivo);
+      }
     }
 
-    // Criterio de reposo garantizado a los ~1.2 segundos
-    const velTotal = d.vel.length();
-    const rotTotal = d.rotVel.length();
-    if (tTranscurrido >= 1.2 || (d.pos.y <= radioPiso + 0.12 && velTotal < 0.25 && rotTotal < 0.35)) {
-      d.asentado = true;
-      d.pos.y = radioPiso;
-      d.malla.quaternion.copy(d.quatObjetivo);
-      d.vel.set(0, 0, 0);
-      d.rotVel.set(0, 0, 0);
-    } else {
+    if (d.fase !== 'asentado') {
       todosAsentados = false;
     }
   }
 
-  // Notificar cuando todos los dados terminaron de rodar
+  // ===================== COLISIÓN ESFÉRICA ENTRE DADOS =====================
+  for (let i = 0; i < dadosActivos.length; i++) {
+    for (let j = i + 1; j < dadosActivos.length; j++) {
+      const dA = dadosActivos[i];
+      const dB = dadosActivos[j];
+      if (dA.fase === 'asentado' && dB.fase === 'asentado') continue;
+
+      const dx = dB.pos.x - dA.pos.x;
+      const dy = dB.pos.y - dA.pos.y;
+      const dz = dB.pos.z - dA.pos.z;
+      const distSq = dx * dx + dy * dy + dz * dz;
+      const minDist = dA.radioColision + dB.radioColision;
+
+      if (distSq < minDist * minDist && distSq > 0.0001) {
+        const dist = Math.sqrt(distSq);
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const nz = dz / dist;
+
+        const overlap = (minDist - dist) * 0.5;
+        if (dA.fase === 'rodando') {
+          dA.pos.x -= nx * overlap;
+          dA.pos.y -= ny * overlap;
+          dA.pos.z -= nz * overlap;
+        }
+        if (dB.fase === 'rodando') {
+          dB.pos.x += nx * overlap;
+          dB.pos.y += ny * overlap;
+          dB.pos.z += nz * overlap;
+        }
+
+        const relVx = dA.vel.x - dB.vel.x;
+        const relVy = dA.vel.y - dB.vel.y;
+        const relVz = dA.vel.z - dB.vel.z;
+        const dotRel = relVx * nx + relVy * ny + relVz * nz;
+
+        if (dotRel > 0) {
+          const impulso = dotRel * 0.60;
+          if (dA.fase === 'rodando') {
+            dA.vel.x -= impulso * nx;
+            dA.vel.y -= impulso * ny;
+            dA.vel.z -= impulso * nz;
+            dA.rotVel.multiplyScalar(0.88);
+          }
+          if (dB.fase === 'rodando') {
+            dB.vel.x += impulso * nx;
+            dB.vel.y += impulso * ny;
+            dB.vel.z += impulso * nz;
+            dB.rotVel.multiplyScalar(0.88);
+          }
+        }
+      }
+    }
+  }
+
+  // Notificar cuando todos los dados terminaron su alineación y reposo
   if (todosAsentados && !tiradaCompletada && dadosActivos.length > 0) {
     tiradaCompletada = true;
-    
+
     // Si era d20 y sacó 20 o 1, reproducir sonido de crítico/pifia
     if (dadosActivos.length === 1 && dadosActivos[0].caras === 20) {
       if (dadosActivos[0].resultado === 20) reproducirCritico();
