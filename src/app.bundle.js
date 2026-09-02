@@ -221,6 +221,16 @@ function obtenerEstiloHabitat(habitat) {
   if (!habitat) return {};
   return HABITAT_ESTILO[habitat] || HABITAT_ESTILO_POR_CLAVE[quitarParentesis(habitat)] || {};
 }
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 // ---- src/features/storage.js ----
 const CLAVE_VARIANTES = 'compendio_variantes_seleccionadas';
 const CLAVE_IMPORTADOS = 'compendio_monstruos_importados';
@@ -323,6 +333,200 @@ function cargarImportados() {
 
 function guardarImportados(lista) {
   localStorage.setItem(CLAVE_IMPORTADOS, JSON.stringify(lista));
+}
+// ---- src/features/tracker-model.js ----
+// src/features/tracker-model.js
+// Gestor de estado y lógica para el Rastreador de Batalla e Iniciativa.
+
+const CLAVE_STORAGE_INICIATIVA = 'compendio_iniciativa_estado';
+
+function crearRastreadorIniciativa() {
+  let estado = {
+    combatientes: [],
+    indiceActivo: 0,
+    ronda: 1,
+    contadorUid: 1
+  };
+
+  // Cargar estado guardado si existe
+  cargarDesdeStorage();
+
+  function cargarDesdeStorage() {
+    try {
+      const guardado = localStorage.getItem(CLAVE_STORAGE_INICIATIVA);
+      if (guardado) {
+        const parseado = JSON.parse(guardado);
+        if (parseado && Array.isArray(parseado.combatientes)) {
+          estado = {
+            combatientes: parseado.combatientes,
+            indiceActivo: typeof parseado.indiceActivo === 'number' ? parseado.indiceActivo : 0,
+            ronda: typeof parseado.ronda === 'number' ? Math.max(1, parseado.ronda) : 1,
+            contadorUid: typeof parseado.contadorUid === 'number' ? parseado.contadorUid : (parseado.combatientes.length + 1)
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo cargar el estado de iniciativa de localStorage:', e);
+    }
+  }
+
+  function guardarEnStorage() {
+    try {
+      localStorage.setItem(CLAVE_STORAGE_INICIATIVA, JSON.stringify(estado));
+    } catch (e) {
+      console.warn('No se pudo guardar el estado de iniciativa en localStorage:', e);
+    }
+  }
+
+  function obtenerEstado() {
+    return estado;
+  }
+
+  function ordenarCombatientes() {
+    // Ordena descendentemente por iniciativa. En empate, por nombre o bono de des si existe.
+    estado.combatientes.sort((a, b) => {
+      const diff = b.iniciativa - a.iniciativa;
+      if (diff !== 0) return diff;
+      const desA = a.desMod || 0;
+      const desB = b.desMod || 0;
+      if (desB !== desA) return desB - desA;
+      return a.nombre.localeCompare(b.nombre);
+    });
+  }
+
+  function agregarCombatiente({
+    nombre,
+    iniciativa = 0,
+    hp = 10,
+    maxHp = null,
+    ca = 10,
+    tipo = 'pc',
+    bando = 'ally',
+    condiciones = '',
+    monstruoId = null,
+    desMod = 0
+  }) {
+    const nuevoHp = Number(hp) || 0;
+    const nuevoMaxHp = maxHp !== null && maxHp !== undefined ? Number(maxHp) : nuevoHp;
+
+    const combatiente = {
+      uid: estado.contadorUid++,
+      nombre: String(nombre).trim() || 'Combatiente',
+      iniciativa: Number(iniciativa) || 0,
+      hp: nuevoHp,
+      maxHp: Math.max(1, nuevoMaxHp),
+      ca: Number(ca) || 10,
+      tipo: tipo === 'npc' ? 'npc' : 'pc',
+      bando: bando === 'enemy' ? 'enemy' : 'ally',
+      condiciones: String(condiciones || '').trim(),
+      monstruoId: monstruoId || null,
+      desMod: Number(desMod) || 0
+    };
+
+    estado.combatientes.push(combatiente);
+    ordenarCombatientes();
+    guardarEnStorage();
+    return combatiente;
+  }
+
+  function actualizarCombatiente(uid, cambios) {
+    const c = estado.combatientes.find((item) => item.uid === uid);
+    if (!c) return null;
+
+    if (cambios.nombre !== undefined) c.nombre = String(cambios.nombre).trim() || c.nombre;
+    if (cambios.iniciativa !== undefined) {
+      c.iniciativa = Number(cambios.iniciativa) || 0;
+      ordenarCombatientes();
+    }
+    if (cambios.hp !== undefined) c.hp = Math.max(0, Number(cambios.hp) || 0);
+    if (cambios.maxHp !== undefined) c.maxHp = Math.max(1, Number(cambios.maxHp) || 1);
+    if (cambios.ca !== undefined) c.ca = Number(cambios.ca) || 0;
+    if (cambios.tipo !== undefined) c.tipo = cambios.tipo === 'npc' ? 'npc' : 'pc';
+    if (cambios.bando !== undefined) c.bando = cambios.bando === 'enemy' ? 'enemy' : 'ally';
+    if (cambios.condiciones !== undefined) c.condiciones = String(cambios.condiciones);
+    if (cambios.desMod !== undefined) c.desMod = Number(cambios.desMod) || 0;
+
+    guardarEnStorage();
+    return c;
+  }
+
+  function eliminarCombatiente(uid) {
+    const idx = estado.combatientes.findIndex((item) => item.uid === uid);
+    if (idx === -1) return false;
+
+    estado.combatientes.splice(idx, 1);
+    if (idx < estado.indiceActivo) {
+      estado.indiceActivo = Math.max(0, estado.indiceActivo - 1);
+    }
+    if (estado.indiceActivo >= estado.combatientes.length) {
+      estado.indiceActivo = 0;
+    }
+    guardarEnStorage();
+    return true;
+  }
+
+  function aplicarDanoCuracion(uid, cantidad, esDano = true) {
+    const c = estado.combatientes.find((item) => item.uid === uid);
+    if (!c) return;
+    const num = Math.abs(Number(cantidad) || 0);
+    if (num === 0) return;
+
+    if (esDano) {
+      c.hp = Math.max(0, c.hp - num);
+    } else {
+      c.hp = c.hp + num;
+      if (c.hp > c.maxHp) {
+        c.maxHp = c.hp;
+      }
+    }
+    guardarEnStorage();
+  }
+
+  function siguienteTurno() {
+    if (estado.combatientes.length === 0) return;
+    estado.indiceActivo++;
+    if (estado.indiceActivo >= estado.combatientes.length) {
+      estado.indiceActivo = 0;
+      estado.ronda++;
+    }
+    guardarEnStorage();
+  }
+
+  function anteriorTurno() {
+    if (estado.combatientes.length === 0) return;
+    estado.indiceActivo--;
+    if (estado.indiceActivo < 0) {
+      estado.indiceActivo = estado.combatientes.length - 1;
+      estado.ronda = Math.max(1, estado.ronda - 1);
+    }
+    guardarEnStorage();
+  }
+
+  function reiniciarRonda() {
+    estado.ronda = 1;
+    estado.indiceActivo = 0;
+    guardarEnStorage();
+  }
+
+  function vaciarRegistro() {
+    estado.combatientes = [];
+    estado.indiceActivo = 0;
+    estado.ronda = 1;
+    guardarEnStorage();
+  }
+
+  return {
+    obtenerEstado,
+    agregarCombatiente,
+    actualizarCombatiente,
+    eliminarCombatiente,
+    aplicarDanoCuracion,
+    ordenarCombatientes,
+    siguienteTurno,
+    anteriorTurno,
+    reiniciarRonda,
+    vaciarRegistro
+  };
 }
 // ---- src/features/dice-audio.js ----
 // src/features/dice-audio.js
@@ -1884,6 +2088,8 @@ let modalAbierto = false;
 let configTiradaActual = null;
 let resultadoActual = null;
 let tiradaIdActual = 0;
+let callbackAlTerminarActual = null;
+let callbackEjecutadoParaTirada = 0;
 
 function manejarEscModalDados(evento) {
   if (evento.key === 'Escape') cerrarModalDados();
@@ -1906,14 +2112,18 @@ function cerrarModalDados() {
   modalAbierto = false;
   configTiradaActual = null;
   resultadoActual = null;
+  callbackAlTerminarActual = null;
+  callbackEjecutadoParaTirada = 0;
   document.removeEventListener('keydown', manejarEscModalDados);
   window.removeEventListener('resize', manejarResizeModalDados);
 }
 
-function abrirModalDados({ configTirada, nombreMonstruo = '', nombreAccion = '' }) {
+function abrirModalDados({ configTirada, nombreMonstruo = '', nombreAccion = '', alTerminar = null }) {
   cerrarModalDados(); // Evitar duplicados
 
   configTiradaActual = configTirada;
+  callbackAlTerminarActual = alTerminar;
+  callbackEjecutadoParaTirada = 0;
   modalAbierto = true;
 
   const infoDano = DANOS_INFO[configTirada.tipoDano] || DANOS_INFO.general;
@@ -2062,6 +2272,232 @@ function actualizarPanelResultadoFinal(res, config) {
     </div>
     ${resumenDetalle}
   `;
+
+  if (typeof callbackAlTerminarActual === 'function' && callbackEjecutadoParaTirada !== tiradaIdActual) {
+    callbackEjecutadoParaTirada = tiradaIdActual;
+    try {
+      callbackAlTerminarActual(res);
+    } catch (err) {
+      console.error('Error en callbackAlTerminar de tirada de dados:', err);
+    }
+  }
+}
+// ---- src/ui/tracker-views.js ----
+// src/ui/tracker-views.js
+// Vistas y plantillas HTML para el Rastreador de Iniciativa y Registro de Batalla.
+
+
+function vistaTracker({ estado }) {
+  const { combatientes, indiceActivo, ronda } = estado;
+  const combatienteActivo = combatientes.length > 0 ? combatientes[indiceActivo] : null;
+
+  return `
+    <div class="tracker-contenedor">
+      <div class="tracker-cabecera-batalla">
+        <div class="eyebrow tracker-eyebrow">Sesión de Mesa &bull; Encuentro Activo</div>
+        <h1 class="tracker-titulo-principal">Registro de Batalla</h1>
+        <div class="rule tracker-rule"></div>
+
+        <div class="round-bar tracker-round-bar">
+          <button type="button" class="btn icon-btn" id="btn-tracker-prev-turn" title="Turno anterior">◂</button>
+
+          <div class="round-badge tracker-round-badge">
+            <div class="round-num" id="tracker-ronda-num">${ronda}</div>
+            <div class="round-label">Ronda</div>
+            <div class="tracker-turno-actual">
+              ${combatienteActivo
+                ? `<span class="turno-indicador">Turno:</span> <b class="turno-nombre-activo">${escapeHtml(combatienteActivo.nombre)}</b>`
+                : '<span class="turno-vacio">Sin combatientes</span>'}
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary btn-siguiente-turno" id="btn-tracker-next-turn" title="Avanzar siguiente turno">
+            Siguiente turno ▸
+          </button>
+        </div>
+      </div>
+
+      <div class="panel tracker-form-panel">
+        <h2 class="form-titulo">Añadir Combatiente</h2>
+        <div class="tracker-add-grid">
+          <div class="campo-autocompletar-wrapper">
+            <label for="inTrackerNombre" class="field-label">Nombre</label>
+            <div class="input-con-sugerencias">
+              <input type="text" id="inTrackerNombre" placeholder="Ej: Goblin, Dragón..." autocomplete="off">
+              <div class="sugerencias-desplegable" id="tracker-sugerencias-monstruos" style="display:none;"></div>
+            </div>
+          </div>
+
+          <div class="campo-init-wrapper">
+            <label for="inTrackerInit" class="field-label">Iniciativa</label>
+            <div class="input-con-dado">
+              <input type="number" id="inTrackerInit" placeholder="d20" class="input-mono">
+              <button type="button" class="btn-dado-init" id="btn-tirar-init-nuevo" title="Lanzar d20 de iniciativa en 3D">
+                🎲 Tirar
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label for="inTrackerHp" class="field-label">PV</label>
+            <input type="number" id="inTrackerHp" placeholder="PV" min="0" class="input-mono">
+          </div>
+
+          <div>
+            <label for="inTrackerAc" class="field-label">CA</label>
+            <input type="number" id="inTrackerAc" placeholder="CA" min="0" class="input-mono">
+          </div>
+
+          <div class="campo-filtro campo-tracker-dd">
+            <label class="field-label">Tipo</label>
+            <details class="dd-filtro dd-tracker" id="dd-tracker-tipo">
+              <summary class="control-filtro" id="resumen-tracker-tipo">PNJ</summary>
+              <div class="dd-panel dd-panel-columna dd-panel-tracker">
+                <label class="chip-opcion chip-tracker">
+                  <input type="radio" name="tracker-tipo-radio" value="npc" checked> PNJ
+                </label>
+                <label class="chip-opcion chip-tracker">
+                  <input type="radio" name="tracker-tipo-radio" value="pc"> PJ
+                </label>
+              </div>
+            </details>
+            <input type="hidden" id="inTrackerTipo" value="npc">
+          </div>
+
+          <div class="campo-filtro campo-tracker-dd">
+            <label class="field-label">Bando</label>
+            <details class="dd-filtro dd-tracker" id="dd-tracker-bando">
+              <summary class="control-filtro" id="resumen-tracker-bando">Enemigo</summary>
+              <div class="dd-panel dd-panel-columna dd-panel-tracker">
+                <label class="chip-opcion chip-tracker">
+                  <input type="radio" name="tracker-bando-radio" value="enemy" checked> Enemigo
+                </label>
+                <label class="chip-opcion chip-tracker">
+                  <input type="radio" name="tracker-bando-radio" value="ally"> Aliado
+                </label>
+              </div>
+            </details>
+            <input type="hidden" id="inTrackerBando" value="enemy">
+          </div>
+
+          <div class="campo-boton-agregar">
+            <button type="button" class="btn-primary btn-agregar-combatiente" id="btn-tracker-agregar">
+              + Añadir
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tracker-roster-seccion">
+        <div class="tracker-roster-header">
+          <h2 class="tracker-roster-titulo">Orden de Batalla (${combatientes.length})</h2>
+          <div class="tracker-roster-ayuda">Haz clic en cualquier valor para editarlo en vivo</div>
+        </div>
+
+        <div id="tracker-empty-state" class="vacio tracker-vacio" style="${combatientes.length === 0 ? '' : 'display:none;'}">
+          La mesa está en silencio. Añade combatientes arriba para comenzar el encuentro.
+        </div>
+
+        <div class="roster tracker-roster-lista" id="tracker-roster-lista">
+          ${renderizarListaCombatientes(estado)}
+        </div>
+      </div>
+
+      <div class="controls-bottom tracker-controles-pie">
+        <button type="button" class="btn" id="btn-tracker-ordenar" title="Reordenar lista por iniciativa">
+          Reordenar por iniciativa
+        </button>
+        <button type="button" class="btn" id="btn-tracker-reiniciar-ronda" title="Reiniciar ronda a 1">
+          Reiniciar ronda a 1
+        </button>
+        <button type="button" class="btn" id="btn-tracker-vaciar" title="Eliminar todos los combatientes">
+          Vaciar registro
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderizarListaCombatientes(estado) {
+  const { combatientes, indiceActivo } = estado;
+  if (!combatientes || combatientes.length === 0) return '';
+
+  return combatientes.map((c, idx) => {
+    const esActivo = idx === indiceActivo;
+    const esCaido = c.hp <= 0;
+    const porcentajeHp = c.maxHp > 0 ? Math.max(0, Math.min(100, Math.round((c.hp / c.maxHp) * 100))) : 0;
+    const colorBarra = porcentajeHp > 50 ? '#4a7a52' : (porcentajeHp > 20 ? '#cfa233' : '#7a2e2e');
+
+    return `
+      <div class="card tracker-tarjeta ${c.bando} ${esActivo ? 'active' : ''} ${esCaido ? 'down' : ''}" data-uid="${c.uid}">
+        <div class="tracker-col-init" title="Iniciativa (clic para editar o relanzar)">
+          <div class="init-num tracker-init-box">
+            <input type="number" class="tracker-input-init editable-inline input-mono" data-uid="${c.uid}" data-campo="iniciativa" value="${c.iniciativa}">
+          </div>
+          <button type="button" class="btn-reroll-init" data-uid="${c.uid}" data-nombre="${escapeHtml(c.nombre)}" data-desmod="${c.desMod || 0}" title="Relanzar 1d20 con dados 3D">🎲</button>
+        </div>
+
+        <div class="name-block tracker-col-info">
+          <div class="name-row tracker-nombre-fila">
+            <input type="text" class="cname-input tracker-input-nombre" data-uid="${c.uid}" data-campo="nombre" value="${escapeHtml(c.nombre)}" title="Clic para editar nombre">
+            <span class="tag ${c.tipo} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-tipo" title="Alternar PJ / PNJ">${c.tipo === 'pc' ? 'PJ' : 'PNJ'}</span>
+            <span class="tag ${c.bando === 'ally' ? 'pc' : 'npc'} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-bando" title="Alternar Aliado / Enemigo">${c.bando === 'ally' ? 'Aliado' : 'Enemigo'}</span>
+            ${c.monstruoId ? `
+              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" target="_blank" title="Abrir ficha del compendio">
+                📖 Ficha
+              </a>
+            ` : ''}
+          </div>
+
+          <div class="tracker-condiciones-fila">
+            <input type="text" class="cond-input tracker-input-condiciones" data-uid="${c.uid}" data-campo="condiciones" placeholder="condiciones (ej: aturdido, veneno)..." value="${escapeHtml(c.condiciones || '')}">
+          </div>
+
+          <div class="tracker-barra-hp-wrapper" title="${c.hp} / ${c.maxHp} PV">
+            <div class="tracker-barra-hp" style="width:${porcentajeHp}%; background:${colorBarra};"></div>
+          </div>
+        </div>
+
+        <div class="stat tracker-col-hp">
+          <div class="stat-label">PV</div>
+          <div class="hp-block">
+            <div class="hp-display tracker-hp-display">
+              <input type="number" class="tracker-input-hp-actual editable-inline input-mono" data-uid="${c.uid}" data-campo="hp" value="${c.hp}" min="0" title="PV actuales (clic para editar)">
+              <span class="tracker-hp-separador">/</span>
+              <input type="number" class="tracker-input-hp-max editable-inline input-mono" data-uid="${c.uid}" data-campo="maxHp" value="${c.maxHp}" min="1" title="PV máximos (clic para editar)">
+            </div>
+            <div class="hp-controls tracker-hp-controls">
+              <input type="number" class="hp-amount tracker-hp-amount input-mono" data-uid="${c.uid}" data-campo="cantidad" placeholder="0" min="0" title="Escribe una cantidad y presiona Enter para restar vida">
+              <button type="button" class="hp-btn heal" data-uid="${c.uid}" data-accion="heal" title="Sumar curación">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat tracker-col-ac">
+          <div class="stat-label">CA</div>
+          <div class="ac-val">
+            <input type="number" class="tracker-input-ac editable-inline input-mono" data-uid="${c.uid}" data-campo="ca" value="${c.ca}" min="0" title="Clase de armadura (clic para editar)">
+          </div>
+        </div>
+
+        <div class="actions tracker-col-acciones">
+          <button type="button" class="icon-btn danger" data-uid="${c.uid}" data-accion="eliminar" title="Eliminar combatiente">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderizarSugerenciasMonstruos(items) {
+  if (!items || items.length === 0) {
+    return '';
+  }
+
+  return items.map((it) => `
+    <div class="sugerencia-item" data-id="${it.id}" data-variante-id="${it.varianteId || ''}" data-nombre="${escapeHtml(it.nombreMostrar)}" data-pg="${it.pg || 10}" data-ca="${escapeHtml(String(it.ca || 10))}" data-des="${it.des !== undefined ? it.des : 10}">
+      <span class="sugerencia-texto-nombre">${escapeHtml(it.nombreMostrar)}</span>
+    </div>
+  `).join('');
 }
 // ---- src/ui/monster-views.js ----
 function retratoProcedural(monstruo, tipoColor) {
@@ -2404,6 +2840,7 @@ function vistaLista({ filtros, crsExactos, panelResultadosHtml }) {
 // ---- src/app.js ----
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
+const rastreador = crearRastreadorIniciativa();
 
 // ===================== UNIDADES DE DISTANCIA EN LA FICHA =====================
 // Cada distancia en pies dentro de la ficha (Velocidad, alcance de acciones,
@@ -2544,6 +2981,7 @@ function analizarHash() {
   const hash   = location.hash || '#/';
   const partes = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (partes[0] === 'monstruo' && partes[1]) return { vista: 'detalle', id: decodeURIComponent(partes[1]) };
+  if (partes[0] === 'iniciativa' || partes[0] === 'rastreador' || partes[0] === 'combate') return { vista: 'iniciativa' };
   return { vista: 'lista' };
 }
 
@@ -2693,6 +3131,498 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   enlazarEventosDistancias();
   enlazarEventosDados(nombreMonstruo);
 }
+function actualizarTabsNavegacion(vista) {
+  const tabCompendio = document.getElementById('nav-tab-compendio');
+  const tabIniciativa = document.getElementById('nav-tab-iniciativa');
+  if (!tabCompendio || !tabIniciativa) return;
+  if (vista === 'iniciativa') {
+    tabCompendio.classList.remove('activa');
+    tabIniciativa.classList.add('activa');
+  } else {
+    tabCompendio.classList.add('activa');
+    tabIniciativa.classList.remove('activa');
+  }
+}
+
+let trackerMonstruoSeleccionado = null;
+let trackerDesModActual = 0;
+
+function actualizarVistaRoster() {
+  const estado = rastreador.obtenerEstado();
+  const rosterLista = document.getElementById('tracker-roster-lista');
+  const emptyState = document.getElementById('tracker-empty-state');
+  const rondaNum = document.getElementById('tracker-ronda-num');
+  const turnoEl = document.querySelector('.tracker-turno-actual');
+  const tituloRoster = document.querySelector('.tracker-roster-titulo');
+
+  if (rondaNum) rondaNum.textContent = estado.ronda;
+  if (tituloRoster) tituloRoster.textContent = `Orden de Iniciativa (${estado.combatientes.length})`;
+
+  if (emptyState) {
+    emptyState.style.display = estado.combatientes.length === 0 ? 'block' : 'none';
+  }
+
+  if (turnoEl) {
+    const cActivo = estado.combatientes.length > 0 ? estado.combatientes[estado.indiceActivo] : null;
+    turnoEl.innerHTML = cActivo
+      ? `<span class="turno-indicador">Turno:</span> <b>${escapeHtml(cActivo.nombre)}</b>`
+      : '<span class="turno-vacio">Sin combatientes activos</span>';
+  }
+
+  if (rosterLista) {
+    rosterLista.innerHTML = renderizarListaCombatientes(estado);
+    enlazarEventosRoster();
+  }
+}
+
+function enlazarEventosRoster() {
+  const rosterLista = document.getElementById('tracker-roster-lista');
+  if (!rosterLista) return;
+
+  // Sumar Curación (+)
+  rosterLista.querySelectorAll('[data-accion="heal"], .hp-btn.heal').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const amountInput = rosterLista.querySelector(`.tracker-hp-amount[data-uid="${uid}"]`);
+      const amount = Number(amountInput ? amountInput.value : 0);
+      if (amount <= 0) return;
+      rastreador.aplicarDanoCuracion(uid, amount, false);
+      actualizarVistaRoster();
+    };
+  });
+
+  // Enter en input de cantidad: siempre resta vida por defecto
+  rosterLista.querySelectorAll('.tracker-hp-amount').forEach((inp) => {
+    inp.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const uid = Number(inp.dataset.uid);
+        const amount = Number(inp.value || 0);
+        if (amount <= 0) return;
+        rastreador.aplicarDanoCuracion(uid, amount, true);
+        actualizarVistaRoster();
+      }
+    };
+  });
+
+  // Edición inline de campos
+  rosterLista.querySelectorAll('.editable-inline').forEach((inp) => {
+    const uid = Number(inp.dataset.uid);
+    const campo = inp.dataset.campo;
+
+    if (campo === 'condiciones') {
+      inp.oninput = (e) => {
+        rastreador.actualizarCombatiente(uid, { condiciones: e.target.value });
+      };
+    } else if (campo === 'iniciativa') {
+      inp.onchange = (e) => {
+        rastreador.actualizarCombatiente(uid, { iniciativa: Number(e.target.value) || 0 });
+        actualizarVistaRoster();
+      };
+      inp.onkeydown = (e) => {
+        if (e.key === 'Enter') inp.blur();
+      };
+    } else {
+      inp.onchange = (e) => {
+        const val = e.target.value;
+        const cambios = {};
+        if (campo === 'nombre') cambios.nombre = val;
+        else if (campo === 'hp') cambios.hp = Number(val) || 0;
+        else if (campo === 'maxHp') cambios.maxHp = Number(val) || 1;
+        else if (campo === 'ca') cambios.ca = Number(val) || 0;
+        rastreador.actualizarCombatiente(uid, cambios);
+        actualizarVistaRoster();
+      };
+      inp.onkeydown = (e) => {
+        if (e.key === 'Enter') inp.blur();
+      };
+    }
+  });
+
+  // Alternar Tipo (PJ / PNJ)
+  rosterLista.querySelectorAll('[data-accion="toggle-tipo"]').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const estado = rastreador.obtenerEstado();
+      const c = estado.combatientes.find((item) => item.uid === uid);
+      if (!c) return;
+      const nuevoTipo = c.tipo === 'pc' ? 'npc' : 'pc';
+      rastreador.actualizarCombatiente(uid, { tipo: nuevoTipo });
+      actualizarVistaRoster();
+    };
+  });
+
+  // Alternar Bando (Aliado / Enemigo)
+  rosterLista.querySelectorAll('[data-accion="toggle-bando"]').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const estado = rastreador.obtenerEstado();
+      const c = estado.combatientes.find((item) => item.uid === uid);
+      if (!c) return;
+      const nuevoBando = c.bando === 'ally' ? 'enemy' : 'ally';
+      rastreador.actualizarCombatiente(uid, { bando: nuevoBando });
+      actualizarVistaRoster();
+    };
+  });
+
+  // Relanzar iniciativa con 3D
+  rosterLista.querySelectorAll('.btn-reroll-init').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const nombre = btn.dataset.nombre || 'Combatiente';
+      const desMod = Number(btn.dataset.desmod) || 0;
+      const modStr = desMod !== 0 ? (desMod > 0 ? `+${desMod}` : `${desMod}`) : '';
+
+      abrirModalDados({
+        configTirada: {
+          cantidad: 1,
+          caras: 20,
+          mod: desMod,
+          etiqueta: `1d20${modStr}`,
+          tipoDano: 'general',
+          tipoTirada: 'iniciativa'
+        },
+        nombreMonstruo: nombre,
+        nombreAccion: 'Relanzar Iniciativa',
+        alTerminar: (res) => {
+          rastreador.actualizarCombatiente(uid, { iniciativa: res.total });
+          actualizarVistaRoster();
+          setTimeout(() => {
+            cerrarModalDados();
+          }, 1400);
+        }
+      });
+    };
+  });
+
+  // Eliminar combatiente
+  rosterLista.querySelectorAll('[data-accion="eliminar"]').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      rastreador.eliminarCombatiente(uid);
+      actualizarVistaRoster();
+    };
+  });
+}
+
+function enlazarEventosTracker() {
+  const inNombre = document.getElementById('inTrackerNombre');
+  const inInit = document.getElementById('inTrackerInit');
+  const inHp = document.getElementById('inTrackerHp');
+  const inAc = document.getElementById('inTrackerAc');
+  const inTipo = document.getElementById('inTrackerTipo');
+  const inBando = document.getElementById('inTrackerBando');
+  const btnAgregar = document.getElementById('btn-tracker-agregar');
+  const btnTirarInit = document.getElementById('btn-tirar-init-nuevo');
+  const cajaSugerencias = document.getElementById('tracker-sugerencias-monstruos');
+
+  // Dropdowns personalizados para Tipo y Bando (estilo compendio)
+  const ddTipo = document.getElementById('dd-tracker-tipo');
+  const resumenTipo = document.getElementById('resumen-tracker-tipo');
+
+  function setTipoTracker(tipo) {
+    if (inTipo) inTipo.value = tipo;
+    if (resumenTipo) resumenTipo.textContent = tipo === 'pc' ? 'PJ' : 'PNJ';
+    const radio = ddTipo?.querySelector(`input[name="tracker-tipo-radio"][value="${tipo}"]`);
+    if (radio) radio.checked = true;
+  }
+
+  if (ddTipo) {
+    ddTipo.querySelectorAll('input[name="tracker-tipo-radio"]').forEach((radio) => {
+      radio.onchange = () => {
+        setTipoTracker(radio.value);
+        ddTipo.removeAttribute('open');
+      };
+    });
+  }
+
+  const ddBando = document.getElementById('dd-tracker-bando');
+  const resumenBando = document.getElementById('resumen-tracker-bando');
+
+  function setBandoTracker(bando) {
+    if (inBando) inBando.value = bando;
+    if (resumenBando) resumenBando.textContent = bando === 'ally' ? 'Aliado' : 'Enemigo';
+    const radio = ddBando?.querySelector(`input[name="tracker-bando-radio"][value="${bando}"]`);
+    if (radio) radio.checked = true;
+  }
+
+  if (ddBando) {
+    ddBando.querySelectorAll('input[name="tracker-bando-radio"]').forEach((radio) => {
+      radio.onchange = () => {
+        setBandoTracker(radio.value);
+        ddBando.removeAttribute('open');
+      };
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (ddTipo && !ddTipo.contains(e.target)) ddTipo.removeAttribute('open');
+    if (ddBando && !ddBando.contains(e.target)) ddBando.removeAttribute('open');
+  });
+
+  function cerrarSugerencias() {
+    if (cajaSugerencias) {
+      cajaSugerencias.style.display = 'none';
+      cajaSugerencias.innerHTML = '';
+    }
+  }
+
+  if (inNombre && cajaSugerencias) {
+    inNombre.oninput = () => {
+      const query = inNombre.value.trim();
+      if (query.length < 1) {
+        cerrarSugerencias();
+        trackerMonstruoSeleccionado = null;
+        trackerDesModActual = 0;
+        return;
+      }
+
+      const qNorm = normalizar(query);
+      const todos = compendio.obtenerTodosMonstruos();
+      const itemsSugeridos = [];
+
+      for (const m of todos) {
+        if (itemsSugeridos.length >= 18) break;
+
+        const nomNorm = normalizar(m.nombre || '');
+        const idNorm = normalizar(m.id || '');
+        const enNorm = normalizar(NOMBRES_INGLES[m.id] || '');
+        const coincideBase = nomNorm.includes(qNorm) || idNorm.includes(qNorm) || enNorm.includes(qNorm);
+
+        if (coincideBase) {
+          itemsSugeridos.push({
+            id: m.id,
+            varianteId: null,
+            nombreMostrar: m.nombre,
+            monstruoRef: m,
+            pg: Number(m.pg) || 10,
+            ca: m.ca,
+            des: m.atributos && m.atributos.des !== undefined ? m.atributos.des : 10
+          });
+        }
+
+        // Revisar variantes de la criatura si tiene
+        if (Array.isArray(m.variantes) && m.variantes.length > 0) {
+          for (const v of m.variantes) {
+            if (itemsSugeridos.length >= 18) break;
+            const varNomNorm = normalizar(v.nombre || '');
+            const coincideVariante = coincideBase || varNomNorm.includes(qNorm);
+
+            if (coincideVariante) {
+              const nombreConVar = `${m.nombre} (${v.nombre})`;
+              if (!itemsSugeridos.some((it) => it.nombreMostrar === nombreConVar)) {
+                const mVar = compendio.aplicarVariante(m, v);
+                itemsSugeridos.push({
+                  id: m.id,
+                  varianteId: v.id,
+                  nombreMostrar: nombreConVar,
+                  monstruoRef: mVar,
+                  pg: Number(mVar.pg) || Number(m.pg) || 10,
+                  ca: mVar.ca || m.ca,
+                  des: (mVar.atributos && mVar.atributos.des !== undefined) ? mVar.atributos.des : (m.atributos?.des ?? 10)
+                });
+              }
+            }
+          }
+        }
+      }
+
+      if (itemsSugeridos.length === 0) {
+        cerrarSugerencias();
+        return;
+      }
+
+      cajaSugerencias.innerHTML = renderizarSugerenciasMonstruos(itemsSugeridos);
+      cajaSugerencias.style.display = 'block';
+
+      cajaSugerencias.querySelectorAll('.sugerencia-item').forEach((item) => {
+        item.onclick = (e) => {
+          e.stopPropagation();
+          const nombreSel = item.dataset.nombre;
+          const pg = Number(item.dataset.pg) || 10;
+          const caMatch = String(item.dataset.ca || '').match(/\d+/);
+          const caVal = caMatch ? Number(caMatch[0]) : 10;
+          const desVal = Number(item.dataset.des) || 10;
+
+          inNombre.value = nombreSel;
+          if (inHp) inHp.value = pg;
+          if (inAc) inAc.value = caVal;
+
+          setTipoTracker('npc');
+          setBandoTracker('enemy');
+
+          trackerDesModActual = Math.floor((desVal - 10) / 2);
+          if (inInit) {
+            inInit.placeholder = trackerDesModActual >= 0 ? `+${trackerDesModActual}` : `${trackerDesModActual}`;
+          }
+
+          const mId = item.dataset.id;
+          const base = compendio.obtenerMonstruoPorId(mId);
+          const vId = item.dataset.varianteId;
+          const variante = (base && Array.isArray(base.variantes)) ? base.variantes.find((v) => v.id === vId) : null;
+          trackerMonstruoSeleccionado = (base && variante) ? compendio.aplicarVariante(base, variante) : base;
+
+          cerrarSugerencias();
+          if (inInit) inInit.focus();
+        };
+      });
+    };
+
+    inNombre.onkeydown = (e) => {
+      if (e.key === 'Escape') cerrarSugerencias();
+    };
+
+    document.addEventListener('click', (e) => {
+      if (cajaSugerencias && !cajaSugerencias.contains(e.target) && e.target !== inNombre) {
+        cerrarSugerencias();
+      }
+    });
+  }
+
+  // Tirar iniciativa en el formulario con 3D
+  if (btnTirarInit) {
+    btnTirarInit.onclick = () => {
+      const nombre = (inNombre && inNombre.value.trim()) || (trackerMonstruoSeleccionado && trackerMonstruoSeleccionado.nombre) || 'Iniciativa';
+      const mod = trackerDesModActual || 0;
+      const modStr = mod !== 0 ? (mod > 0 ? `+${mod}` : `${mod}`) : '';
+
+      abrirModalDados({
+        configTirada: {
+          cantidad: 1,
+          caras: 20,
+          mod: mod,
+          etiqueta: `1d20${modStr}`,
+          tipoDano: 'general',
+          tipoTirada: 'iniciativa'
+        },
+        nombreMonstruo: nombre,
+        nombreAccion: 'Tirada de Iniciativa',
+        alTerminar: (res) => {
+          if (inInit) {
+            inInit.value = res.total;
+          }
+          setTimeout(() => {
+            cerrarModalDados();
+          }, 1400);
+        }
+      });
+    };
+  }
+
+  // Agregar combatiente
+  function ejecutarAgregar() {
+    const nombre = inNombre ? inNombre.value.trim() : '';
+    if (!nombre) {
+      if (inNombre) inNombre.focus();
+      return;
+    }
+
+    const iniciativa = inInit && inInit.value !== '' ? Number(inInit.value) : (trackerDesModActual || 0);
+    const hp = Number(inHp ? inHp.value : 0) || 10;
+    const ac = Number(inAc ? inAc.value : 0) || 10;
+    const tipo = inTipo ? inTipo.value : 'npc';
+    const bando = inBando ? inBando.value : 'enemy';
+    const monstruoId = trackerMonstruoSeleccionado ? trackerMonstruoSeleccionado.id : null;
+
+    rastreador.agregarCombatiente({
+      nombre,
+      iniciativa,
+      hp,
+      maxHp: hp,
+      ca: ac,
+      tipo,
+      bando,
+      monstruoId,
+      desMod: trackerDesModActual
+    });
+
+    // Resetear formulario
+    if (inNombre) inNombre.value = '';
+    if (inInit) {
+      inInit.value = '';
+      inInit.placeholder = 'd20';
+    }
+    if (inHp) inHp.value = '';
+    if (inAc) inAc.value = '';
+    setTipoTracker('npc');
+    setBandoTracker('enemy');
+    trackerMonstruoSeleccionado = null;
+    trackerDesModActual = 0;
+    cerrarSugerencias();
+
+    actualizarVistaRoster();
+    if (inNombre) inNombre.focus();
+  }
+
+
+  if (btnAgregar) {
+    btnAgregar.onclick = ejecutarAgregar;
+  }
+
+  [inNombre, inInit, inHp, inAc].forEach((input) => {
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          ejecutarAgregar();
+        }
+      });
+    }
+  });
+
+  // Botones de Ronda y Turno
+  const btnNext = document.getElementById('btn-tracker-next-turn');
+  if (btnNext) {
+    btnNext.onclick = () => {
+      rastreador.siguienteTurno();
+      actualizarVistaRoster();
+    };
+  }
+
+  const btnPrev = document.getElementById('btn-tracker-prev-turn');
+  if (btnPrev) {
+    btnPrev.onclick = () => {
+      rastreador.anteriorTurno();
+      actualizarVistaRoster();
+    };
+  }
+
+  const btnOrdenar = document.getElementById('btn-tracker-ordenar');
+  if (btnOrdenar) {
+    btnOrdenar.onclick = () => {
+      rastreador.ordenarCombatientes();
+      actualizarVistaRoster();
+    };
+  }
+
+  const btnReiniciarRonda = document.getElementById('btn-tracker-reiniciar-ronda');
+  if (btnReiniciarRonda) {
+    btnReiniciarRonda.onclick = () => {
+      if (confirm('¿Deseas reiniciar la ronda a 1?')) {
+        rastreador.reiniciarRonda();
+        actualizarVistaRoster();
+      }
+    };
+  }
+
+  const btnVaciar = document.getElementById('btn-tracker-vaciar');
+  if (btnVaciar) {
+    btnVaciar.onclick = () => {
+      if (confirm('¿Estás seguro de que deseas vaciar todos los combatientes del encuentro?')) {
+        rastreador.vaciarRegistro();
+        actualizarVistaRoster();
+      }
+    };
+  }
+
+  enlazarEventosRoster();
+}
+
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
@@ -2701,7 +3631,12 @@ function render() {
   const ruta = analizarHash();
   const app  = document.getElementById('app');
 
-  if (ruta.vista === 'detalle') {
+  actualizarTabsNavegacion(ruta.vista);
+
+  if (ruta.vista === 'iniciativa') {
+    app.innerHTML = vistaTracker({ estado: rastreador.obtenerEstado() });
+    enlazarEventosTracker();
+  } else if (ruta.vista === 'detalle') {
     const base     = compendio.obtenerMonstruoPorId(ruta.id);
     const variante = compendio.obtenerVarianteSeleccionada(base);
     const monstruo = base ? compendio.aplicarVariante(base, variante) : null;

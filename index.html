@@ -603,6 +603,958 @@ button.fantasma:disabled:hover{background:transparent;}
   background: var(--pergamino);
 }
 
+/* ===================== BARRA DE NAVEGACIÓN SUPERIOR ===================== */
+.barra-navegacion-superior {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-family: 'Cinzel', serif;
+  font-size: 13.5px;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  color: #dfd2be;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(184, 135, 74, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.nav-tab:hover {
+  background: rgba(184, 135, 74, 0.25);
+  color: #fff;
+  border-color: var(--oro-claro);
+  transform: translateY(-1px);
+}
+
+.nav-tab.activa {
+  background: linear-gradient(180deg, #c7934c 0%, #8c5d26 100%);
+  color: #1a1209;
+  font-weight: 700;
+  border-color: #ffdca3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+.nav-icono {
+  font-size: 15px;
+}
+
+/* ===================== ESTILOS DEL RASTREADOR DE INICIATIVA ===================== */
+:root {
+  --ink: #14110d;
+  --ink-2: #1c1810;
+  --parchment: #e9dcbd;
+  --parchment-dim: #a9986c;
+  --ember: #c1663a;
+  --ember-bright: #e08a52;
+  --blood: #7a2e2e;
+  --gold: #cfa233;
+  --line: #4a4030;
+}
+
+.tracker-contenedor {
+  max-width: 820px;
+  margin: 0 auto;
+  font-family: Georgia, 'Iowan Old Style', serif;
+  color: var(--parchment);
+}
+
+.tracker-cabecera-batalla {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.eyebrow.tracker-eyebrow {
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--ember-bright);
+  font-family: 'Trebuchet MS', sans-serif;
+  margin-bottom: 4px;
+}
+
+.tracker-titulo-principal {
+  font-size: 32px;
+  margin: 4px 0;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--parchment);
+  font-family: Georgia, serif;
+}
+
+.rule.tracker-rule {
+  width: 140px;
+  height: 1px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.round-bar.tracker-round-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 22px 0 18px;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.round-badge.tracker-round-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.round-num {
+  font-family: Georgia, serif;
+  font-size: 40px;
+  color: var(--gold);
+}
+
+.round-label {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+  margin-top: 4px;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.tracker-turno-actual {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 11.5px;
+  color: var(--parchment-dim);
+  margin-top: 6px;
+}
+
+.turno-indicador {
+  color: var(--ember-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10.5px;
+}
+
+.turno-nombre-activo {
+  color: var(--gold);
+}
+
+.turno-vacio {
+  color: var(--parchment-dim);
+  font-style: italic;
+}
+
+/* Botones originales */
+.btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--parchment-dim);
+  padding: 8px 16px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  border-color: var(--ember-bright);
+  color: var(--ember-bright);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--ember-bright), var(--ember));
+  border: 1px solid #8a4325;
+  color: #1a0e08;
+  font-weight: bold;
+  padding: 9px 20px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-family: 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: filter 0.15s ease;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.12);
+}
+
+/* Panel Formulario */
+.tracker-form-panel {
+  background: var(--ink-2) !important;
+  border: 1px solid var(--line) !important;
+  padding: 14px 16px !important;
+  border-radius: 4px !important;
+  margin-bottom: 26px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+.tracker-form-panel .form-titulo {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ember-bright);
+  margin: 0 0 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+}
+
+.field-label {
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+  margin-bottom: 4px;
+  display: block;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.tracker-form-panel input,
+.tracker-form-panel select {
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  padding: 8px 8px !important;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 13px !important;
+  border-radius: 3px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tracker-form-panel input::placeholder {
+  color: #6b5f45;
+}
+
+.tracker-form-panel input:focus {
+  outline: none !important;
+  border-color: var(--ember-bright) !important;
+  box-shadow: 0 0 0 1px var(--ember-bright) !important;
+}
+
+/* Ocultar flechas/spinners de inputs numéricos para que no tapen los números */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+#inTrackerInit {
+  font-family: Georgia, 'JetBrains Mono', serif !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  color: var(--gold) !important;
+  text-align: center !important;
+  min-width: 48px !important;
+  width: 100% !important;
+}
+#inTrackerInit::placeholder {
+  color: #8c7853 !important;
+  font-weight: normal !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+}
+
+.tracker-add-grid {
+  display: grid;
+  grid-template-columns: 2fr 160px 0.85fr 0.85fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+/* Dropdowns tipo compendio en el formulario (flotantes sin agrandar cuadrícula) */
+.campo-tracker-dd {
+  position: relative !important;
+  min-width: 80px;
+}
+
+.dd-tracker {
+  position: relative !important;
+}
+
+.dd-tracker > summary {
+  list-style: none;
+  position: relative;
+  cursor: pointer;
+  padding-right: 22px !important;
+  user-select: none;
+}
+
+.dd-tracker > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dd-tracker > summary::after {
+  content: '▾';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--parchment-dim);
+  transition: transform 0.15s ease;
+}
+
+.dd-tracker[open] > summary::after {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--ember-bright);
+}
+
+.dd-tracker .control-filtro {
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  padding: 8px 10px !important;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 13px !important;
+  border-radius: 3px !important;
+  cursor: pointer;
+}
+
+.dd-tracker[open] > summary {
+  outline: none !important;
+  border-color: var(--ember-bright) !important;
+}
+
+.dd-panel-tracker {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  left: 0 !important;
+  z-index: 250 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  padding: 6px !important;
+  background: var(--ink-2) !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9) !important;
+  min-width: 140px !important;
+  width: max-content !important;
+  box-sizing: border-box !important;
+}
+
+.chip-tracker {
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 12px !important;
+  padding: 5px 8px !important;
+}
+
+.chip-tracker:hover {
+  border-color: var(--ember-bright) !important;
+  color: var(--ember-bright) !important;
+}
+
+.chip-tracker:has(input:checked) {
+  box-shadow: inset 0 0 0 2px var(--ember-bright) !important;
+  color: #fff !important;
+}
+
+
+.campo-init-wrapper {
+  min-width: 0;
+}
+
+.input-con-dado {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-con-dado input {
+  flex: 1;
+  min-width: 40px !important;
+}
+
+.btn-dado-init {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  padding: 7px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-dado-init:hover {
+  border-color: var(--ember-bright);
+  color: var(--ember-bright);
+}
+
+/* Sugerencias de Autocompletado (solo nombre y variantes) */
+.campo-autocompletar-wrapper {
+  position: relative;
+}
+
+.input-con-sugerencias {
+  position: relative;
+}
+
+.sugerencias-desplegable {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  background: var(--ink-2);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 3px;
+}
+
+.sugerencia-item {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(74, 64, 48, 0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.12s;
+}
+
+.sugerencia-item:last-child {
+  border-bottom: none;
+}
+
+.sugerencia-item:hover {
+  background: rgba(193, 102, 58, 0.22);
+}
+
+.sugerencia-texto-nombre {
+  font-family: Georgia, 'EB Garamond', serif;
+  font-size: 14.5px;
+  color: var(--parchment);
+}
+
+.sugerencia-item:hover .sugerencia-texto-nombre {
+  color: #fff;
+}
+
+/* Roster Section */
+.tracker-roster-seccion {
+  margin-top: 22px;
+}
+
+.tracker-roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tracker-roster-titulo {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  color: var(--parchment);
+  margin: 0;
+}
+
+.tracker-roster-ayuda {
+  font-size: 11px;
+  color: var(--parchment-dim);
+  font-family: 'Trebuchet MS', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.tracker-vacio {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--parchment-dim);
+  font-style: italic;
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  background: rgba(28, 24, 16, 0.4);
+}
+
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Tarjeta Combatiente (Fiel al original) */
+.card.tracker-tarjeta {
+  display: grid;
+  grid-template-columns: 56px 1fr auto auto auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 4px;
+  padding: 12px 14px;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.card.tracker-tarjeta.active {
+  box-shadow: 0 0 0 1px rgba(207, 162, 51, 0.45), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.card.tracker-tarjeta.ally {
+  border-left-color: #4a7a52;
+}
+.card.tracker-tarjeta.ally:not(.active) {
+  background: linear-gradient(90deg, rgba(94, 141, 102, 0.09), var(--ink-2) 42%);
+}
+
+.card.tracker-tarjeta.enemy {
+  border-left-color: var(--blood);
+}
+.card.tracker-tarjeta.enemy:not(.active) {
+  background: linear-gradient(90deg, rgba(122, 46, 46, 0.12), var(--ink-2) 42%);
+}
+
+.card.tracker-tarjeta.down {
+  opacity: 0.45;
+}
+
+/* Columna Init */
+.tracker-col-init {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 50px;
+}
+
+.init-num {
+  font-size: 24px;
+  text-align: center;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  font-family: Georgia, serif;
+}
+
+.card.tracker-tarjeta.active .init-num {
+  color: var(--ember-bright);
+}
+
+.tracker-input-init {
+  width: 54px;
+  min-width: 54px;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--gold) !important;
+  text-align: center;
+  font-family: Georgia, serif !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  padding: 2px 0 !important;
+  border-radius: 3px;
+  display: block;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.tracker-input-init:hover {
+  border-color: var(--line) !important;
+}
+
+.tracker-input-init:focus {
+  background: var(--ink) !important;
+  border-color: var(--ember-bright) !important;
+  color: var(--ember-bright) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--ember-bright) !important;
+}
+
+.btn-reroll-init {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--parchment-dim);
+  padding: 0;
+  transition: transform 0.15s;
+}
+
+.btn-reroll-init:hover {
+  transform: scale(1.25);
+  color: var(--ember-bright);
+}
+
+/* Columna Info / Nombre */
+.name-block {
+  min-width: 0;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Input editable de Nombre con contraste perfecto al editar */
+.cname-input {
+  font-size: 17px !important;
+  color: var(--parchment) !important;
+  font-family: Georgia, 'EB Garamond', serif !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 3px !important;
+  padding: 2px 4px !important;
+  flex: 1;
+  min-width: 100px;
+}
+
+.cname-input:hover {
+  border-color: var(--line) !important;
+}
+
+.cname-input:focus {
+  background: #231c14 !important; /* fondo cálido oscuro de alto contraste */
+  color: #fff !important;
+  border: 1px solid var(--ember-bright) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--ember-bright) !important;
+}
+
+.cname-input::selection,
+.editable-inline::selection {
+  background: var(--gold) !important;
+  color: var(--ink) !important;
+}
+
+/* Tags PJ / PNJ / Aliado / Enemigo */
+.tag {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tag.pc {
+  background: rgba(94, 141, 102, 0.18);
+  color: #7fbf8a;
+  border: 1px solid rgba(127, 191, 138, 0.3);
+}
+
+.tag.npc {
+  background: rgba(122, 46, 46, 0.25);
+  color: #d98a8a;
+  border: 1px solid rgba(217, 138, 138, 0.3);
+}
+
+.tag.tracker-tag-ficha {
+  background: rgba(207, 162, 51, 0.15);
+  color: var(--gold);
+  border: 1px solid rgba(207, 162, 51, 0.3);
+  text-decoration: none;
+}
+
+/* Condiciones y estados SIN RECTÁNGULO BLANCO */
+.tracker-condiciones-fila {
+  margin-top: 3px;
+}
+
+.cond-input {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dashed var(--line) !important;
+  color: var(--ember-bright) !important;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 11px !important;
+  padding: 2px 0 !important;
+  margin-top: 3px !important;
+  box-shadow: none !important;
+}
+
+.cond-input::placeholder {
+  color: #5a4f3a !important;
+}
+
+.cond-input:focus {
+  outline: none !important;
+  border-bottom-color: var(--ember-bright) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tracker-barra-hp-wrapper {
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.tracker-barra-hp {
+  height: 100%;
+  transition: width 0.25s ease;
+}
+
+/* Columna HP */
+.stat {
+  text-align: center;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--parchment-dim);
+  margin-bottom: 2px;
+}
+
+.hp-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tracker-hp-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.tracker-input-hp-actual {
+  width: 44px;
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  text-align: center;
+  padding: 3px 2px;
+  border-radius: 3px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.tracker-input-hp-actual:focus {
+  border-color: var(--ember-bright) !important;
+  outline: none !important;
+}
+
+.tracker-hp-separador {
+  color: var(--parchment-dim);
+  font-size: 13px;
+}
+
+.tracker-input-hp-max {
+  width: 44px;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--parchment-dim) !important;
+  text-align: center;
+  padding: 3px 2px;
+  border-radius: 3px;
+  font-family: Georgia, serif;
+  font-size: 13px;
+}
+
+.tracker-input-hp-max:hover,
+.tracker-input-hp-max:focus {
+  background: var(--ink) !important;
+  border-color: var(--line) !important;
+  color: var(--parchment) !important;
+  outline: none !important;
+}
+
+.hp-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hp-amount {
+  width: 40px;
+  height: 24px;
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  text-align: center;
+  padding: 3px 2px;
+  border-radius: 3px;
+  font-family: 'Trebuchet MS', sans-serif !important;
+  font-size: 12px !important;
+}
+
+.hp-amount:focus {
+  border-color: var(--ember-bright) !important;
+  outline: none !important;
+}
+
+.hp-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 3px;
+  background: transparent;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.hp-btn.dmg {
+  color: #d98a8a;
+}
+
+.hp-btn.dmg:hover {
+  border-color: var(--blood);
+  background: rgba(122, 46, 46, 0.18);
+}
+
+.hp-btn.heal {
+  color: #7fbf8a;
+}
+
+.hp-btn.heal:hover {
+  border-color: #4a7a52;
+  background: rgba(94, 141, 102, 0.18);
+}
+
+/* Columna CA */
+.tracker-input-ac {
+  width: 44px;
+  background: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--parchment) !important;
+  text-align: center;
+  padding: 4px 2px;
+  border-radius: 3px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.tracker-input-ac:focus {
+  border-color: var(--ember-bright) !important;
+  outline: none !important;
+}
+
+/* Acciones */
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--parchment-dim);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.icon-btn:hover {
+  border-color: var(--ember-bright);
+  color: var(--ember-bright);
+}
+
+.icon-btn.danger:hover {
+  border-color: var(--blood);
+  color: #e08585;
+}
+
+/* Controles inferiores */
+.controls-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+/* ===================== RESPONSIVIDAD ===================== */
+@media (max-width: 760px) {
+  .tracker-add-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .campo-autocompletar-wrapper {
+    grid-column: 1 / -1;
+  }
+  .campo-boton-agregar {
+    grid-column: 1 / -1;
+  }
+  .btn-agregar-combatiente {
+    width: 100%;
+  }
+  .card.tracker-tarjeta {
+    grid-template-columns: 36px 1fr auto auto;
+    row-gap: 8px;
+  }
+  .actions.tracker-col-acciones {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 520px) {
+  .round-bar.tracker-round-bar {
+    gap: 10px;
+  }
+  .tracker-add-grid {
+    grid-template-columns: 1fr;
+  }
+  .card.tracker-tarjeta {
+    grid-template-columns: 36px 1fr;
+    row-gap: 10px;
+  }
+  .stat.tracker-col-hp,
+  .stat.tracker-col-ac {
+    grid-column: span 1;
+    text-align: left;
+  }
+  .hp-controls {
+    justify-content: flex-start;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -610,6 +1562,14 @@ button.fantasma:disabled:hover{background:transparent;}
 <div class="cabecera">
   <h1>Compendio de Monstruos</h1>
   <p>Colección personal — Dungeons &amp; Dragons, edición revisada 2024</p>
+  <nav class="barra-navegacion-superior" aria-label="Navegación principal">
+    <a href="#/" class="nav-tab activa" id="nav-tab-compendio">
+      <span class="nav-icono">📖</span> Compendio
+    </a>
+    <a href="#/iniciativa" class="nav-tab" id="nav-tab-iniciativa">
+      <span class="nav-icono">⚔️</span> Rastreador de Batalla
+    </a>
+  </nav>
 </div>
 
 <div class="contenedor" id="app"></div>
@@ -618,3 +1578,4 @@ button.fantasma:disabled:hover{background:transparent;}
 <script src="./src/app.bundle.js"></script>
 </body>
 </html>
+

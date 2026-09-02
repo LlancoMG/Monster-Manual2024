@@ -10,11 +10,13 @@ ARCHIVOS_EN_ORDEN = [
     'src/features/nombres-en.js',
     'src/features/utils.js',
     'src/features/storage.js',
+    'src/features/tracker-model.js',
     'src/features/dice-audio.js',
     'src/features/dice-parser.js',
     'src/features/dice-3d.js',
     'src/features/monster-model.js',
     'src/ui/dice-modal.js',
+    'src/ui/tracker-views.js',
     'src/ui/monster-views.js',
     'src/ui/filtros-views.js',
     'src/app.js'

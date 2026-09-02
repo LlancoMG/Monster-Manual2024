@@ -15,6 +15,8 @@ let modalAbierto = false;
 let configTiradaActual = null;
 let resultadoActual = null;
 let tiradaIdActual = 0;
+let callbackAlTerminarActual = null;
+let callbackEjecutadoParaTirada = 0;
 
 function manejarEscModalDados(evento) {
   if (evento.key === 'Escape') cerrarModalDados();
@@ -37,14 +39,18 @@ export function cerrarModalDados() {
   modalAbierto = false;
   configTiradaActual = null;
   resultadoActual = null;
+  callbackAlTerminarActual = null;
+  callbackEjecutadoParaTirada = 0;
   document.removeEventListener('keydown', manejarEscModalDados);
   window.removeEventListener('resize', manejarResizeModalDados);
 }
 
-export function abrirModalDados({ configTirada, nombreMonstruo = '', nombreAccion = '' }) {
+export function abrirModalDados({ configTirada, nombreMonstruo = '', nombreAccion = '', alTerminar = null }) {
   cerrarModalDados(); // Evitar duplicados
 
   configTiradaActual = configTirada;
+  callbackAlTerminarActual = alTerminar;
+  callbackEjecutadoParaTirada = 0;
   modalAbierto = true;
 
   const infoDano = DANOS_INFO[configTirada.tipoDano] || DANOS_INFO.general;
@@ -193,4 +199,13 @@ function actualizarPanelResultadoFinal(res, config) {
     </div>
     ${resumenDetalle}
   `;
+
+  if (typeof callbackAlTerminarActual === 'function' && callbackEjecutadoParaTirada !== tiradaIdActual) {
+    callbackEjecutadoParaTirada = tiradaIdActual;
+    try {
+      callbackAlTerminarActual(res);
+    } catch (err) {
+      console.error('Error en callbackAlTerminar de tirada de dados:', err);
+    }
+  }
 }
