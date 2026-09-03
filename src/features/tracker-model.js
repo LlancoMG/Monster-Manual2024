@@ -1,5 +1,5 @@
 // src/features/tracker-model.js
-// Gestor de estado y lógica para el Rastreador de Batalla e Iniciativa.
+// Gestor de estado y lógica para el Rastreador de Iniciativa.
 
 const CLAVE_STORAGE_INICIATIVA = 'compendio_iniciativa_estado';
 

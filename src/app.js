@@ -336,7 +336,7 @@ function actualizarVistaRoster() {
   if (turnoEl) {
     const cActivo = estado.combatientes.length > 0 ? estado.combatientes[estado.indiceActivo] : null;
     turnoEl.innerHTML = cActivo
-      ? `<span class="turno-indicador">Turno:</span> <b>${escapeHtml(cActivo.nombre)}</b>`
+      ? `<span class="turno-indicador">Turno:</span> <b class="turno-nombre-activo">${escapeHtml(cActivo.nombre)}</b>`
       : '<span class="turno-vacio">Sin combatientes activos</span>';
   }
 
@@ -649,11 +649,6 @@ function enlazarEventosTracker() {
       trackerMonstruoSeleccionado = (base && variante) ? compendio.aplicarVariante(base, variante) : base;
     }
 
-    // Función que solo carga el nombre (sin PV, CA ni datos extra)
-    function soloNombreDesdeItem(item) {
-      inNombre.value = item.dataset.nombre;
-    }
-
     let indiceSugerido = -1;
 
     function resaltarSugerencia(items, nuevoIndice) {
@@ -683,14 +678,14 @@ function enlazarEventosTracker() {
         resaltarSugerencia(items, indiceSugerido);
       } else if (e.key === 'Enter') {
         if (visible && indiceSugerido >= 0 && items[indiceSugerido]) {
-          // Primer Enter con lista abierta y flecha usada: solo pone el nombre
+          // El primer Enter selecciona y carga los datos predeterminados.
           e.preventDefault();
-          soloNombreDesdeItem(items[indiceSugerido]);
+          e.stopImmediatePropagation();
+          cargarMonstruoDesdeItem(items[indiceSugerido]);
           cerrarSugerencias();
           indiceSugerido = -1;
         }
-        // Si la lista no está visible o no hay ítem seleccionado, Enter no hace nada aquí
-        // (el segundo Enter en el campo nombre puede usarse libremente)
+        // El segundo Enter, ya sin sugerencias visibles, añade el combatiente.
       } else if (e.key === 'Escape') {
         cerrarSugerencias();
         indiceSugerido = -1;
