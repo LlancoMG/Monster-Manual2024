@@ -3440,38 +3440,48 @@ function enlazarEventosTracker() {
       cajaSugerencias.innerHTML = renderizarSugerenciasMonstruos(itemsSugeridos);
       cajaSugerencias.style.display = 'block';
 
+      // Click con ratón → carga todo el monstruo directamente
       cajaSugerencias.querySelectorAll('.sugerencia-item').forEach((item) => {
         item.onclick = (e) => {
           e.stopPropagation();
-          const nombreSel = item.dataset.nombre;
-          const pg = Number(item.dataset.pg) || 10;
-          const caMatch = String(item.dataset.ca || '').match(/\d+/);
-          const caVal = caMatch ? Number(caMatch[0]) : 10;
-          const desVal = Number(item.dataset.des) || 10;
-
-          inNombre.value = nombreSel;
-          if (inHp) inHp.value = pg;
-          if (inAc) inAc.value = caVal;
-
-          setTipoTracker('npc');
-          setBandoTracker('enemy');
-
-          trackerDesModActual = Math.floor((desVal - 10) / 2);
-          if (inInit) {
-            inInit.placeholder = trackerDesModActual >= 0 ? `+${trackerDesModActual}` : `${trackerDesModActual}`;
-          }
-
-          const mId = item.dataset.id;
-          const base = compendio.obtenerMonstruoPorId(mId);
-          const vId = item.dataset.varianteId;
-          const variante = (base && Array.isArray(base.variantes)) ? base.variantes.find((v) => v.id === vId) : null;
-          trackerMonstruoSeleccionado = (base && variante) ? compendio.aplicarVariante(base, variante) : base;
-
+          cargarMonstruoDesdeItem(item);
           cerrarSugerencias();
           if (inInit) inInit.focus();
         };
       });
     };
+
+    // Función que carga todos los datos del monstruo al formulario
+    function cargarMonstruoDesdeItem(item) {
+      const nombreSel = item.dataset.nombre;
+      const pg = Number(item.dataset.pg) || 10;
+      const caMatch = String(item.dataset.ca || '').match(/\d+/);
+      const caVal = caMatch ? Number(caMatch[0]) : 10;
+      const desVal = Number(item.dataset.des) || 10;
+
+      inNombre.value = nombreSel;
+      if (inHp) inHp.value = pg;
+      if (inAc) inAc.value = caVal;
+
+      setTipoTracker('npc');
+      setBandoTracker('enemy');
+
+      trackerDesModActual = Math.floor((desVal - 10) / 2);
+      if (inInit) {
+        inInit.placeholder = trackerDesModActual >= 0 ? `+${trackerDesModActual}` : `${trackerDesModActual}`;
+      }
+
+      const mId = item.dataset.id;
+      const base = compendio.obtenerMonstruoPorId(mId);
+      const vId = item.dataset.varianteId;
+      const variante = (base && Array.isArray(base.variantes)) ? base.variantes.find((v) => v.id === vId) : null;
+      trackerMonstruoSeleccionado = (base && variante) ? compendio.aplicarVariante(base, variante) : base;
+    }
+
+    // Función que solo carga el nombre (sin PV, CA ni datos extra)
+    function soloNombreDesdeItem(item) {
+      inNombre.value = item.dataset.nombre;
+    }
 
     let indiceSugerido = -1;
 
@@ -3502,10 +3512,14 @@ function enlazarEventosTracker() {
         resaltarSugerencia(items, indiceSugerido);
       } else if (e.key === 'Enter') {
         if (visible && indiceSugerido >= 0 && items[indiceSugerido]) {
+          // Primer Enter con lista abierta y flecha usada: solo pone el nombre
           e.preventDefault();
-          items[indiceSugerido].click();
+          soloNombreDesdeItem(items[indiceSugerido]);
+          cerrarSugerencias();
           indiceSugerido = -1;
         }
+        // Si la lista no está visible o no hay ítem seleccionado, Enter no hace nada aquí
+        // (el segundo Enter en el campo nombre puede usarse libremente)
       } else if (e.key === 'Escape') {
         cerrarSugerencias();
         indiceSugerido = -1;
