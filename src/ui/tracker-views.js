@@ -1,5 +1,5 @@
 // src/ui/tracker-views.js
-// Vistas y plantillas HTML para el Rastreador de Iniciativa y Registro de Batalla.
+// Vistas y plantillas HTML para el Rastreador de Iniciativa.
 
 import { escapeHtml } from '../features/utils.js';
 
@@ -11,7 +11,7 @@ export function vistaTracker({ estado }) {
     <div class="tracker-contenedor">
       <div class="tracker-cabecera-batalla">
         <div class="eyebrow tracker-eyebrow">Sesión de Mesa &bull; Encuentro Activo</div>
-        <h1 class="tracker-titulo-principal">Registro de Batalla</h1>
+        <h1 class="tracker-titulo-principal">Rastreador de Iniciativa</h1>
         <div class="rule tracker-rule"></div>
 
         <div class="round-bar tracker-round-bar">
@@ -106,7 +106,7 @@ export function vistaTracker({ estado }) {
 
       <div class="tracker-roster-seccion">
         <div class="tracker-roster-header">
-          <h2 class="tracker-roster-titulo">Orden de Batalla (${combatientes.length})</h2>
+          <h2 class="tracker-roster-titulo">Orden de Iniciativa (${combatientes.length})</h2>
           <div class="tracker-roster-ayuda">Haz clic en cualquier valor para editarlo en vivo</div>
         </div>
 

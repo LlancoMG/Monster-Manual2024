@@ -336,7 +336,7 @@ function guardarImportados(lista) {
 }
 // ---- src/features/tracker-model.js ----
 // src/features/tracker-model.js
-// Gestor de estado y lógica para el Rastreador de Batalla e Iniciativa.
+// Gestor de estado y lógica para el Rastreador de Iniciativa.
 
 const CLAVE_STORAGE_INICIATIVA = 'compendio_iniciativa_estado';
 
@@ -2284,7 +2284,7 @@ function actualizarPanelResultadoFinal(res, config) {
 }
 // ---- src/ui/tracker-views.js ----
 // src/ui/tracker-views.js
-// Vistas y plantillas HTML para el Rastreador de Iniciativa y Registro de Batalla.
+// Vistas y plantillas HTML para el Rastreador de Iniciativa.
 
 
 function vistaTracker({ estado }) {
@@ -2295,7 +2295,7 @@ function vistaTracker({ estado }) {
     <div class="tracker-contenedor">
       <div class="tracker-cabecera-batalla">
         <div class="eyebrow tracker-eyebrow">Sesión de Mesa &bull; Encuentro Activo</div>
-        <h1 class="tracker-titulo-principal">Registro de Batalla</h1>
+        <h1 class="tracker-titulo-principal">Rastreador de Iniciativa</h1>
         <div class="rule tracker-rule"></div>
 
         <div class="round-bar tracker-round-bar">
@@ -2390,7 +2390,7 @@ function vistaTracker({ estado }) {
 
       <div class="tracker-roster-seccion">
         <div class="tracker-roster-header">
-          <h2 class="tracker-roster-titulo">Orden de Batalla (${combatientes.length})</h2>
+          <h2 class="tracker-roster-titulo">Orden de Iniciativa (${combatientes.length})</h2>
           <div class="tracker-roster-ayuda">Haz clic en cualquier valor para editarlo en vivo</div>
         </div>
 
@@ -3165,7 +3165,7 @@ function actualizarVistaRoster() {
   if (turnoEl) {
     const cActivo = estado.combatientes.length > 0 ? estado.combatientes[estado.indiceActivo] : null;
     turnoEl.innerHTML = cActivo
-      ? `<span class="turno-indicador">Turno:</span> <b>${escapeHtml(cActivo.nombre)}</b>`
+      ? `<span class="turno-indicador">Turno:</span> <b class="turno-nombre-activo">${escapeHtml(cActivo.nombre)}</b>`
       : '<span class="turno-vacio">Sin combatientes activos</span>';
   }
 
@@ -3478,11 +3478,6 @@ function enlazarEventosTracker() {
       trackerMonstruoSeleccionado = (base && variante) ? compendio.aplicarVariante(base, variante) : base;
     }
 
-    // Función que solo carga el nombre (sin PV, CA ni datos extra)
-    function soloNombreDesdeItem(item) {
-      inNombre.value = item.dataset.nombre;
-    }
-
     let indiceSugerido = -1;
 
     function resaltarSugerencia(items, nuevoIndice) {
@@ -3512,14 +3507,14 @@ function enlazarEventosTracker() {
         resaltarSugerencia(items, indiceSugerido);
       } else if (e.key === 'Enter') {
         if (visible && indiceSugerido >= 0 && items[indiceSugerido]) {
-          // Primer Enter con lista abierta y flecha usada: solo pone el nombre
+          // El primer Enter selecciona y carga los datos predeterminados.
           e.preventDefault();
-          soloNombreDesdeItem(items[indiceSugerido]);
+          e.stopImmediatePropagation();
+          cargarMonstruoDesdeItem(items[indiceSugerido]);
           cerrarSugerencias();
           indiceSugerido = -1;
         }
-        // Si la lista no está visible o no hay ítem seleccionado, Enter no hace nada aquí
-        // (el segundo Enter en el campo nombre puede usarse libremente)
+        // El segundo Enter, ya sin sugerencias visibles, añade el combatiente.
       } else if (e.key === 'Escape') {
         cerrarSugerencias();
         indiceSugerido = -1;
