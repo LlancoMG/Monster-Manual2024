@@ -1048,13 +1048,19 @@ input[type=number] {
   background: rgba(193, 102, 58, 0.22);
 }
 
+.sugerencia-item.sugerencia-resaltada {
+  background: rgba(207, 162, 51, 0.2);
+  outline: 1px solid rgba(207, 162, 51, 0.5);
+}
+
 .sugerencia-texto-nombre {
   font-family: Georgia, 'EB Garamond', serif;
   font-size: 14.5px;
   color: var(--parchment);
 }
 
-.sugerencia-item:hover .sugerencia-texto-nombre {
+.sugerencia-item:hover .sugerencia-texto-nombre,
+.sugerencia-item.sugerencia-resaltada .sugerencia-texto-nombre {
   color: #fff;
 }
 

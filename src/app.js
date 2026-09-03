@@ -644,8 +644,45 @@ function enlazarEventosTracker() {
       });
     };
 
+    let indiceSugerido = -1;
+
+    function resaltarSugerencia(items, nuevoIndice) {
+      items.forEach((it, i) => {
+        it.classList.toggle('sugerencia-resaltada', i === nuevoIndice);
+        if (i === nuevoIndice) {
+          it.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    }
+
     inNombre.onkeydown = (e) => {
-      if (e.key === 'Escape') cerrarSugerencias();
+      const items = cajaSugerencias
+        ? Array.from(cajaSugerencias.querySelectorAll('.sugerencia-item'))
+        : [];
+      const visible = cajaSugerencias && cajaSugerencias.style.display !== 'none' && items.length > 0;
+
+      if (e.key === 'ArrowDown') {
+        if (!visible) return;
+        e.preventDefault();
+        indiceSugerido = (indiceSugerido + 1) % items.length;
+        resaltarSugerencia(items, indiceSugerido);
+      } else if (e.key === 'ArrowUp') {
+        if (!visible) return;
+        e.preventDefault();
+        indiceSugerido = (indiceSugerido - 1 + items.length) % items.length;
+        resaltarSugerencia(items, indiceSugerido);
+      } else if (e.key === 'Enter') {
+        if (visible && indiceSugerido >= 0 && items[indiceSugerido]) {
+          e.preventDefault();
+          items[indiceSugerido].click();
+          indiceSugerido = -1;
+        }
+      } else if (e.key === 'Escape') {
+        cerrarSugerencias();
+        indiceSugerido = -1;
+      } else {
+        indiceSugerido = -1;
+      }
     };
 
     document.addEventListener('click', (e) => {
