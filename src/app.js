@@ -4,14 +4,117 @@ import { NOMBRES_INGLES } from './features/nombres-en.js';
 import { crearCompendio } from './features/monster-model.js';
 import { imagenesListas } from './features/storage.js';
 import { crearRastreadorIniciativa } from './features/tracker-model.js';
+import { crearRelojMundo } from './features/reloj-model.js';
 import { construirPanelResultados, retratoProcedural, vistaDetalle } from './ui/monster-views.js';
 import { vistaLista } from './ui/filtros-views.js';
 import { vistaTracker, renderizarListaCombatientes, renderizarSugerenciasMonstruos } from './ui/tracker-views.js';
+import { vistaReloj } from './ui/reloj-views.js';
 import { abrirModalDados, cerrarModalDados } from './ui/dice-modal.js';
 
 const BASE_CREATURES = Array.isArray(window.Monstruos) ? window.Monstruos : [];
 const compendio = crearCompendio(BASE_CREATURES);
 const rastreador = crearRastreadorIniciativa();
+const relojMundo = crearRelojMundo();
+
+function manejarEventosVencidos(vencidos) {
+  if (!vencidos || vencidos.length === 0) return;
+  const mensaje = vencidos.length === 1
+    ? `Evento cumplido: ${vencidos[0].nombre}`
+    : `Eventos cumplidos:\n- ${vencidos.map((evento) => evento.nombre).join('\n- ')}`;
+  alert(`⏰ ${mensaje}`);
+}
+
+function actualizarVistaReloj() {
+  const panel = document.getElementById('panel-reloj-mundo');
+  if (!panel) return;
+  if (document.activeElement?.classList.contains('reloj-hora-texto')) return;
+  panel.outerHTML = vistaReloj({ estado: relojMundo.obtenerEstado() });
+  enlazarEventosReloj();
+}
+
+function enlazarEventosReloj() {
+  const horaEditable = document.querySelector('.reloj-hora-texto');
+  if (horaEditable) {
+    const confirmarHora = () => {
+      const coincidencia = horaEditable.value.match(/^([01]\d|2[0-3]):[0-5]\d$/);
+      if (!coincidencia) {
+        actualizarVistaReloj();
+        return;
+      }
+      const [horas, minutos] = horaEditable.value.split(':').map(Number);
+      const vencidos = relojMundo.establecerHora(horas, minutos);
+      if (vencidos === null) {
+        actualizarVistaReloj();
+        return;
+      }
+      manejarEventosVencidos(vencidos);
+      actualizarVistaReloj();
+    };
+    horaEditable.onkeydown = (evento) => {
+      if (evento.key === 'Enter') {
+        evento.preventDefault();
+        horaEditable.blur();
+      }
+      if (evento.key === 'Escape') {
+        evento.preventDefault();
+        actualizarVistaReloj();
+      }
+    };
+    horaEditable.onblur = confirmarHora;
+  }
+
+  const btnPlay = document.getElementById('btn-reloj-play');
+  if (btnPlay) btnPlay.onclick = () => {
+    relojMundo.alternarReproduccion();
+    actualizarVistaReloj();
+  };
+
+  const btnCorto = document.getElementById('btn-reloj-descanso-corto');
+  if (btnCorto) btnCorto.onclick = () => {
+    manejarEventosVencidos(relojMundo.aplicarDescansoCorto());
+    actualizarVistaReloj();
+  };
+
+  const btnLargo = document.getElementById('btn-reloj-descanso-largo');
+  if (btnLargo) btnLargo.onclick = () => {
+    manejarEventosVencidos(relojMundo.aplicarDescansoLargo());
+    actualizarVistaReloj();
+  };
+
+  const btnAgregarTiempo = document.getElementById('btn-reloj-agregar-tiempo');
+  if (btnAgregarTiempo) btnAgregarTiempo.onclick = () => {
+    const cantidad = Number(document.getElementById('reloj-cantidad-tiempo')?.value || 0);
+    if (!cantidad || cantidad <= 0) return;
+    const esHora = document.getElementById('reloj-unidad-tiempo')?.value === 'h';
+    manejarEventosVencidos(relojMundo.agregarMinutos(esHora ? cantidad * 60 : cantidad));
+    actualizarVistaReloj();
+  };
+
+  const btnAgregarEvento = document.getElementById('btn-reloj-agregar-evento');
+  if (btnAgregarEvento) btnAgregarEvento.onclick = () => {
+    const nombre = document.getElementById('reloj-evento-nombre')?.value.trim();
+    const cantidad = Number(document.getElementById('reloj-evento-minutos')?.value || 0);
+    if (!nombre || !cantidad || cantidad <= 0) return;
+    const esHora = document.getElementById('reloj-evento-unidad')?.value === 'h';
+    relojMundo.agregarEvento(nombre, esHora ? cantidad * 60 : cantidad);
+    actualizarVistaReloj();
+  };
+
+  document.querySelectorAll('.reloj-evento-quitar').forEach((boton) => {
+    boton.onclick = () => {
+      relojMundo.eliminarEvento(Number(boton.dataset.eventoId));
+      actualizarVistaReloj();
+    };
+  });
+
+  const nombreEvento = document.getElementById('reloj-evento-nombre');
+  if (nombreEvento) nombreEvento.onkeydown = (evento) => {
+    if (evento.key === 'Enter') {
+      evento.preventDefault();
+      document.getElementById('btn-reloj-agregar-evento')?.click();
+    }
+  };
+}
 
 // ===================== UNIDADES DE DISTANCIA EN LA FICHA =====================
 // Cada distancia en pies dentro de la ficha (Velocidad, alcance de acciones,
@@ -771,6 +874,11 @@ function enlazarEventosTracker() {
       desMod: trackerDesModActual
     });
 
+    if (rastreador.obtenerEstado().combatientes.length === 1) {
+      relojMundo.pausarPorInicioCombate();
+      actualizarVistaReloj();
+    }
+
     // Resetear formulario
     if (inNombre) inNombre.value = '';
     if (inInit) {
@@ -810,7 +918,9 @@ function enlazarEventosTracker() {
   if (btnNext) {
     btnNext.onclick = () => {
       rastreador.siguienteTurno();
+      manejarEventosVencidos(relojMundo.avanzarPorTurno());
       actualizarVistaRoster();
+      actualizarVistaReloj();
     };
   }
 
@@ -864,8 +974,9 @@ function render() {
   actualizarTabsNavegacion(ruta.vista);
 
   if (ruta.vista === 'iniciativa') {
-    app.innerHTML = vistaTracker({ estado: rastreador.obtenerEstado() });
+    app.innerHTML = vistaTracker({ estado: rastreador.obtenerEstado(), estadoReloj: relojMundo.obtenerEstado() });
     enlazarEventosTracker();
+    enlazarEventosReloj();
   } else if (ruta.vista === 'detalle') {
     const base     = compendio.obtenerMonstruoPorId(ruta.id);
     const variante = compendio.obtenerVarianteSeleccionada(base);
@@ -907,6 +1018,11 @@ window.manejarErrorImagen = (imgEl, id) => {
 };
 
 window.addEventListener('hashchange', render);
+setInterval(() => {
+  const vencidos = relojMundo.tickTiempoReal(1);
+  if (vencidos.length > 0) manejarEventosVencidos(vencidos);
+  if (relojMundo.estaReproduciendo() || vencidos.length > 0) actualizarVistaReloj();
+}, 1000);
 imagenesListas.then(() => {
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', render);
   else render();

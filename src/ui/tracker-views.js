@@ -2,13 +2,16 @@
 // Vistas y plantillas HTML para el Rastreador de Iniciativa.
 
 import { escapeHtml } from '../features/utils.js';
+import { vistaReloj } from './reloj-views.js';
 
-export function vistaTracker({ estado }) {
+export function vistaTracker({ estado, estadoReloj }) {
   const { combatientes, indiceActivo, ronda } = estado;
   const combatienteActivo = combatientes.length > 0 ? combatientes[indiceActivo] : null;
 
   return `
     <div class="tracker-contenedor">
+      ${vistaReloj({ estado: estadoReloj })}
+
       <div class="tracker-cabecera-batalla">
         <div class="eyebrow tracker-eyebrow">Sesión de Mesa &bull; Encuentro Activo</div>
         <h1 class="tracker-titulo-principal">Rastreador de Iniciativa</h1>

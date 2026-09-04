@@ -701,6 +701,40 @@ button.fantasma:disabled:hover{background:transparent;}
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
+/* ===================== RELOJ DE MUNDO ===================== */
+.tracker-reloj-panel{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:14px 16px 16px;margin-bottom:20px;box-shadow:0 4px 18px rgba(0,0,0,.4);transition:background .4s ease;}
+.tracker-reloj-panel.reloj-cielo-dia{background:linear-gradient(180deg,#2b3a52 0%,var(--ink-2) 78%);}
+.tracker-reloj-panel.reloj-cielo-noche{background:linear-gradient(180deg,#0d0f1a 0%,var(--ink-2) 78%);}
+.reloj-semicirculo-wrap{position:relative;max-width:340px;margin:0 auto;}
+.reloj-svg{width:100%;height:auto;display:block;}
+.reloj-arco{stroke:rgba(207,162,51,.35);stroke-width:1.5;stroke-dasharray:4 6;}
+.reloj-horizonte{stroke:rgba(207,162,51,.5);stroke-width:1.5;}
+.reloj-astro-halo{fill:rgba(207,162,51,.22);}
+.reloj-astro-icono{font-size:16px;fill:var(--gold);}
+.reloj-hora-central{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;}
+.reloj-hora-texto{appearance:none;-webkit-appearance:none;width:78px;margin:0;padding:0;background:transparent;border:0;color:var(--gold);font-family:Georgia,serif;font-size:26px;letter-spacing:.05em;font-variant-numeric:tabular-nums;cursor:text;outline:none;}
+.reloj-hora-texto::-webkit-calendar-picker-indicator{display:none;}
+.reloj-btn-play{background:linear-gradient(180deg,var(--ember-bright),var(--ember));border:1px solid #8a4325;color:#1a0e08;width:32px;height:32px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:filter .15s ease;}
+.reloj-btn-play:hover{filter:brightness(1.15);}
+.reloj-controles-fila{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;}
+.reloj-btn-descanso{font-family:'Trebuchet MS',sans-serif;font-size:11.5px;}
+.reloj-agregar-tiempo{display:flex;align-items:center;gap:4px;}
+.reloj-input-numero{width:54px;background:var(--ink) !important;border:1px solid var(--line) !important;color:var(--parchment) !important;padding:6px !important;font-family:'Trebuchet MS',sans-serif !important;font-size:12.5px !important;border-radius:3px !important;}
+.reloj-select-unidad{background:var(--ink) !important;border:1px solid var(--line) !important;color:var(--parchment) !important;padding:6px 4px !important;font-family:'Trebuchet MS',sans-serif !important;font-size:12px !important;border-radius:3px !important;}
+.reloj-btn-agregar{background:transparent;border:1px solid var(--line);color:var(--gold);padding:7px 10px;font-size:11.5px;font-family:'Trebuchet MS',sans-serif;letter-spacing:.04em;border-radius:3px;cursor:pointer;transition:all .15s ease;white-space:nowrap;}
+.reloj-btn-agregar:hover{border-color:var(--ember-bright);color:var(--ember-bright);}
+.reloj-eventos-seccion{margin-top:14px;border-top:1px dashed var(--line);padding-top:10px;}
+.reloj-eventos-form{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.reloj-input-evento-nombre{flex:1;min-width:160px;background:var(--ink) !important;border:1px solid var(--line) !important;color:var(--parchment) !important;padding:7px 8px !important;font-family:'Trebuchet MS',sans-serif !important;font-size:12.5px !important;border-radius:3px !important;}
+.reloj-input-evento-minutos{width:56px;background:var(--ink) !important;border:1px solid var(--line) !important;color:var(--parchment) !important;padding:7px 6px !important;font-family:'Trebuchet MS',sans-serif !important;font-size:12.5px !important;border-radius:3px !important;}
+.reloj-eventos-lista{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px;}
+.reloj-evento-item{display:flex;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:5px 9px;font-family:'Trebuchet MS',sans-serif;font-size:11.5px;}
+.reloj-evento-nombre{flex:1;color:var(--parchment);}
+.reloj-evento-restante{color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.reloj-evento-quitar{background:transparent;border:none;color:var(--parchment-dim);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;}
+.reloj-evento-quitar:hover{color:#e08585;}
+.reloj-evento-vacio{color:var(--parchment-dim);font-style:italic;font-size:11.5px;text-align:center;list-style:none;}
+
 .round-bar.tracker-round-bar {
   display: flex;
   align-items: center;
