@@ -3177,6 +3177,19 @@ function enlazarEventosRoster() {
   const rosterLista = document.getElementById('tracker-roster-lista');
   if (!rosterLista) return;
 
+  // Restar Daño (-)
+  rosterLista.querySelectorAll('[data-accion="dmg"], .hp-btn.dmg').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const amountInput = rosterLista.querySelector(`.tracker-hp-amount[data-uid="${uid}"]`);
+      const amount = Number(amountInput ? amountInput.value : 0);
+      if (amount <= 0) return;
+      rastreador.aplicarDanoCuracion(uid, amount, true);
+      actualizarVistaRoster();
+    };
+  });
+
   // Sumar Curación (+)
   rosterLista.querySelectorAll('[data-accion="heal"], .hp-btn.heal').forEach((btn) => {
     btn.onclick = (e) => {
