@@ -1360,8 +1360,8 @@ input[type=number] {
 
 .tracker-input-hp-actual {
   width: 44px;
-  background: var(--ink) !important;
-  border: 1px solid var(--line) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
   color: var(--parchment) !important;
   text-align: center;
   padding: 3px 2px;
@@ -1370,10 +1370,14 @@ input[type=number] {
   font-size: 15px;
 }
 
+.tracker-input-hp-actual:hover,
 .tracker-input-hp-actual:focus {
-  border-color: var(--ember-bright) !important;
+  background: var(--ink) !important;
+  border-color: var(--line) !important;
+  color: var(--parchment) !important;
   outline: none !important;
 }
+
 
 .tracker-hp-separador {
   color: var(--parchment-dim);
@@ -1403,17 +1407,19 @@ input[type=number] {
 .hp-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .hp-amount {
-  width: 40px;
+  width: 45px;
   height: 24px;
   background: var(--ink) !important;
   border: 1px solid var(--line) !important;
   color: var(--parchment) !important;
   text-align: center;
-  padding: 3px 2px;
+  padding: 3px 4px;
   border-radius: 3px;
   font-family: 'Trebuchet MS', sans-serif !important;
   font-size: 12px !important;
@@ -1425,31 +1431,35 @@ input[type=number] {
 }
 
 .hp-btn {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   border-radius: 3px;
   background: transparent;
   border: 1px solid var(--line);
   cursor: pointer;
   transition: all 0.12s ease;
+  flex-shrink: 0;
 }
 
 .hp-btn.dmg {
   color: #d98a8a;
+  border-color: #d98a8a;
 }
 
 .hp-btn.dmg:hover {
   border-color: var(--blood);
   background: rgba(122, 46, 46, 0.18);
+  color: #ff9999;
 }
 
 .hp-btn.heal {
   color: #7fbf8a;
+  border-color: #7fbf8a;
 }
 
 .hp-btn.heal:hover {
@@ -1460,14 +1470,21 @@ input[type=number] {
 /* Columna CA */
 .tracker-input-ac {
   width: 44px;
-  background: var(--ink) !important;
-  border: 1px solid var(--line) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
   color: var(--parchment) !important;
   text-align: center;
   padding: 4px 2px;
   border-radius: 3px;
   font-family: Georgia, serif;
   font-size: 15px;
+}
+
+.tracker-input-ac:hover,
+.tracker-input-ac:focus {
+  background: var(--ink) !important;
+  border-color: var(--line) !important;
+  outline: none !important;
 }
 
 .tracker-input-ac:focus {
@@ -1549,15 +1566,51 @@ input[type=number] {
   }
   .card.tracker-tarjeta {
     grid-template-columns: 36px 1fr;
-    row-gap: 10px;
+    row-gap: 12px;
   }
   .stat.tracker-col-hp,
   .stat.tracker-col-ac {
-    grid-column: span 1;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
     text-align: left;
   }
+  .stat.tracker-col-hp .stat-label,
+  .stat.tracker-col-ac .stat-label {
+    min-width: 24px;
+    margin-bottom: 0;
+    padding-top: 3px;
+  }
+  .stat.tracker-col-hp .hp-block,
+  .stat.tracker-col-ac .ac-val {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hp-display.tracker-hp-display {
+    width: 100%;
+    gap: 3px;
+  }
+  .tracker-input-hp-actual,
+  .tracker-input-hp-max {
+    flex: 1;
+    max-width: 60px;
+  }
   .hp-controls {
-    justify-content: flex-start;
+    width: 100%;
+    gap: 4px;
+  }
+  .hp-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+  .hp-amount {
+    flex: 1;
+    min-width: 50px;
+    max-width: 100px;
   }
 }
 

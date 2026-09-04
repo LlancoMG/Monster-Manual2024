@@ -474,10 +474,7 @@ function crearRastreadorIniciativa() {
     if (esDano) {
       c.hp = Math.max(0, c.hp - num);
     } else {
-      c.hp = c.hp + num;
-      if (c.hp > c.maxHp) {
-        c.maxHp = c.hp;
-      }
+      c.hp = Math.min(c.maxHp, c.hp + num);
     }
     guardarEnStorage();
   }
@@ -2467,7 +2464,8 @@ function renderizarListaCombatientes(estado) {
               <input type="number" class="tracker-input-hp-max editable-inline input-mono" data-uid="${c.uid}" data-campo="maxHp" value="${c.maxHp}" min="1" title="PV máximos (clic para editar)">
             </div>
             <div class="hp-controls tracker-hp-controls">
-              <input type="number" class="hp-amount tracker-hp-amount input-mono" data-uid="${c.uid}" data-campo="cantidad" placeholder="0" min="0" title="Escribe una cantidad y presiona Enter para restar vida">
+              <button type="button" class="hp-btn dmg" data-uid="${c.uid}" data-accion="dmg" title="Restar daño">−</button>
+              <input type="number" class="hp-amount tracker-hp-amount input-mono" data-uid="${c.uid}" data-campo="cantidad" placeholder="0" min="0" title="Escribe una cantidad y presiona Enter para restar vida, o usa los botones">
               <button type="button" class="hp-btn heal" data-uid="${c.uid}" data-accion="heal" title="Sumar curación">+</button>
             </div>
           </div>

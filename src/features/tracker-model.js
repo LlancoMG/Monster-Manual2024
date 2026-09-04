@@ -137,10 +137,7 @@ export function crearRastreadorIniciativa() {
     if (esDano) {
       c.hp = Math.max(0, c.hp - num);
     } else {
-      c.hp = c.hp + num;
-      if (c.hp > c.maxHp) {
-        c.maxHp = c.hp;
-      }
+      c.hp = Math.min(c.maxHp, c.hp + num);
     }
     guardarEnStorage();
   }
