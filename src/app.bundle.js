@@ -638,7 +638,7 @@ function crearRelojMundo() {
 
   function tickTiempoReal(segundosReales = 1) {
     if (!estado.enReproduccion) return [];
-    return agregarMinutos(segundosReales);
+    return agregarMinutos(segundosReales / 60);
   }
 
   function agregarEvento(nombre, minutosDuracion) {
@@ -2599,9 +2599,10 @@ function renderizarListaCombatientes(estado) {
             <span class="tag ${c.tipo} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-tipo" title="Alternar PJ / PNJ">${c.tipo === 'pc' ? 'PJ' : 'PNJ'}</span>
             <span class="tag ${c.bando === 'ally' ? 'pc' : 'npc'} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-bando" title="Alternar Aliado / Enemigo">${c.bando === 'ally' ? 'Aliado' : 'Enemigo'}</span>
             ${c.monstruoId ? `
-              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" target="_blank" title="Abrir ficha del compendio">
+              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" data-monstruo-id="${escapeHtml(c.monstruoId)}" title="Previsualizar ficha del compendio">
                 📖 Ficha
               </a>
+              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha-nueva" target="_blank" rel="noopener" title="Abrir ficha completa en otra pestaña" aria-label="Abrir ficha completa en otra pestaña">↗</a>
             ` : ''}
           </div>
 
@@ -3475,6 +3476,73 @@ function enlazarEventosDetalle(id, nombreMonstruo) {
   enlazarEventosDistancias();
   enlazarEventosDados(nombreMonstruo);
 }
+
+function manejarEscPrevisualizacion(evento) {
+  if (evento.key === 'Escape') cerrarPrevisualizacionMonstruo();
+}
+
+function cerrarPrevisualizacionMonstruo() {
+  const fondo = document.querySelector('.tracker-ficha-preview-fondo');
+  if (fondo) fondo.remove();
+  document.removeEventListener('keydown', manejarEscPrevisualizacion);
+}
+
+function abrirPrevisualizacionMonstruo(id) {
+  const base = compendio.obtenerMonstruoPorId(id);
+  if (!base) return;
+
+  cerrarPrevisualizacionMonstruo();
+  const variante = compendio.obtenerVarianteSeleccionada(base);
+  const monstruo = compendio.aplicarVariante(base, variante);
+  const urlFicha = `${location.href.split('#')[0]}#/monstruo/${encodeURIComponent(id)}`;
+  const fondo = document.createElement('div');
+  fondo.className = 'tracker-ficha-preview-fondo';
+  fondo.setAttribute('role', 'dialog');
+  fondo.setAttribute('aria-modal', 'true');
+  fondo.setAttribute('aria-label', `Previsualización de la ficha de ${monstruo.nombre}`);
+  fondo.innerHTML = `
+    <div class="tracker-ficha-preview-caja">
+      <div class="tracker-ficha-preview-barra">
+        <span>Previsualización de ficha</span>
+        <div class="tracker-ficha-preview-acciones">
+          <a class="accion fantasma" href="${urlFicha}" target="_blank" rel="noopener">↗ Abrir ficha completa</a>
+          <button type="button" class="tracker-ficha-preview-cerrar" aria-label="Cerrar previsualización">×</button>
+        </div>
+      </div>
+      <div class="tracker-ficha-preview-contenido">${vistaDetalle({
+        monstruoBase: base,
+        monstruo,
+        varianteSeleccionada: variante,
+        obtenerFuenteImagen: compendio.obtenerFuenteImagen,
+        tipoColor: TIPO_COLOR,
+      })}</div>
+    </div>`;
+  document.body.appendChild(fondo);
+
+  fondo.onclick = (evento) => {
+    if (evento.target === fondo) cerrarPrevisualizacionMonstruo();
+  };
+  fondo.querySelector('.tracker-ficha-preview-cerrar').onclick = cerrarPrevisualizacionMonstruo;
+  const btnVolver = fondo.querySelector('#btn-volver');
+  if (btnVolver) {
+    btnVolver.textContent = '× Cerrar previsualización';
+    btnVolver.onclick = cerrarPrevisualizacionMonstruo;
+  }
+  enlazarEventosDetalle(id, monstruo.nombre);
+  document.addEventListener('keydown', manejarEscPrevisualizacion);
+  fondo.querySelector('.tracker-ficha-preview-cerrar').focus();
+}
+
+function enlazarPrevisualizacionesTracker() {
+  document.querySelectorAll('.tracker-tag-ficha').forEach((enlace) => {
+    enlace.onclick = (evento) => {
+      evento.preventDefault();
+      evento.stopPropagation();
+      abrirPrevisualizacionMonstruo(enlace.dataset.monstruoId);
+    };
+  });
+}
+
 function actualizarTabsNavegacion(vista) {
   const tabCompendio = document.getElementById('nav-tab-compendio');
   const tabIniciativa = document.getElementById('nav-tab-iniciativa');
@@ -3516,6 +3584,7 @@ function actualizarVistaRoster() {
   if (rosterLista) {
     rosterLista.innerHTML = renderizarListaCombatientes(estado);
     enlazarEventosRoster();
+    enlazarPrevisualizacionesTracker();
   }
 }
 
@@ -4031,12 +4100,14 @@ function enlazarEventosTracker() {
   }
 
   enlazarEventosRoster();
+  enlazarPrevisualizacionesTracker();
 }
 
 function render() {
   cerrarZoomImagen();
   cerrarPopoverDistancia();
   cerrarModalDados();
+  cerrarPrevisualizacionMonstruo();
 
   const ruta = analizarHash();
   const app  = document.getElementById('app');

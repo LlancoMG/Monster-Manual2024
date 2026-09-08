@@ -162,9 +162,10 @@ export function renderizarListaCombatientes(estado) {
             <span class="tag ${c.tipo} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-tipo" title="Alternar PJ / PNJ">${c.tipo === 'pc' ? 'PJ' : 'PNJ'}</span>
             <span class="tag ${c.bando === 'ally' ? 'pc' : 'npc'} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-bando" title="Alternar Aliado / Enemigo">${c.bando === 'ally' ? 'Aliado' : 'Enemigo'}</span>
             ${c.monstruoId ? `
-              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" target="_blank" title="Abrir ficha del compendio">
+              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" data-monstruo-id="${escapeHtml(c.monstruoId)}" title="Previsualizar ficha del compendio">
                 📖 Ficha
               </a>
+              <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha-nueva" target="_blank" rel="noopener" title="Abrir ficha completa en otra pestaña" aria-label="Abrir ficha completa en otra pestaña">↗</a>
             ` : ''}
           </div>
 

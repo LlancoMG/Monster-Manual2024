@@ -110,7 +110,7 @@ export function crearRelojMundo() {
 
   function tickTiempoReal(segundosReales = 1) {
     if (!estado.enReproduccion) return [];
-    return agregarMinutos(segundosReales);
+    return agregarMinutos(segundosReales / 60);
   }
 
   function agregarEvento(nombre, minutosDuracion) {
