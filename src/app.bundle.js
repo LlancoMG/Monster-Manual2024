@@ -479,24 +479,82 @@ function crearRastreadorIniciativa() {
     guardarEnStorage();
   }
 
+  function esCombatienteValidoParaTurno(c) {
+    if (!c) return false;
+    // Los monstruos/PNJs caídos (0 PV o menos) no toman turnos
+    if (c.tipo === 'npc' && c.hp <= 0) return false;
+    return true;
+  }
+
   function siguienteTurno() {
-    if (estado.combatientes.length === 0) return;
-    estado.indiceActivo++;
-    if (estado.indiceActivo >= estado.combatientes.length) {
-      estado.indiceActivo = 0;
-      estado.ronda++;
+    const total = estado.combatientes.length;
+    if (total === 0) return;
+
+    const hayValidos = estado.combatientes.some(esCombatienteValidoParaTurno);
+    if (!hayValidos) {
+      estado.indiceActivo = (estado.indiceActivo + 1) % total;
+      if (estado.indiceActivo === 0) estado.ronda++;
+      guardarEnStorage();
+      return;
+    }
+
+    let nuevoIndice = estado.indiceActivo;
+    let vueltas = 0;
+    while (vueltas < total) {
+      nuevoIndice++;
+      if (nuevoIndice >= total) {
+        nuevoIndice = 0;
+        estado.ronda++;
+      }
+      if (esCombatienteValidoParaTurno(estado.combatientes[nuevoIndice])) {
+        estado.indiceActivo = nuevoIndice;
+        break;
+      }
+      vueltas++;
     }
     guardarEnStorage();
   }
 
   function anteriorTurno() {
-    if (estado.combatientes.length === 0) return;
-    estado.indiceActivo--;
-    if (estado.indiceActivo < 0) {
-      estado.indiceActivo = estado.combatientes.length - 1;
-      estado.ronda = Math.max(1, estado.ronda - 1);
+    const total = estado.combatientes.length;
+    if (total === 0) return;
+
+    const hayValidos = estado.combatientes.some(esCombatienteValidoParaTurno);
+    if (!hayValidos) {
+      estado.indiceActivo--;
+      if (estado.indiceActivo < 0) {
+        estado.indiceActivo = total - 1;
+        estado.ronda = Math.max(1, estado.ronda - 1);
+      }
+      guardarEnStorage();
+      return;
+    }
+
+    let nuevoIndice = estado.indiceActivo;
+    let vueltas = 0;
+    while (vueltas < total) {
+      nuevoIndice--;
+      if (nuevoIndice < 0) {
+        nuevoIndice = total - 1;
+        estado.ronda = Math.max(1, estado.ronda - 1);
+      }
+      if (esCombatienteValidoParaTurno(estado.combatientes[nuevoIndice])) {
+        estado.indiceActivo = nuevoIndice;
+        break;
+      }
+      vueltas++;
     }
     guardarEnStorage();
+  }
+
+  function establecerTurnoActivo(uid) {
+    const idx = estado.combatientes.findIndex((item) => item.uid === uid);
+    if (idx !== -1) {
+      estado.indiceActivo = idx;
+      guardarEnStorage();
+      return true;
+    }
+    return false;
   }
 
   function reiniciarRonda() {
@@ -521,6 +579,8 @@ function crearRastreadorIniciativa() {
     ordenarCombatientes,
     siguienteTurno,
     anteriorTurno,
+    establecerTurnoActivo,
+    esCombatienteValidoParaTurno,
     reiniciarRonda,
     vaciarRegistro
   };
@@ -2581,11 +2641,29 @@ function renderizarListaCombatientes(estado) {
   return combatientes.map((c, idx) => {
     const esActivo = idx === indiceActivo;
     const esCaido = c.hp <= 0;
+    const esMonstruoMuerto = esCaido && c.tipo === 'npc';
     const porcentajeHp = c.maxHp > 0 ? Math.max(0, Math.min(100, Math.round((c.hp / c.maxHp) * 100))) : 0;
     const colorBarra = porcentajeHp > 50 ? '#4a7a52' : (porcentajeHp > 20 ? '#cfa233' : '#7a2e2e');
 
     return `
-      <div class="card tracker-tarjeta ${c.bando} ${esActivo ? 'active' : ''} ${esCaido ? 'down' : ''}" data-uid="${c.uid}">
+      <div class="card tracker-tarjeta ${c.bando} ${esActivo ? 'active' : ''} ${esCaido ? 'down' : ''} ${esMonstruoMuerto ? 'monstruo-muerto' : ''}" data-uid="${c.uid}">
+        ${esActivo ? '<div class="tracker-badge-turno-activo">★ TURNO ACTUAL</div>' : ''}
+        ${esMonstruoMuerto ? '<div class="tracker-watermark-muerto" aria-hidden="true">💀</div>' : ''}
+
+        <div class="tracker-col-turno">
+          ${esActivo ? `
+            <button type="button" class="btn-tracker-pasar-turno-izq" data-uid="${c.uid}" title="Pasar turno ▸ (Avanza al siguiente combatiente)">
+              <span class="btn-pasar-icono">▶</span>
+              <span class="btn-pasar-texto">Pasar</span>
+            </button>
+          ` : `
+            <button type="button" class="btn-tracker-activar-turno-izq" data-uid="${c.uid}" title="Clic para activar turno de ${escapeHtml(c.nombre)}">
+              <span class="turno-slot-num">#${idx + 1}</span>
+              <span class="turno-slot-play">▶</span>
+            </button>
+          `}
+        </div>
+
         <div class="tracker-col-init" title="Iniciativa (clic para editar o relanzar)">
           <div class="init-num tracker-init-box">
             <input type="number" class="tracker-input-init editable-inline input-mono" data-uid="${c.uid}" data-campo="iniciativa" value="${c.iniciativa}">
@@ -2598,6 +2676,14 @@ function renderizarListaCombatientes(estado) {
             <input type="text" class="cname-input tracker-input-nombre" data-uid="${c.uid}" data-campo="nombre" value="${escapeHtml(c.nombre)}" title="Clic para editar nombre">
             <span class="tag ${c.tipo} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-tipo" title="Alternar PJ / PNJ">${c.tipo === 'pc' ? 'PJ' : 'PNJ'}</span>
             <span class="tag ${c.bando === 'ally' ? 'pc' : 'npc'} tracker-tag-toggle" data-uid="${c.uid}" data-accion="toggle-bando" title="Alternar Aliado / Enemigo">${c.bando === 'ally' ? 'Aliado' : 'Enemigo'}</span>
+
+            ${esMonstruoMuerto ? `
+              <span class="tag tag-muerto tracker-tag-muerto" data-uid="${c.uid}" data-accion="revivir" title="Monstruo caído. No cuenta para turnos. Clic para revivir">💀 MUERTO</span>
+              <button type="button" class="btn-revivir-inline" data-uid="${c.uid}" data-accion="revivir" title="Restaurar puntos de vida de la criatura">↺ Revivir</button>
+            ` : (esCaido ? `
+              <span class="tag tag-inconsciente tracker-tag-inconsciente" title="Personaje a 0 PV (inconsciente / tiradas de muerte)">⚠️ 0 PV</span>
+            ` : '')}
+
             ${c.monstruoId ? `
               <a href="#/monstruo/${encodeURIComponent(c.monstruoId)}" class="tag tracker-tag-ficha" data-monstruo-id="${escapeHtml(c.monstruoId)}" title="Previsualizar ficha del compendio">
                 📖 Ficha
@@ -3722,6 +3808,41 @@ function enlazarEventosRoster() {
           }, 1400);
         }
       });
+    };
+  });
+
+  // Pasar turno desde botón izquierdo de combatiente activo
+  rosterLista.querySelectorAll('.btn-tracker-pasar-turno-izq').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      rastreador.siguienteTurno();
+      manejarEventosVencidos(relojMundo.avanzarPorTurno());
+      actualizarVistaRoster();
+      actualizarVistaReloj();
+    };
+  });
+
+  // Activar turno directamente en cualquier combatiente
+  rosterLista.querySelectorAll('.btn-tracker-activar-turno-izq').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      rastreador.establecerTurnoActivo(uid);
+      actualizarVistaRoster();
+    };
+  });
+
+  // Revivir criatura / Restaurar PV
+  rosterLista.querySelectorAll('[data-accion="revivir"]').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const estado = rastreador.obtenerEstado();
+      const c = estado.combatientes.find((item) => item.uid === uid);
+      if (!c) return;
+      const vidaRestaurada = Math.max(1, c.maxHp);
+      rastreador.actualizarCombatiente(uid, { hp: vidaRestaurada });
+      actualizarVistaRoster();
     };
   });
 

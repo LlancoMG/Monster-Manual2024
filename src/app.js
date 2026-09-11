@@ -654,6 +654,41 @@ function enlazarEventosRoster() {
     };
   });
 
+  // Pasar turno desde botón izquierdo de combatiente activo
+  rosterLista.querySelectorAll('.btn-tracker-pasar-turno-izq').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      rastreador.siguienteTurno();
+      manejarEventosVencidos(relojMundo.avanzarPorTurno());
+      actualizarVistaRoster();
+      actualizarVistaReloj();
+    };
+  });
+
+  // Activar turno directamente en cualquier combatiente
+  rosterLista.querySelectorAll('.btn-tracker-activar-turno-izq').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      rastreador.establecerTurnoActivo(uid);
+      actualizarVistaRoster();
+    };
+  });
+
+  // Revivir criatura / Restaurar PV
+  rosterLista.querySelectorAll('[data-accion="revivir"]').forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const uid = Number(btn.dataset.uid);
+      const estado = rastreador.obtenerEstado();
+      const c = estado.combatientes.find((item) => item.uid === uid);
+      if (!c) return;
+      const vidaRestaurada = Math.max(1, c.maxHp);
+      rastreador.actualizarCombatiente(uid, { hp: vidaRestaurada });
+      actualizarVistaRoster();
+    };
+  });
+
   // Eliminar combatiente
   rosterLista.querySelectorAll('[data-accion="eliminar"]').forEach((btn) => {
     btn.onclick = (e) => {

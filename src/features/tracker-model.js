@@ -142,24 +142,82 @@ export function crearRastreadorIniciativa() {
     guardarEnStorage();
   }
 
+  function esCombatienteValidoParaTurno(c) {
+    if (!c) return false;
+    // Los monstruos/PNJs caídos (0 PV o menos) no toman turnos
+    if (c.tipo === 'npc' && c.hp <= 0) return false;
+    return true;
+  }
+
   function siguienteTurno() {
-    if (estado.combatientes.length === 0) return;
-    estado.indiceActivo++;
-    if (estado.indiceActivo >= estado.combatientes.length) {
-      estado.indiceActivo = 0;
-      estado.ronda++;
+    const total = estado.combatientes.length;
+    if (total === 0) return;
+
+    const hayValidos = estado.combatientes.some(esCombatienteValidoParaTurno);
+    if (!hayValidos) {
+      estado.indiceActivo = (estado.indiceActivo + 1) % total;
+      if (estado.indiceActivo === 0) estado.ronda++;
+      guardarEnStorage();
+      return;
+    }
+
+    let nuevoIndice = estado.indiceActivo;
+    let vueltas = 0;
+    while (vueltas < total) {
+      nuevoIndice++;
+      if (nuevoIndice >= total) {
+        nuevoIndice = 0;
+        estado.ronda++;
+      }
+      if (esCombatienteValidoParaTurno(estado.combatientes[nuevoIndice])) {
+        estado.indiceActivo = nuevoIndice;
+        break;
+      }
+      vueltas++;
     }
     guardarEnStorage();
   }
 
   function anteriorTurno() {
-    if (estado.combatientes.length === 0) return;
-    estado.indiceActivo--;
-    if (estado.indiceActivo < 0) {
-      estado.indiceActivo = estado.combatientes.length - 1;
-      estado.ronda = Math.max(1, estado.ronda - 1);
+    const total = estado.combatientes.length;
+    if (total === 0) return;
+
+    const hayValidos = estado.combatientes.some(esCombatienteValidoParaTurno);
+    if (!hayValidos) {
+      estado.indiceActivo--;
+      if (estado.indiceActivo < 0) {
+        estado.indiceActivo = total - 1;
+        estado.ronda = Math.max(1, estado.ronda - 1);
+      }
+      guardarEnStorage();
+      return;
+    }
+
+    let nuevoIndice = estado.indiceActivo;
+    let vueltas = 0;
+    while (vueltas < total) {
+      nuevoIndice--;
+      if (nuevoIndice < 0) {
+        nuevoIndice = total - 1;
+        estado.ronda = Math.max(1, estado.ronda - 1);
+      }
+      if (esCombatienteValidoParaTurno(estado.combatientes[nuevoIndice])) {
+        estado.indiceActivo = nuevoIndice;
+        break;
+      }
+      vueltas++;
     }
     guardarEnStorage();
+  }
+
+  function establecerTurnoActivo(uid) {
+    const idx = estado.combatientes.findIndex((item) => item.uid === uid);
+    if (idx !== -1) {
+      estado.indiceActivo = idx;
+      guardarEnStorage();
+      return true;
+    }
+    return false;
   }
 
   function reiniciarRonda() {
@@ -184,6 +242,8 @@ export function crearRastreadorIniciativa() {
     ordenarCombatientes,
     siguienteTurno,
     anteriorTurno,
+    establecerTurnoActivo,
+    esCombatienteValidoParaTurno,
     reiniciarRonda,
     vaciarRegistro
   };

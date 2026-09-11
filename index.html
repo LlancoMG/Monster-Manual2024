@@ -1178,25 +1178,157 @@ input[type=number] {
   gap: 10px;
 }
 
-/* Tarjeta Combatiente (Fiel al original) */
+/* Tarjeta Combatiente */
 .card.tracker-tarjeta {
   display: grid;
-  grid-template-columns: 56px 1fr auto auto auto;
+  grid-template-columns: 78px 52px 1fr auto auto auto;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   background: var(--ink-2);
   border: 1px solid var(--line);
   border-left: 3px solid var(--line);
-  border-radius: 4px;
-  padding: 12px 14px;
+  border-radius: 6px;
+  padding: 10px 14px;
   position: relative;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Indicador de Turno Activo - Recuadro Dorado Radiante */
+@keyframes pulso-dorado-turno {
+  0% {
+    box-shadow: 0 0 0 2px var(--gold), 0 0 16px rgba(207, 162, 51, 0.4), 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 2.5px var(--gold-light), 0 0 24px rgba(207, 162, 51, 0.65), 0 8px 26px rgba(0, 0, 0, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--gold), 0 0 16px rgba(207, 162, 51, 0.4), 0 6px 20px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .card.tracker-tarjeta.active {
-  box-shadow: 0 0 0 1px rgba(207, 162, 51, 0.45), 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: var(--gold) !important;
+  border-left: 5px solid var(--gold) !important;
+  background: linear-gradient(90deg, rgba(207, 162, 51, 0.16) 0%, rgba(32, 26, 18, 0.96) 40%, var(--ink-2) 100%) !important;
+  animation: pulso-dorado-turno 2.6s infinite ease-in-out;
+  z-index: 2;
 }
 
+.card.tracker-tarjeta.active .tracker-input-nombre {
+  color: var(--gold-light) !important;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(207, 162, 51, 0.3);
+}
+
+.tracker-badge-turno-activo {
+  position: absolute;
+  top: -9px;
+  left: 16px;
+  background: linear-gradient(135deg, #dfb448, #b8861e);
+  color: #14110d;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  padding: 1px 8px;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Columna Izquierda: Botón de Pasar Turno / Selector */
+.tracker-col-turno {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+}
+
+.btn-tracker-pasar-turno-izq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #dfb448 0%, #b8861e 100%);
+  color: #14110d;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  border: 1px solid #ffe394;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(207, 162, 51, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.btn-tracker-pasar-turno-izq:hover {
+  background: linear-gradient(135deg, #f2c759 0%, #cf9825 100%);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 14px rgba(207, 162, 51, 0.6), inset 0 1px 0 #fff;
+  color: #000;
+}
+
+.btn-tracker-pasar-turno-izq:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(207, 162, 51, 0.3);
+}
+
+.btn-tracker-pasar-turno-izq .btn-pasar-icono {
+  font-size: 10px;
+  display: inline-block;
+  animation: flecha-pasar-turno 1.2s infinite ease-in-out alternate;
+}
+
+@keyframes flecha-pasar-turno {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(3px); }
+}
+
+.btn-tracker-activar-turno-izq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: rgba(28, 24, 16, 0.5);
+  border: 1px solid rgba(207, 162, 51, 0.18);
+  color: var(--parchment-dim);
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-tracker-activar-turno-izq:hover {
+  background: rgba(207, 162, 51, 0.18);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  transform: scale(1.08);
+}
+
+.btn-tracker-activar-turno-izq .turno-slot-play {
+  display: none;
+  font-size: 10px;
+}
+
+.btn-tracker-activar-turno-izq:hover .turno-slot-num {
+  display: none;
+}
+
+.btn-tracker-activar-turno-izq:hover .turno-slot-play {
+  display: inline;
+}
+
+/* Bandos Aliado y Enemigo */
 .card.tracker-tarjeta.ally {
   border-left-color: #4a7a52;
 }
@@ -1211,8 +1343,77 @@ input[type=number] {
   background: linear-gradient(90deg, rgba(122, 46, 46, 0.12), var(--ink-2) 42%);
 }
 
-.card.tracker-tarjeta.down {
-  opacity: 0.45;
+/* Monstruo Muerto / Caído */
+.card.tracker-tarjeta.monstruo-muerto {
+  background: linear-gradient(90deg, rgba(50, 18, 18, 0.5) 0%, rgba(22, 19, 17, 0.85) 45%) !important;
+  border-color: rgba(122, 46, 46, 0.45) !important;
+  border-left: 4px solid #5a1c1c !important;
+  opacity: 0.62;
+  filter: grayscale(0.55);
+}
+
+.card.tracker-tarjeta.monstruo-muerto:hover {
+  opacity: 0.88;
+  filter: grayscale(0.15);
+}
+
+.card.tracker-tarjeta.monstruo-muerto .tracker-input-nombre {
+  text-decoration: line-through;
+  color: #a89486 !important;
+}
+
+.tracker-watermark-muerto {
+  position: absolute;
+  right: 54px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40px;
+  opacity: 0.10;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tag.tag-muerto {
+  background: #501616 !important;
+  color: #ff9e9e !important;
+  border: 1px solid #9e3d21 !important;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tag.tag-muerto:hover {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
+.btn-revivir-inline {
+  background: rgba(74, 122, 82, 0.25);
+  border: 1px solid rgba(127, 191, 138, 0.4);
+  color: #7fbf8a;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-revivir-inline:hover {
+  background: #4a7a52;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.tag.tag-inconsciente {
+  background: rgba(207, 162, 51, 0.2) !important;
+  color: #f0c353 !important;
+  border: 1px solid rgba(207, 162, 51, 0.5) !important;
+  font-weight: 700;
+}
+
+.card.tracker-tarjeta.down:not(.monstruo-muerto) {
+  opacity: 0.65;
 }
 
 /* Columna Init */
@@ -1616,7 +1817,7 @@ input[type=number] {
     width: 100%;
   }
   .card.tracker-tarjeta {
-    grid-template-columns: 36px 1fr auto auto;
+    grid-template-columns: auto 42px 1fr auto auto;
     row-gap: 8px;
   }
   .actions.tracker-col-acciones {
@@ -1633,7 +1834,7 @@ input[type=number] {
     grid-template-columns: 1fr;
   }
   .card.tracker-tarjeta {
-    grid-template-columns: 36px 1fr;
+    grid-template-columns: auto 40px 1fr;
     row-gap: 12px;
   }
   .stat.tracker-col-hp,
